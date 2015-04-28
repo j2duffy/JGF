@@ -16,14 +16,20 @@ Vdown = band_shift + (ex_split + hw0)/2.0
 Vup = band_shift - (ex_split + hw0)/2.0
 
 
-def JBulkSubs(m,n,s):
-  """ The bog standard coupling calculation in bulk graphene."""
-  def GF(y):
-    return gBulkSubsMx(m,n,s,EF+1j*y)
+def J(GF):
+  """Calculates the Hartree-Fock spin susceptibility"""
   def integrand(y):
     return 1.0/pi*log( abs(1.0 + ex_split**2 * Dyson(GF(y),Vup)[1,0] * Dyson(GF(y),Vdown)[0,1])  ).real 
   C = quad(integrand, eta, np.inf, epsabs=0.0e0, epsrel=1.0e-4, limit=200 )
   return C[0]
+
+
+
+def JBulkSubs(m,n,s):
+  """ The bog standard coupling calculation in bulk graphene."""
+  def GF(y):
+    return gBulkSubsMx(m,n,s,EF+1j*y)
+  return J(GF)
 
 
 def JBulkTop(m,n,s):
@@ -31,10 +37,7 @@ def JBulkTop(m,n,s):
   Really, not so different from the substitutional case that it should require its own code."""
   def GF(y):
     return gBulkTopMx(m,n,s,EF+1j*y)
-  def integrand(y):
-    return 1.0/pi*log( abs(1.0 + ex_split**2 * Dyson(GF(y),Vup)[1,0] * Dyson(GF(y),Vdown)[0,1])  ).real
-  C = quad(integrand, eta, np.inf, epsabs=0.0e0, epsrel=1.0e-4, limit=200 )
-  return C[0]
+  return J(GF)
 
 
 def JBulkCenter(m,n):
@@ -42,10 +45,7 @@ def JBulkCenter(m,n):
     Done in Python because why not?"""
   def GF(y):
     return CenterMx(m,n,EF+1j*y)
-  def integrand(y):
-    return 1.0/pi*log( abs(1.0 + ex_split**2 * Dyson(GF(y),Vup)[1,0] * Dyson(GF(y),Vdown)[0,1])  ).real	#Rather ugly way of doing this
-  C = quad(integrand, eta, np.inf, epsabs=0.0, epsrel=1.0e-2, limit=200 )
-  return C[0]
+  return J(GF)
 
 
 def JGNRSubs(nE,m1,n1,m2,n2,s):
@@ -53,10 +53,7 @@ def JGNRSubs(nE,m1,n1,m2,n2,s):
   Has been tested against recursive for bb"""
   def GF(y):
     return gGNRSubsMx(nE,m1,n1,m2,n2,s,EF+1j*y)
-  def integrand(y):
-    return 1.0/pi*log( abs(1.0 + ex_split**2 * Dyson(GF(y),Vup)[1,0] * Dyson(GF(y),Vdown)[0,1])  ).real	#Ugly, etc.
-  C = quad(integrand, eta, np.inf, epsabs=0.0e0, epsrel=1.0e-4, limit=200 ) 
-  return C[0]
+  return J(GF)
 
 
 def JGNRTop(nE,m1,n1,m2,n2,s):
@@ -64,10 +61,7 @@ def JGNRTop(nE,m1,n1,m2,n2,s):
   Is very untested, and relies on an untested subroutine"""
   def GF(y):
     return gGNRTopMx(nE,m1,n1,m2,n2,s,EF+1j*y)
-  def integrand(y):
-    return 1.0/pi*log( abs(1.0 + ex_split**2 * Dyson(GF(y),Vup)[1,0] * Dyson(GF(y),Vdown)[0,1])  ).real
-  C = quad(integrand, eta, np.inf, epsabs=0.0e0, epsrel=1.0e-4, limit=200 ) 
-  return C[0]
+  return J(GF)
   
   
 
@@ -174,20 +168,6 @@ def Line_CouplingSPA(DA):
   temp = inv( np.eye(len(X00)) + X00.dot(U) )
   return temp.dot(X00)[0,1]
 
-
-
-def JGNRSubstest(nE,m1,n1,m2,n2,s):
-  """A routine for calculating the coupling in GNRs, modified to work with matrices.
-  Unsurprisingly, takes a bit longer than the usual method."""
-  def GF(y):
-    return gGNRSubsMx(nE,m1,n1,m2,n2,s,EF+1j*y)
-  def integrand(y):
-    VRot = np.array([[-2*Vup,0],[0,-2*Vdown]])
-    g = np.array([[Dyson(GF(y),Vup)[1,1],0],[0,Dyson(GF(y),Vdown)[1,1]]])
-    log(det(np.eye(2)-g.dot(VRot)))
-    return 1.0/pi*log(det(np.eye(2)-g.dot(VRot))).real
-  C = quad(integrand, eta, np.inf, epsabs=0.0e0, epsrel=1.0e-4, limit=200 ) 
-  return C[0]
 
 
 def JGNRSubstest(nE,m1,n1,m2,n2,s):
@@ -316,5 +296,13 @@ def CenterGen2(rij,E):
 
 
 if __name__ == "__main__":
-  nE,m1,n1,m2,n2,s = 6,1,0,5,3,0
+  m,n,s = 1,3,1
+  time1 = time.clock()
+  print JBulkSubs(m,n,s)
+  print JBulkTop(m,n,s)
+  print JBulkCenter(m,n)
+  nE,m1,n1,m2,n2,s = 8,1,0,5,1,1
+  print JGNRSubs(nE,m1,n1,m2,n2,s)
   print JGNRTop(nE,m1,n1,m2,n2,s)
+  time2 = time.clock()
+  print time2 - time1
