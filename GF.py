@@ -237,39 +237,6 @@ def gTube_Arm(nC,m,n,s,E):
   """The Green's Function of a Carbon Nanotube
     Problem: k is a really weird choice for index given that it alludes to the Fermi wavevector"""
   return FMod.gtube_arm(nC,m,n,s,E)
-
-
-def gTube_Python(nC,m,n,s,E):
-  """The Green's Function of a Carbon Nanotube, written in Python because you never know.
-    Problem: k is a really weird choice for index given that it alludes to the Fermi wavevector"""
-  g = 0.0
-  for k in range(0,nC):		# The zero is unnecessary by Python convention
-    qp = acos( 0.5*(-cos(pi*k/nC) + sqrt( (E**2/t**2) - (sin(pi*k/nC))**2 ) )  )
-    qm = acos( 0.5*(-cos(pi*k/nC) - sqrt( (E**2/t**2) - (sin(pi*k/nC))**2 ) )  ) 
-
-    if qp.imag < 0.0: qp = -qp
-    if qm.imag < 0.0: qm = -qm
-
-    sig = copysign(1,m-n)
-    const = 1j/(4.0*t**2)  
-    if s == 0:
-      g += const*( E*exp( 1j*( pi*k/nC *(m+n) + sig*qp*(m-n) )  ) / ( sin(2*qp) + sin(qp)*cos(pi*k/nC)  ) \
-	+ E*exp( 1j*(  pi*k/nC *(m+n) + sig*qm*(m-n) )  ) / ( sin(2*qm) + sin(qm)*cos(pi*k/nC)  )  ) 
-    elif s == 1:
-      fp = t*( 1.0 + 2.0*cos(qp)*exp(1j*pi*k/nC)  )
-      fm = t*( 1.0 + 2.0*cos(qm)*exp(1j*pi*k/nC)  )
-
-      g += const*( fp*exp( 1j*( pi*k/nC *(m+n) + sig*qp*(m-n) )  ) / ( sin(2*qp) + sin(qp)*cos(pi*k/nC)  ) \
-      + fm*exp( 1j*( pi*k/nC *(m+n) + sig*qm*(m-n) )  ) / ( sin(2*qm) + sin(qm)*cos(pi*k/nC)  )  ) 
-    elif s == -1:
-      ftp = t*( 1.0 + 2.0*cos(qp)*exp(-1j*pi*k/nC)  )
-      ftm = t*( 1.0 + 2.0*cos(qm)*exp(-1j*pi*k/nC)  )
-
-      g += const*( exp( 1j*( pi*k/nC *(m+n) + sig*qp*(m-n) )  )*ftp / ( sin(2*qp) + sin(qp)*cos(pi*k/nC)  ) \
-      + exp( 1j*( pi*k/nC *(m+n) + sig*qm*(m-n) )  )*ftm / ( sin(2*qm) + sin(qm)*cos(pi*k/nC)  )  ) 
-    else: print "Sublattice error in gTube_Python"
-    
-  return g/nC
   
 
 def gBulkComplete(m,n,s,E,E0=0.0):
