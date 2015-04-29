@@ -247,6 +247,5 @@ def gBulkComplete(m,n,s,E,E0=0.0):
 
 
 if __name__ == "__main__":   
-  for E in np.linspace(-3.0+1j*eta,3.0+1j*eta,601):
-    g = gBulkComplete(0,0,0,E,E0=-1.0)
-    print E.real, g.real, g.imag
+  for m,n,s,E,E0 in [[1,3,0,1.2+1j*eta,1.0],[5,3,1,1.0-1j*eta,3.0],[0,3,-1,-1.2+1j*eta,0.0],[-1,-3,-1,1.2+1j*eta,-1.0]]:
+    print gBulkComplete(m,n,s,E,E0=0.0)
