@@ -5,19 +5,18 @@ implicit none
   ! Mathematical parameters
   complex(8), parameter :: im = (0.0d0,1.0d0)
   real(8), parameter :: pi = acos(-1.0d0)
-  ! Material parameters
-  real(8), parameter :: t = -1.0d0
 end module
 
 
-function gtest(m,n,s,E,E0,kZ)
+function gbulk_kz_int(m,n,s,E,E0,t,kZ)
 use shared_data
 implicit none
   ! Input arguments
-  complex(8) :: gtest
+  complex(8) :: gbulk_kz_int
   complex(8), intent(in) :: E
   real(8), intent(in) :: kZ
   real(8), intent(in) :: E0	! The onsite energy
+  real(8), intent(in) :: t	! The hopping
   integer, intent(in) :: m,n
   integer, intent(in) :: s	! The sublattice term. 0 for bb, 1 for bw, -1 for wb.
   ! Dummy arguments
@@ -35,47 +34,7 @@ implicit none
 
   if (s == 0) then
     sig = sign(1,m+n)
-    gtest = Const*(E-E0)*exp( im*(sig*q*(m+n) + kZ*(m-n) ) )/ Den 
-  else if (s == 1) then 
-    sig = sign(1,m+n)
-    f = t*( 1.0d0 + 2.0d0*cos(kZ)*exp(sig*im*q) )
-    gtest = Const*f*exp( im*(sig*q*(m+n) + kZ*(m-n) ) )/Den  
-  else if (s == -1) then
-    sig = sign(1,m+n-1)
-    ft = t*( 1.0d0 + 2.0d0*cos(kZ)*exp(-sig*im*q) )
-    gtest = Const*ft*exp( im*(sig*q*(m+n) + kZ*(m-n) ) )/Den 
-  else
-    print *, "Sublattice error in gtest"
-  end if
-    
-end function gtest 
-
-
-function gbulk_kz_int(m,n,s,E,kZ)
-use shared_data
-implicit none
-  ! Input arguments
-  complex(8) :: gbulk_kz_int
-  complex(8), intent(in) :: E
-  real(8), intent(in) :: kZ
-  integer, intent(in) :: m,n
-  integer, intent(in) :: s	! The sublattice term. 0 for bb, 1 for bw, -1 for wb.
-  ! Dummy arguments
-  complex(8) :: f, ft 
-  complex(8) :: q
-  complex(8) :: Const, Den
-  integer :: sig
-
-  q = acos( (E**2 - t**2 - 4.0d0*t**2 *cos(kZ)**2)/(4.0d0*t**2 *cos(kZ) ) )
-
-  if (aimag(q) < 0.0d0) q = -q
-
-  Const = im/(4*pi*t**2)
-  Den = cos(kZ)*sin(q)
-
-  if (s == 0) then
-    sig = sign(1,m+n)
-    gbulk_kz_int = Const*E*exp( im*(sig*q*(m+n) + kZ*(m-n) ) )/ Den 
+    gbulk_kz_int = Const*(E-E0)*exp( im*(sig*q*(m+n) + kZ*(m-n) ) )/ Den 
   else if (s == 1) then 
     sig = sign(1,m+n)
     f = t*( 1.0d0 + 2.0d0*cos(kZ)*exp(sig*im*q) )
@@ -87,17 +46,18 @@ implicit none
   else
     print *, "Sublattice error in gbulk_kz_int"
   end if
-  
+    
 end function gbulk_kz_int 
 
 
-function grib_arm(nE,m1,n1,m2,n2,s,E)
+function grib_arm(nE,m1,n1,m2,n2,s,E,t)
 use shared_data
 implicit none
   complex(8) :: grib_arm
   integer :: j
   ! Other parameters
   complex(8) :: E
+  real(8) :: t
   integer :: m1, n1, m2, n2, s
   integer :: nE
   
@@ -172,13 +132,14 @@ implicit none
 end function grib_arm
 
 
-function gtube_arm(nC,m,n,s,E)
+function gtube_arm(nC,m,n,s,E,t)
 use shared_data
 implicit none
   ! Calculates the GF for an armchair nanotube
   ! Input arguments
   complex(8) :: gtube_arm
   complex(8), intent(in) :: E
+  real(8), intent(in) :: t
   integer, intent(in) :: m,n,s
   integer, intent(in) :: nC
   ! Dummy arguments
@@ -222,3 +183,42 @@ implicit none
   gtube_arm = gtube_arm/nC
     
 end function gtube_arm
+
+
+! function gsi_kz_int(m1,n1,m2,n2,s,E,kZ):
+! use shared_data
+! implicit none
+!   !The Semi-Infinite Graphene Green's function
+!   !The kZ integration is performed last
+!   ! Input arguments
+!   complex(8) :: gsi_kz_int
+!   complex(8), intent(in) :: E
+!   real(8), intent(in) :: kZ
+!   integer, intent(in) :: m1,n1,m2,n2,s
+!   ! Dummy arguments
+!   complex(8) :: q, f, ft
+!   complex(8) :: const, den
+!   integer :: sig
+!   
+!   q = acos( (E**2 - t**2 - 4.0d0*t**2 *cos(kZ)**2)/(4.0d0*t**2 *cos(kZ) ) )
+!   if (aimag(q) < 0.0d0) q = -q
+!   
+!   const = im/(2.0d0*pi*t**2)
+!   den = cos(kZ)*sin(q)
+!   
+!   if (s == 0) then
+!     sig = sign(1,m2+n2-m1-n1)
+!     gsi_kz_int = const*E*exp( im*sig*q*(m2+n2-m1-n1) )*sin( kZ*(m1-n1) )*sin( kZ*(m2-n2) )/den
+!   else if (s == 1) then
+!     sig = sign(1,m2+n2-m1-n1)
+!     f = t*( 1.0d0 + 2.0d0*cos(kZ)*exp(im*sig*q) )
+!     gsi_kz_int = const*f*exp( im*sig*q*(m2+n2-m1-n1) )*sin( kZ*(m1-n1) )*sin( kZ*(m2-n2) )/den
+!   else if (s == -1) then
+!     sig = sign(1,m2+n2-m1-n1-1)
+!     ft = t*( 1.0d0 + 2.0d0*cos(kZ)*exp(-im*sig*q) )
+!     gsi_kz_int = const*ft*exp( im*sig*q*(m2+n2-m1-n1) )*sin( kZ*(m1-n1) )*sin( kZ*(m2-n2) )/den
+!   else
+!     print *, "Sublattice error in gSI_kZ"
+!   end if
+! 
+! end function gsi_kz_int

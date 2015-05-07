@@ -38,10 +38,10 @@ def gLin_Chain(n,E):
   return 1j*exp(1j*abs(n)*acos(E/(2.0*t)))/(t*sqrt(4.0-E**2/t**2))
 
 
-def gBulk_kZ(m,n,s,E):
+def gBulk_kZ(m,n,s,E,E0=0.0):
   """The Graphene Green's function
     The kZ integration is performed last"""
-  GF = partial(FMod.gbulk_kz_int,m,n,s,E)
+  GF = partial(FMod.gbulk_kz_int,m,n,s,E,E0,t)
   return C_int(GF,-pi/2,pi/2)
 
 
@@ -229,57 +229,20 @@ def gSIZigtest(DA1,DA2,DZ,s_lat,E):		# You need to change the sublattice notatio
 def gRib_Arm(nE,m1,n1,m2,n2,s,E):
   """An interace to the FORTRAN armchair ribbon GF.
   There is little computational cost to having this interface, but also little advantage. Do as you like"""
-  GF = FMod.grib_arm(nE,m1,n1,m2,n2,s,E)
+  GF = FMod.grib_arm(nE,m1,n1,m2,n2,s,E,t)
   return GF
 
 
 def gTube_Arm(nC,m,n,s,E):
   """The Green's Function of a Carbon Nanotube
     Problem: k is a really weird choice for index given that it alludes to the Fermi wavevector"""
-  return FMod.gtube_arm(nC,m,n,s,E)
-
-
-def gTube_Python(nC,m,n,s,E):
-  """The Green's Function of a Carbon Nanotube, written in Python because you never know.
-    Problem: k is a really weird choice for index given that it alludes to the Fermi wavevector"""
-  g = 0.0
-  for k in range(0,nC):		# The zero is unnecessary by Python convention
-    qp = acos( 0.5*(-cos(pi*k/nC) + sqrt( (E**2/t**2) - (sin(pi*k/nC))**2 ) )  )
-    qm = acos( 0.5*(-cos(pi*k/nC) - sqrt( (E**2/t**2) - (sin(pi*k/nC))**2 ) )  ) 
-
-    if qp.imag < 0.0: qp = -qp
-    if qm.imag < 0.0: qm = -qm
-
-    sig = copysign(1,m-n)
-    const = 1j/(4.0*t**2)  
-    if s == 0:
-      g += const*( E*exp( 1j*( pi*k/nC *(m+n) + sig*qp*(m-n) )  ) / ( sin(2*qp) + sin(qp)*cos(pi*k/nC)  ) \
-	+ E*exp( 1j*(  pi*k/nC *(m+n) + sig*qm*(m-n) )  ) / ( sin(2*qm) + sin(qm)*cos(pi*k/nC)  )  ) 
-    elif s == 1:
-      fp = t*( 1.0 + 2.0*cos(qp)*exp(1j*pi*k/nC)  )
-      fm = t*( 1.0 + 2.0*cos(qm)*exp(1j*pi*k/nC)  )
-
-      g += const*( fp*exp( 1j*( pi*k/nC *(m+n) + sig*qp*(m-n) )  ) / ( sin(2*qp) + sin(qp)*cos(pi*k/nC)  ) \
-      + fm*exp( 1j*( pi*k/nC *(m+n) + sig*qm*(m-n) )  ) / ( sin(2*qm) + sin(qm)*cos(pi*k/nC)  )  ) 
-    elif s == -1:
-      ftp = t*( 1.0 + 2.0*cos(qp)*exp(-1j*pi*k/nC)  )
-      ftm = t*( 1.0 + 2.0*cos(qm)*exp(-1j*pi*k/nC)  )
-
-      g += const*( exp( 1j*( pi*k/nC *(m+n) + sig*qp*(m-n) )  )*ftp / ( sin(2*qp) + sin(qp)*cos(pi*k/nC)  ) \
-      + exp( 1j*( pi*k/nC *(m+n) + sig*qm*(m-n) )  )*ftm / ( sin(2*qm) + sin(qm)*cos(pi*k/nC)  )  ) 
-    else: print "Sublattice error in gTube_Python"
-    
-  return g/nC
-  
-
-def gBulkComplete(m,n,s,E,E0=0.0):
-  """The Graphene Green's function
-    The kZ integration is performed last"""
-  GF = partial(FMod.gtest,m,n,s,E,E0)
-  return C_int(GF,-pi/2,pi/2)
+  return FMod.gtube_arm(nC,m,n,s,E,t)
 
 
 if __name__ == "__main__":   
-  for E in np.linspace(-3.0+1j*eta,3.0+1j*eta,601):
-    g = gBulkComplete(0,0,0,E,E0=-1.0)
-    print E.real, g.real, g.imag
+  m,n,s,E = 1,2,1,1.2+1j*eta
+  print gBulk_kZ(m,n,s,E,E0=0.0)
+  nC,m,n,s,E = 8,5,2,1,1.3+1j*eta
+  print gTube_Arm(nC,m,n,s,E)
+  nE,m1,n1,m2,n2,s,E = 9,5,4,3,-1,-1,-1.3+1j*eta
+  print gRib_Arm(nE,m1,n1,m2,n2,s,E)

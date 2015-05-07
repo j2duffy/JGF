@@ -335,5 +335,13 @@ def CenterGen2(rij,E):
   return g_mx
 
 
+
+def gTubeSubsMx(nC,m,n,s,E):
+  """ Returns the GF matrix for two atomic sites in bulk graphene"""
+  g = np.zeros((2,2),dtype=complex)
+  g[0,0],g[1,1] = 2*(gTube_Arm(nC,0,0,0,E),)
+  g[0,1],g[1,0] = 2*(gTube_Arm(nC,m,n,s,E),)
+  return g
+
 if __name__ == "__main__":   
-  print CenterTest(3,-1,-2.0+1j*eta)
+  print gTubeSubsMx(6,4,4,0,1.2+1j*eta)

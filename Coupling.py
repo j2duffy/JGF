@@ -295,6 +295,15 @@ def CenterGen2(rij,E):
   return g_mx
 
 
+def JGNRTubeSubs(nC,m,n,s):
+  """A routine for calculating the coupling for substitutional impurities in a nanotube. Really not tested a whole bunch."""
+  def GF(y):
+    return gTubeSubsMx(nC,m,n,s,EF+1j*y)
+  def integrand(y):
+    return 1.0/pi*log( abs(1.0 + ex_split**2 * Dyson(GF(y),Vup)[1,0] * Dyson(GF(y),Vdown)[0,1])  ).real
+  C = quad(integrand, eta, np.inf, epsabs=0.0e0, epsrel=1.0e-4, limit=200 ) 
+  return C[0]
+
 if __name__ == "__main__":
   m,n,s = 1,3,1
   time1 = time.clock()
@@ -306,3 +315,7 @@ if __name__ == "__main__":
   print JGNRTop(nE,m1,n1,m2,n2,s)
   time2 = time.clock()
   print time2 - time1
+  nC,s = 21,0
+  for m in range(10,50):
+    n = -m
+    print m, JGNRTubeSubs(nC,m,n,s)
