@@ -38,10 +38,10 @@ def gLin_Chain(n,E):
   return 1j*exp(1j*abs(n)*acos(E/(2.0*t)))/(t*sqrt(4.0-E**2/t**2))
 
 
-def gBulk_kZ(m,n,s,E):
+def gBulk_kZ(m,n,s,E,E0=0.0):
   """The Graphene Green's function
     The kZ integration is performed last"""
-  GF = partial(FMod.gbulk_kz_int,m,n,s,E)
+  GF = partial(FMod.gbulk_kz_int,m,n,s,E,E0,t)
   return C_int(GF,-pi/2,pi/2)
 
 
@@ -229,23 +229,20 @@ def gSIZigtest(DA1,DA2,DZ,s_lat,E):		# You need to change the sublattice notatio
 def gRib_Arm(nE,m1,n1,m2,n2,s,E):
   """An interace to the FORTRAN armchair ribbon GF.
   There is little computational cost to having this interface, but also little advantage. Do as you like"""
-  GF = FMod.grib_arm(nE,m1,n1,m2,n2,s,E)
+  GF = FMod.grib_arm(nE,m1,n1,m2,n2,s,E,t)
   return GF
 
 
 def gTube_Arm(nC,m,n,s,E):
   """The Green's Function of a Carbon Nanotube
     Problem: k is a really weird choice for index given that it alludes to the Fermi wavevector"""
-  return FMod.gtube_arm(nC,m,n,s,E)
-  
-
-def gBulkComplete(m,n,s,E,E0=0.0):
-  """The Graphene Green's function
-    The kZ integration is performed last"""
-  GF = partial(FMod.gtest,m,n,s,E,E0)
-  return C_int(GF,-pi/2,pi/2)
+  return FMod.gtube_arm(nC,m,n,s,E,t)
 
 
 if __name__ == "__main__":   
-  for m,n,s,E,E0 in [[1,3,0,1.2+1j*eta,1.0],[5,3,1,1.0-1j*eta,3.0],[0,3,-1,-1.2+1j*eta,0.0],[-1,-3,-1,1.2+1j*eta,-1.0]]:
-    print gBulkComplete(m,n,s,E,E0=0.0)
+  m,n,s,E = 1,2,1,1.2+1j*eta
+  print gBulk_kZ(m,n,s,E,E0=0.0)
+  nC,m,n,s,E = 8,5,2,1,1.3+1j*eta
+  print gTube_Arm(nC,m,n,s,E)
+  nE,m1,n1,m2,n2,s,E = 9,5,4,3,-1,-1,-1.3+1j*eta
+  print gRib_Arm(nE,m1,n1,m2,n2,s,E)
