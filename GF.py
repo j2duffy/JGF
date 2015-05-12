@@ -24,7 +24,7 @@ U = 10.0
 dtol = 1.0e-6		# Stands for "default tolerance". Could be better
 
 
-def C_int(f,lim1,lim2):		# This is nicer than your current python one. Keep it. 
+def C_int(f,lim1,lim2):
   int_re = quad(lambda x: f(x).real, lim1, lim2, epsabs=0.0, epsrel=1.0e-4, limit=200 )
   int_im = quad(lambda x: f(x).imag, lim1, lim2, epsabs=0.0, epsrel=1.0e-4, limit=200 )
   return int_re[0] + 1j*int_im[0]
