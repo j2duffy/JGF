@@ -1,3 +1,5 @@
+"""Coupling routines for various systems"""
+
 from GFRoutines import *
 from scipy import optimize
 from numpy.linalg import norm, det
@@ -17,7 +19,7 @@ Vup = band_shift - (ex_split + hw0)/2.0
 
 
 def J(GF):
-  """Calculates the Hartree-Fock spin susceptibility"""
+  """A general routine for calculating the coupling between two impurities"""
   def integrand(y):
     return 1.0/pi*log( abs(1.0 + ex_split**2 * Dyson(GF(y),Vup)[1,0] * Dyson(GF(y),Vdown)[0,1])  ).real 
   C = quad(integrand, eta, np.inf, epsabs=0.0e0, epsrel=1.0e-4, limit=200 )
@@ -25,46 +27,42 @@ def J(GF):
 
 
 def JBulkSubs(m,n,s):
-  """ The bog standard coupling calculation in bulk graphene."""
+  """The Coupling calculation in bulk graphene for substitutional impurities."""
   def GF(y):
     return gBulkSubsMx(m,n,s,EF+1j*y)
   return J(GF)
 
 
 def JBulkTop(m,n,s):
-  """Calculating the Top Adsorbed coupling in bulk graphene. 
-  Really, not so different from the substitutional case that it should require its own code."""
+  """The coupling for top-adsorbed impurities in bulk graphene"""
   def GF(y):
     return gBulkTopMx(m,n,s,EF+1j*y)
   return J(GF)
 
 
 def JBulkCenter(m,n):
-  """ The bog standard coupling calculation in bulk graphene.
-    Done in Python because why not?"""
+  """The coupling for center-adsorbed impurities in bulk graphene"""
   def GF(y):
     return CenterMx(m,n,EF+1j*y)
   return J(GF)
 
 
 def JGNRSubs(nE,m1,n1,m2,n2,s):
-  """A routine for calculating the coupling in GNRs.
-  Has been tested against recursive for bb"""
+  """The coupling for substitutional impurities in a GNR"""
   def GF(y):
     return gGNRSubsMx(nE,m1,n1,m2,n2,s,EF+1j*y)
   return J(GF)
 
 
 def JGNRTop(nE,m1,n1,m2,n2,s):
-  """A routine for calculating the coupling for Top Adsorbed Impurities in GNRs.
-  Is very untested, and relies on an untested subroutine"""
+  """The coupling for top-adsorbed impurities in a GNR"""
   def GF(y):
     return gGNRTopMx(nE,m1,n1,m2,n2,s,EF+1j*y)
   return J(GF)
   
   
-def JGNRTubeSubs(nC,m,n,s):
-  """A routine for calculating the coupling for substitutional impurities in a nanotube. Really not tested a whole bunch."""
+def JTubeSubs(nC,m,n,s):
+  """The coupling for substitutional impurities in a nanotube. Not tested a whole bunch"""
   def GF(y):
     return gTubeSubsMx(nC,m,n,s,EF+1j*y)
   return J(GF)
@@ -303,4 +301,4 @@ def CenterGen2(rij,E):
 
 if __name__ == "__main__":
     for nC,m,n,s in [[6,1,0,1],[8,5,3,0],[7,1,-3,-1]]:
-      print JGNRTubeSubs(nC,m,n,s)
+      print JTubeSubs(nC,m,n,s)
