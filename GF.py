@@ -77,7 +77,20 @@ def gBulk_kA(m,n,s,E):
   
   return C_int(int_temp,-pi/2,pi/2)
 
-    
+
+def gRib_Arm(nE,m1,n1,m2,n2,s,E):
+  """An interace to the FORTRAN armchair ribbon GF.
+  There is little computational cost to having this interface, but also little advantage. Do as you like"""
+  GF = FMod.grib_arm(nE,m1,n1,m2,n2,s,E,t)
+  return GF
+
+
+def gTube_Arm(nC,m,n,s,E):
+  """The Green's Function of a Carbon Nanotube
+    Problem: k is a really weird choice for index given that it alludes to the Fermi wavevector"""
+  return FMod.gtube_arm(nC,m,n,s,E,t)
+
+
 def gBulk_Lin(E,a=1.0):		# Seems to be off by a factor of 2
   def int_qxqy(qx,qy,Re):
     eps2 = 3.0*t**2  *a**2/4.0 *(qx**2 + qy**2)
@@ -171,27 +184,8 @@ def gLine_kZ(DA,kZ,s,E):	# This really needs to be tested against something
 def gSI_kZ(m1,n1,m2,n2,s,E):
   """The Semi-Infinite Graphene Green's function
       The kZ integration is performed last"""
-  def int_temp(kZ):
-    q = acos( (E**2 - t**2 - 4.0*t**2 *cos(kZ)**2)/(4.0*t**2 *cos(kZ) ) )
-    if q.imag < 0.0: q = -q
-    
-    Const = 1j/(2*pi*t**2)
-    Den = cos(kZ)*sin(q)
-    
-    if s == 0:
-      sig = copysign(1,m2+n2-m1-n1)
-      return Const*E*exp( 1j*sig*q*(m2+n2-m1-n1) )*sin( kZ*(m1-n1) )*sin( kZ*(m2-n2) )/Den
-    elif s == 1: 
-      sig = copysign(1,m2+n2-m1-n1)
-      f = t*( 1.0 + 2.0*cos(kZ)*exp( 1j*sig*q ) )
-      return Const*f*exp( 1j*sig*q*(m2+n2-m1-n1) )*sin( kZ*(m1-n1) )*sin( kZ*(m2-n2) )/Den
-    elif s == -1:
-      sig = copysign(1,m2+n2-m1-n1-1)
-      ft = t*( 1.0 + 2.0*cos(kZ)*exp(- 1j*sig*q) )
-      return Const*ft*exp( 1j*sig*q*(m2+n2-m1-n1) )*sin( kZ*(m1-n1) )*sin( kZ*(m2-n2) )/Den
-    else: print "Sublattice error in gSI_kZ"
-
-  return C_int(int_temp,-pi/2,pi/2)
+  GF = partial(FMod.gsi_kz_int,m1,n1,m2,n2,s,E,t)
+  return C_int(GF,-pi/2,pi/2)
 
 
 def gSIZigtest(DA1,DA2,DZ,s_lat,E):		# You need to change the sublattice notation. Which will be hard
@@ -226,23 +220,11 @@ def gSIZigtest(DA1,DA2,DZ,s_lat,E):		# You need to change the sublattice notatio
   return C_int(int_temp,-pi/2,pi/2)
 
 
-def gRib_Arm(nE,m1,n1,m2,n2,s,E):
-  """An interace to the FORTRAN armchair ribbon GF.
-  There is little computational cost to having this interface, but also little advantage. Do as you like"""
-  GF = FMod.grib_arm(nE,m1,n1,m2,n2,s,E,t)
-  return GF
 
-
-def gTube_Arm(nC,m,n,s,E):
-  """The Green's Function of a Carbon Nanotube
-    Problem: k is a really weird choice for index given that it alludes to the Fermi wavevector"""
-  return FMod.gtube_arm(nC,m,n,s,E,t)
 
 
 if __name__ == "__main__":   
-  m,n,s,E = 1,2,1,1.2+1j*eta
-  print gBulk_kZ(m,n,s,E,E0=0.0)
-  nC,m,n,s,E = 8,5,2,1,1.3+1j*eta
-  print gTube_Arm(nC,m,n,s,E)
-  nE,m1,n1,m2,n2,s,E = 9,5,4,3,-1,-1,-1.3+1j*eta
+  nE,m1,n1,m2,n2,s,E = 6,1,0,3,-1,-1,1.3+1j*eta
   print gRib_Arm(nE,m1,n1,m2,n2,s,E)
+  nC,m,n,s,E = 9,3,1,1,-1.2+1j*eta
+  print gTube_Arm(nC,m,n,s,E)

@@ -301,7 +301,6 @@ def CenterGen2(rij,E):
 
 
 
-
 if __name__ == "__main__":
     for nC,m,n,s in [[6,1,0,1],[8,5,3,0],[7,1,-3,-1]]:
       print JGNRTubeSubs(nC,m,n,s)

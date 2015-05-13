@@ -185,40 +185,41 @@ implicit none
 end function gtube_arm
 
 
-! function gsi_kz_int(m1,n1,m2,n2,s,E,kZ):
-! use shared_data
-! implicit none
-!   !The Semi-Infinite Graphene Green's function
-!   !The kZ integration is performed last
-!   ! Input arguments
-!   complex(8) :: gsi_kz_int
-!   complex(8), intent(in) :: E
-!   real(8), intent(in) :: kZ
-!   integer, intent(in) :: m1,n1,m2,n2,s
-!   ! Dummy arguments
-!   complex(8) :: q, f, ft
-!   complex(8) :: const, den
-!   integer :: sig
-!   
-!   q = acos( (E**2 - t**2 - 4.0d0*t**2 *cos(kZ)**2)/(4.0d0*t**2 *cos(kZ) ) )
-!   if (aimag(q) < 0.0d0) q = -q
-!   
-!   const = im/(2.0d0*pi*t**2)
-!   den = cos(kZ)*sin(q)
-!   
-!   if (s == 0) then
-!     sig = sign(1,m2+n2-m1-n1)
-!     gsi_kz_int = const*E*exp( im*sig*q*(m2+n2-m1-n1) )*sin( kZ*(m1-n1) )*sin( kZ*(m2-n2) )/den
-!   else if (s == 1) then
-!     sig = sign(1,m2+n2-m1-n1)
-!     f = t*( 1.0d0 + 2.0d0*cos(kZ)*exp(im*sig*q) )
-!     gsi_kz_int = const*f*exp( im*sig*q*(m2+n2-m1-n1) )*sin( kZ*(m1-n1) )*sin( kZ*(m2-n2) )/den
-!   else if (s == -1) then
-!     sig = sign(1,m2+n2-m1-n1-1)
-!     ft = t*( 1.0d0 + 2.0d0*cos(kZ)*exp(-im*sig*q) )
-!     gsi_kz_int = const*ft*exp( im*sig*q*(m2+n2-m1-n1) )*sin( kZ*(m1-n1) )*sin( kZ*(m2-n2) )/den
-!   else
-!     print *, "Sublattice error in gSI_kZ"
-!   end if
-! 
-! end function gsi_kz_int
+function gsi_kz_int(m1,n1,m2,n2,s,E,t,kZ)
+use shared_data
+implicit none
+  !The Semi-Infinite Graphene Green's function
+  !The kZ integration is performed last
+  ! Input arguments
+  complex(8) :: gsi_kz_int
+  complex(8), intent(in) :: E
+  real(8), intent(in) :: t
+  real(8), intent(in) :: kZ
+  integer, intent(in) :: m1,n1,m2,n2,s
+  ! Dummy arguments
+  complex(8) :: q, f, ft
+  complex(8) :: const, den
+  integer :: sig
+  
+  q = acos( (E**2 - t**2 - 4.0d0*t**2 *cos(kZ)**2)/(4.0d0*t**2 *cos(kZ) ) )
+  if (aimag(q) < 0.0d0) q = -q
+  
+  const = im/(2.0d0*pi*t**2)
+  den = cos(kZ)*sin(q)
+  
+  if (s == 0) then
+    sig = sign(1,m2+n2-m1-n1)
+    gsi_kz_int = const*E*exp( im*sig*q*(m2+n2-m1-n1) )*sin( kZ*(m1-n1) )*sin( kZ*(m2-n2) )/den
+  else if (s == 1) then
+    sig = sign(1,m2+n2-m1-n1)
+    f = t*( 1.0d0 + 2.0d0*cos(kZ)*exp(im*sig*q) )
+    gsi_kz_int = const*f*exp( im*sig*q*(m2+n2-m1-n1) )*sin( kZ*(m1-n1) )*sin( kZ*(m2-n2) )/den
+  else if (s == -1) then
+    sig = sign(1,m2+n2-m1-n1-1)
+    ft = t*( 1.0d0 + 2.0d0*cos(kZ)*exp(-im*sig*q) )
+    gsi_kz_int = const*ft*exp( im*sig*q*(m2+n2-m1-n1) )*sin( kZ*(m1-n1) )*sin( kZ*(m2-n2) )/den
+  else
+    print *, "Sublattice error in gSI_kZ"
+  end if
+
+end function gsi_kz_int
