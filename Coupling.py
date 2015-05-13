@@ -68,6 +68,45 @@ def JTubeSubs(nC,m,n,s):
   return J(GF)
 
 
+def JGNRSubsMx(nE,m1,n1,m2,n2,s):
+  """A routine for calculating the coupling in GNRs, modified to work with matrices.
+  Unsurprisingly, takes a bit longer than the usual method."""
+  def GF(y):
+    return gGNRSubsMx(nE,m1,n1,m2,n2,s,EF+1j*y)
+  def integrand(y):
+    VRot = np.array([[-2*Vup,0],[0,-2*Vdown]])
+    g = np.array([[Dyson(GF(y),Vup)[1,1],0],[0,Dyson(GF(y),Vdown)[1,1]]])
+    return 1.0/pi*log(det(np.eye(2)-g.dot(VRot))).real
+  C = quad(integrand, eta, np.inf, epsabs=0.0e0, epsrel=1.0e-4, limit=200 ) 
+  return C[0]
+
+
+def JBulkSubsMx(m,n,s):
+  """A routine for calculating the coupling in Bulk, modified to work with matrices.
+  Unsurprisingly, takes a bit longer than the usual method."""
+  def GF(y):
+    return gBulkSubsMx(m,n,s,EF+1j*y)
+  def integrand(y):
+    VRot = np.array([[-2*Vup,0],[0,-2*Vdown]])
+    g = np.array([[Dyson(GF(y),Vup)[1,1],0],[0,Dyson(GF(y),Vdown)[1,1]]])
+    return 1.0/pi*log(det(np.eye(2)-g.dot(VRot))).real
+  C = quad(integrand, eta, np.inf, epsabs=0.0e0, epsrel=1.0e-4, limit=200 ) 
+  return C[0]
+
+
+def JBulkTop3(r1,r2):
+  """A routine for calculating the Bulk Coupling for top adsorbed impurities with 3 atoms. 
+  Been tested a little. Acutally seems alright."""
+  def GF(y):
+    return gBulkTopMx3(r1,r2,EF+1j*y)
+  def integrand(y):
+    VRot = np.array([[-2*Vup,0],[0,-2*Vdown]])
+    g = np.array([[Dyson(GF(y),Vup)[2,2],0],[0,Dyson(GF(y),Vdown)[2,2]]])
+    return 1.0/pi*log(det(np.eye(2)-g.dot(VRot))).real
+  C = quad(integrand, eta, np.inf, epsabs=0.0e0, epsrel=1.0e-4, limit=200 ) 
+  return C[0]
+
+
 def Line_Coupling(DA,s,a=1.0):
   """Finds the coupling between two lines, hopefully"""
   def g_mx(ky,E):
@@ -170,47 +209,6 @@ def Line_CouplingSPA(DA):
   
   temp = inv( np.eye(len(X00)) + X00.dot(U) )
   return temp.dot(X00)[0,1]
-
-
-
-def JGNRSubstest(nE,m1,n1,m2,n2,s):
-  """A routine for calculating the coupling in GNRs, modified to work with matrices.
-  Unsurprisingly, takes a bit longer than the usual method."""
-  def GF(y):
-    return gGNRSubsMx(nE,m1,n1,m2,n2,s,EF+1j*y)
-  def integrand(y):
-    VRot = np.array([[-2*Vup,0],[0,-2*Vdown]])
-    g = np.array([[Dyson(GF(y),Vup)[1,1],0],[0,Dyson(GF(y),Vdown)[1,1]]])
-    return 1.0/pi*log(det(np.eye(2)-g.dot(VRot))).real
-  C = quad(integrand, eta, np.inf, epsabs=0.0e0, epsrel=1.0e-4, limit=200 ) 
-  return C[0]
-
-
-def JBulkSubstest(m,n,s):
-  """A routine for calculating the coupling in Bulk, modified to work with matrices.
-  Unsurprisingly, takes a bit longer than the usual method."""
-  def GF(y):
-    return gBulkSubsMx(m,n,s,EF+1j*y)
-  def integrand(y):
-    VRot = np.array([[-2*Vup,0],[0,-2*Vdown]])
-    g = np.array([[Dyson(GF(y),Vup)[1,1],0],[0,Dyson(GF(y),Vdown)[1,1]]])
-    return 1.0/pi*log(det(np.eye(2)-g.dot(VRot))).real
-  C = quad(integrand, eta, np.inf, epsabs=0.0e0, epsrel=1.0e-4, limit=200 ) 
-  return C[0]
-
-
-def JBulkTop3(r1,r2):
-  """A routine for calculating the Bulk Coupling for top adsorbed impurities with 3 atoms. 
-  Been tested a little. Acutally seems alright."""
-  def GF(y):
-    return gBulkTopMx3(r1,r2,EF+1j*y)
-  def integrand(y):
-    VRot = np.array([[-2*Vup,0],[0,-2*Vdown]])
-    g = np.array([[Dyson(GF(y),Vup)[2,2],0],[0,Dyson(GF(y),Vdown)[2,2]]])
-    return 1.0/pi*log(det(np.eye(2)-g.dot(VRot))).real
-  C = quad(integrand, eta, np.inf, epsabs=0.0e0, epsrel=1.0e-4, limit=200 ) 
-  return C[0]
-
 
 # Here we have a bunch of attempts at creating a general routine that calculates the matrices for any distribution of impurities in bulk graphene.
 def CenterTest(m,n,E):
