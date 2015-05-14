@@ -296,7 +296,7 @@ def Top3Test(r1,r2,E):
   return G[3:6,3:6]
 
 
-def SubsTest(r1):
+def SubsTest(r1,E):
   """Testing function that returns the GF matrix for two atomic sites in bulk graphene"""
   r0 = [0,0,0]
   r1 = r1
@@ -332,7 +332,6 @@ def CenterGen2(rij,E):
   rUnique = set(map(tuple,rSflat))
   dic = {k:ListGF(E,k) for k in rUnique}
   gflat = np.array([dic[tuple(r)] for r in rSflat])
-  
   g_mx = gflat.reshape(n,n)  
   return g_mx
 
