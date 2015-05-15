@@ -55,7 +55,7 @@ def gBulkTopMx(m,n,s,E):
   return G[2:4,2:4]
 
 
-def gBulkTopMx3(r1,r2,E):
+def gBulkTop3Mx(r1,r2,E):
   """An attempt to do the top adsorbed for 3 impurities.
   Tested to see that it reduces to the 2 impurity case in appropriate conditions.
   No attempt has yet been made to account for symmetries"""
@@ -121,8 +121,7 @@ def gGNRTopMx(nE,m1,n1,m2,n2,s,E):
 
 def gGNRTopMxFast(nE,m1,n1,m2,n2,s,E):      
   """A faster version of gGNRTopMx. 
-  Uses Dyson's formula in a more specific way to speed everything up.
-  Gets a speed up of a factor of about 2."""
+  Uses the analytic results of Dyson's formula to get a speed up of a factor of 2."""
   
   # Introduce the connecting GFs
   gaa = gRib_Arm(nE,m1,n1,m1,n1,0,E)
@@ -144,6 +143,14 @@ def gGNRTopMxFast(nE,m1,n1,m2,n2,s,E):
   G[1,1] = GBB
   G[0,1],G[1,0] = 2*(GAB,)
   return G
+
+
+def gTubeSubsMx(nC,m,n,s,E):
+  """ Returns the GF matrix for two atomic sites in a graphene nanotube"""
+  g = np.zeros((2,2),dtype=complex)
+  g[0,0],g[1,1] = 2*(gTube_Arm(nC,0,0,0,E),)
+  g[0,1],g[1,0] = 2*(gTube_Arm(nC,m,n,s,E),)
+  return g
 
 
 def gBulkCenterOld(m,n,E):
@@ -303,7 +310,7 @@ def SubsTest(r1,E):
   r = np.array([r0,r1])
   rcol = r[:,np.newaxis]
   rij = r-rcol  
-  return CenterGen(rij,E)
+  return CenterGen2(rij,E)
 
 
 def CenterGen(rij,E):
@@ -336,13 +343,10 @@ def CenterGen2(rij,E):
   return g_mx
 
 
-
-def gTubeSubsMx(nC,m,n,s,E):
-  """ Returns the GF matrix for two atomic sites in bulk graphene"""
-  g = np.zeros((2,2),dtype=complex)
-  g[0,0],g[1,1] = 2*(gTube_Arm(nC,0,0,0,E),)
-  g[0,1],g[1,0] = 2*(gTube_Arm(nC,m,n,s,E),)
-  return g
-
-if __name__ == "__main__":   
-  print gTubeSubsMx(6,4,4,0,1.2+1j*eta)
+if __name__ == "__main__":  
+  m,n,E = 3,3,1.6+1j*eta
+  print CenterTest(m,n,E)
+  r1,r2,E = [0,1,1],[1,-3,1],3.2+1j*eta
+  print Top3Test(r1,r2,E)
+  r1,E = [3,1,1],1.5+1j*eta
+  print SubsTest(r1,E)
