@@ -265,11 +265,9 @@ def CenterTest(m,n,E):
   hex1 = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])
   hex2 = hex1 + D
   r = np.concatenate((hex1,hex2))
-  rcol = r[:,np.newaxis]	# Realistically, from this line onward should be in your GF generator
-  rij = r-rcol
   
   g_mx = np.zeros([14,14],dtype=complex)
-  g_mx[:12,:12] = CenterGen2(rij,E)
+  g_mx[:12,:12] = CenterGen2(r,E)
   
   g_impurity = 1.0/(E-eps_imp)
   g_mx[12,12] = g_mx[13,13] = g_impurity
@@ -281,13 +279,10 @@ def Top3Test(r1,r2,E):
   r0 = [0,0,0]
   r1 = r1
   r2 = r2
-  
   r = np.array([r0,r1,r2])
-  rcol = r[:,np.newaxis]
-  rij = r-rcol
   
   g = np.zeros((6,6),dtype=complex)
-  g[:3,:3] = CenterGen2(rij,E)
+  g[:3,:3] = CenterGen2(r,E)
 
   #Introduce the impurity GFs
   g_impurity = 1.0/(E-eps_imp)
@@ -308,13 +303,14 @@ def SubsTest(r1,E):
   r0 = [0,0,0]
   r1 = r1
   r = np.array([r0,r1])
-  rcol = r[:,np.newaxis]
-  rij = r-rcol  
-  return CenterGen2(rij,E)
+  return CenterGen(r,E)
 
 
-def CenterGen(rij,E):
+def CenterGen(r,E):
   """A function that should calculate the appropriate matrix for a bunch of bulk positions. Very much in the testing phase."""
+  rcol = r[:,np.newaxis]
+  rij = r-rcol
+  
   n = len(rij)
   rijS = [[SymSector(rij[i,j]) for j in range(n)] for i in range(n)]
   
@@ -331,8 +327,10 @@ def CenterGen(rij,E):
   return g_mx
 
 
-def CenterGen2(rij,E):
+def CenterGen2(r,E):
   """Another function that should calculate the appropriate matrix for a bunch of bulk positions. Very much in the testing phase."""
+  rcol = r[:,np.newaxis]
+  rij = r-rcol
   n = len(rij)
   rflat = rij.reshape(n*n,3)
   rSflat = map(SymSector,rflat)
