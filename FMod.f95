@@ -50,13 +50,14 @@ implicit none
 end function gbulk_kz_int 
 
 
-function grib_arm(nE,m1,n1,m2,n2,s,E,t)
+function grib_arm(nE,m1,n1,m2,n2,s,E,E0,t)
 use shared_data
 implicit none
   complex(8) :: grib_arm
   integer :: j
   ! Other parameters
   complex(8) :: E
+  real(8) :: E0		! The onsite peturbation
   real(8) :: t
   integer :: m1, n1, m2, n2, s
   integer :: nE
@@ -88,7 +89,7 @@ implicit none
       complex(8) :: Const, Den
       integer :: sig
 
-      q = acos( (E**2 - t**2 - 4.0d0*t**2 *cos(ky)**2)/(4.0d0*t**2 *cos(ky) ) )
+      q = acos( ((E-E0)**2 - t**2 - 4.0d0*t**2 *cos(ky)**2)/(4.0d0*t**2 *cos(ky) ) )
       if (aimag(q) < 0.0d0) q = -q
 
       Const = im/(2.0d0*nE*t**2)
@@ -96,7 +97,7 @@ implicit none
 
       if (s == 0) then
 	sig = sign(1,m2+n2-m1-n1)
-	g_term = Const*E*exp( im*sig*q*(m2+n2-m1-n1) )*sin(ky*(m2-n2))*sin(ky*(m1-n1))/ Den 
+	g_term = Const*(E-E0)*exp( im*sig*q*(m2+n2-m1-n1) )*sin(ky*(m2-n2))*sin(ky*(m1-n1))/ Den 
       else if (s == 1) then 
 	sig = sign(1,m2+n2-m1-n1)
 	f = 1.0d0 + 2.0d0*cos(ky)*exp(sig*im*q)
@@ -118,14 +119,14 @@ implicit none
       complex(8) :: N_ab
 
       if (s == 0) then
-	N_ab = E
+	N_ab = (E-E0)
       else if ( (s == 1) .or. (s == -1) ) then
 	N_ab = t
       else
 	write(*,*) 'Sublattice error in grib_arm'
       end if
       
-      limit_term = 2.0d0*N_ab*sin(ky*(m2-n2))*sin(ky*(m1-n1))/( nE*( E**2 - t**2 ) )
+      limit_term = 2.0d0*N_ab*sin(ky*(m2-n2))*sin(ky*(m1-n1))/( nE*( (E-E0)**2 - t**2 ) )
 
     end function limit_term 
 

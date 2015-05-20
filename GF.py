@@ -80,10 +80,10 @@ def gBulk_kA(m,n,s,E):
   return C_int(int_temp,-pi/2,pi/2)
 
 
-def gRib_Arm(nE,m1,n1,m2,n2,s,E):
+def gRib_Arm(nE,m1,n1,m2,n2,s,E,E0=0.0):
   """An interace to the FORTRAN armchair ribbon GF.
   There is little computational cost to having this interface, but also little advantage. Do as you like"""
-  GF = FMod.grib_arm(nE,m1,n1,m2,n2,s,E,t)
+  GF = FMod.grib_arm(nE,m1,n1,m2,n2,s,E,E0,t)
   return GF
 
 

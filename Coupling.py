@@ -212,5 +212,6 @@ def Line_CouplingSPA(DA):
 
 
 if __name__ == "__main__":
-  r1,r2 = [[1,1,0],[3,4,1]]
-  print JBulkTop3(r1,r2)
+  nE,m1,n1,m2,n2,s,E = 8,5,3,-2,-5,1,1.7+1j*eta
+  print gRib_Arm(nE,m1,n1,m2,n2,s,E,E0=1.0)
+  print JGNRSubs(nE,m1,n1,m2,n2,s)
