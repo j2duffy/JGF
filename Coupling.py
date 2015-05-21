@@ -43,7 +43,7 @@ def JBulkTop(m,n,s):
 def JBulkCenter(m,n):
   """The coupling for center-adsorbed impurities in bulk graphene"""
   def GF(y):
-    return CenterMx(m,n,EF+1j*y)
+    return gBulkCenterMx(m,n,EF+1j*y)
   return J(GF)
 
 
@@ -212,6 +212,5 @@ def Line_CouplingSPA(DA):
 
 
 if __name__ == "__main__":
-  nE,m1,n1,m2,n2,s,E = 8,5,3,-2,-5,1,1.7+1j*eta
-  print gRib_Arm(nE,m1,n1,m2,n2,s,E,E0=1.0)
-  print JGNRSubs(nE,m1,n1,m2,n2,s)
+  m,n = 3,7
+  print JBulkCenter(m,n)

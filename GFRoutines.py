@@ -2,6 +2,7 @@
 
 from GF import *
 
+
 def Dyson(g,V):
   """Uses Dyson's formula to get the GF mx after a given perturbation."""
   return inv( np.eye(len(g)) - g.dot(V) ).dot(g)	# If V inputted as scalar, automatically multiplies by identity
@@ -25,6 +26,41 @@ def SymSector(r):
     m,n=n,m
     
   return [m,n,s]
+
+
+def CenterGen(r,E):
+  """Given a list of positions in bulk graphene, calculates the relevant matrix of GFs"""
+  rcol = r[:,np.newaxis]
+  rij = r-rcol
+  n = len(rij)
+  rflat = rij.reshape(n*n,3)
+  rSflat = map(SymSector,rflat)
+  rUnique = set(map(tuple,rSflat))
+  dic = {k:ListGF(E,k) for k in rUnique}
+  gflat = np.array([dic[tuple(r)] for r in rSflat])
+  g_mx = gflat.reshape(n,n)  
+  return g_mx
+
+
+def CenterGen2(r,E):
+  """Just a different way of doing CenterGen"""
+  rcol = r[:,np.newaxis]
+  rij = r-rcol
+  
+  n = len(rij)
+  rijS = [[SymSector(rij[i,j]) for j in range(n)] for i in range(n)]
+  
+  g_dic = {}
+  g_mx = np.zeros([n,n],dtype=complex)
+  for i in range(n):
+    for j in range(n):
+      key = tuple(rijS[i][j])
+      try:
+	g_mx[i,j] = g_dic[key]
+      except KeyError:
+	g_mx[i,j] = g_dic[key] = ListGF(E,key)
+  
+  return g_mx
 
 
 def gBulkSubsMx(m,n,s,E):
@@ -83,6 +119,67 @@ def gBulkTop3Mx(r1,r2,E):
   
   # Return the part of the matrix that governs the impurity behaviour. 
   return G[3:6,3:6]
+
+
+def gBulkCenterMx(m,n,E):
+  """A routine that calculates the 2x2 matrix for Center adsorbed impurities"""
+  D = [m,n,0]
+  hex1 = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])
+  hex2 = hex1 + D
+  r = np.concatenate((hex1,hex2))
+  
+  g_mx = np.zeros([14,14],dtype=complex)
+  g_mx[:12,:12] = CenterGen(r,E)
+  g_impurity = 1.0/(E-eps_imp)
+  g_mx[12,12] = g_mx[13,13] = g_impurity
+
+  V = np.zeros([14,14],dtype=complex)
+  V[:6,12] = tau
+  V[12,:6] = tau
+  V[6:12,13] = tau
+  V[13,6:12] = tau
+  
+  g_new = Dyson(g_mx,V)
+
+  g_impur =  np.zeros([2,2],dtype=complex)
+  g_impur[0,0] = g_new[12,12]
+  g_impur[0,1] = g_new[12,13]
+  g_impur[1,0] = g_new[13,12]
+  g_impur[1,1] = g_new[13,13]
+
+  return g_impur
+
+
+def gBulkCenterMxMulti(m,n,E):
+  """An old Center code designed to run in parallel fashion on threads (not cores).
+    Is included here more as an example of how to do this kind of thing than anything else."""
+  D = [m,n,0]
+  hex1 = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])
+  hex2 = hex1 + D
+  r = np.concatenate((hex1,hex2))
+  rcol = r[:,np.newaxis]
+  rij = r-rcol
+  
+  rflat = rij.reshape(144,3)
+  rSflat = map(SymSector,rflat)
+  rUnique = list(set(map(tuple,map(SymSector,rflat))))		# Needs to be ordered for the map
+  
+  g = partial(ListGF,E)
+  pool = multiprocessing.Pool()
+  gS = pool.map(g,rUnique)
+  pool.close()
+  pool.join()
+   
+  dic = {k:v for k,v in zip(rUnique,gS)}
+  gflat = np.array([dic[tuple(r)] for r in rSflat])
+  
+  g_mx = np.zeros([14,14],dtype=complex)
+  g_mx[:12,:12] = gflat.reshape(12,12)
+  
+  g_impurity = 1.0/(E-eps_imp)
+  g_mx[12,12] = g_mx[13,13] = g_impurity
+  
+  return g_mx
 
 
 def gGNRSubsMx(nE,m1,n1,m2,n2,s,E):      
@@ -153,127 +250,7 @@ def gTubeSubsMx(nC,m,n,s,E):
   return g
 
 
-def gBulkCenterOld(m,n,E):
-  """A tidied version of our old Center Code"""
-  D = [m,n,0]
-  hex1 = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])
-  hex2 = hex1 + D
-  r = np.concatenate((hex1,hex2))
-  rcol = r[:,np.newaxis]
-  rij = r-rcol
-  
-  n = len(rij)
-  rijS = [[SymSector(rij[i,j]) for j in range(n)] for i in range(n)]
-  
-  g_dic = {}
-  g_mx = np.zeros([14,14],dtype=complex)
-  for i in range(n):
-    for j in range(n):
-      key = tuple(rijS[i][j])
-      try:
-	g_mx[i,j] = g_dic[key]
-      except KeyError:
-	g_mx[i,j] = g_dic[key] = ListGF(E,key)
-  
-  g_impurity = 1.0/(E-eps_imp)
-  g_mx[12,12] = g_mx[13,13] = g_impurity
-  
-  return g_mx
-
-
-def gBulkCenterMx(m,n,E):
-  """Our Center Code using Dictionary Methods and the lot. I think this is pretty slick."""
-  D = [m,n,0]
-  hex1 = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])
-  hex2 = hex1 + D
-  r = np.concatenate((hex1,hex2))
-  rcol = r[:,np.newaxis]
-  rij = r-rcol
-  
-  rflat = rij.reshape(144,3)
-  rSflat = map(SymSector,rflat)
-  rUnique = set(map(tuple,rSflat))
-  dic = {k:ListGF(E,k) for k in rUnique}
-  gflat = np.array([dic[tuple(r)] for r in rSflat])
-  
-  g_mx = np.zeros([14,14],dtype=complex)
-  g_mx[:12,:12] = gflat.reshape(12,12)
-  
-  g_impurity = 1.0/(E-eps_imp)
-  g_mx[12,12] = g_mx[13,13] = g_impurity
-  
-  return g_mx
-
-
-def gBulkCenterMxMulti(m,n,E):
-  """Our Center Code using Dictionary Methods and the lot. A LOT of map tricks. Runs in parallel, but slowly. More of a demo than anything else."""
-  D = [m,n,0]
-  hex1 = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])
-  hex2 = hex1 + D
-  r = np.concatenate((hex1,hex2))
-  rcol = r[:,np.newaxis]
-  rij = r-rcol
-  
-  rflat = rij.reshape(144,3)
-  rSflat = map(SymSector,rflat)
-  rUnique = list(set(map(tuple,map(SymSector,rflat))))		# Needs to be ordered for the map
-  
-  g = partial(ListGF,E)
-  pool = multiprocessing.Pool()
-  gS = pool.map(g,rUnique)
-  pool.close()
-  pool.join()
-   
-  dic = {k:v for k,v in zip(rUnique,gS)}
-  gflat = np.array([dic[tuple(r)] for r in rSflat])
-  
-  g_mx = np.zeros([14,14],dtype=complex)
-  g_mx[:12,:12] = gflat.reshape(12,12)
-  
-  g_impurity = 1.0/(E-eps_imp)
-  g_mx[12,12] = g_mx[13,13] = g_impurity
-  
-  return g_mx
-
-
-def CenterMx(m,n,E):
-  """A routine for calculating the 2x2 impurity matrix for Center adsorbed impurities"""
-  V = np.zeros([14,14],dtype=complex)
-  V[:6,12] = tau
-  V[12,:6] = tau
-
-  V[6:12,13] = tau
-  V[13,6:12] = tau
-  
-  g = gBulkCenterMx(m,n,E)
-
-  g_new = Dyson(g,V)
-
-  g_impur =  np.zeros([2,2],dtype=complex)
-  g_impur[0,0] = g_new[12,12]
-  g_impur[0,1] = g_new[12,13]
-  g_impur[1,0] = g_new[13,12]
-  g_impur[1,1] = g_new[13,13]
-
-  return g_impur
-
-
-# Here we have a bunch of attempts at creating a general routine that calculates the matrices for any distribution of impurities in bulk graphene.
-def CenterTest(m,n,E):
-  """A testing version of our center code. Extended a great deal for generality"""
-  D = [m,n,0]
-  hex1 = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])
-  hex2 = hex1 + D
-  r = np.concatenate((hex1,hex2))
-  
-  g_mx = np.zeros([14,14],dtype=complex)
-  g_mx[:12,:12] = CenterGen2(r,E)
-  
-  g_impurity = 1.0/(E-eps_imp)
-  g_mx[12,12] = g_mx[13,13] = g_impurity
-  return g_mx
-
-
+# Some testing functions that utilise our routine for calculating general impurities.
 def Top3Test(r1,r2,E):
   """Should calculate the appropriate mx for 3 Top Adsorbed impurities. VERY VERY much in the testing phase"""
   r0 = [0,0,0]
@@ -282,7 +259,7 @@ def Top3Test(r1,r2,E):
   r = np.array([r0,r1,r2])
   
   g = np.zeros((6,6),dtype=complex)
-  g[:3,:3] = CenterGen2(r,E)
+  g[:3,:3] = CenterGen(r,E)
 
   #Introduce the impurity GFs
   g_impurity = 1.0/(E-eps_imp)
@@ -299,52 +276,15 @@ def Top3Test(r1,r2,E):
 
 
 def SubsTest(r1,E):
-  """Testing function that returns the GF matrix for two atomic sites in bulk graphene"""
+  """Testing function that returns the GF matrix for two atomic sites in bulk graphene.
+    Hasn't yet incorporated a way of determining sublattice"""
   r0 = [0,0,0]
   r1 = r1
   r = np.array([r0,r1])
-  return CenterGen(r,E)
+  return CenterGen2(r,E)
 
-
-def CenterGen(r,E):
-  """A function that should calculate the appropriate matrix for a bunch of bulk positions. Very much in the testing phase."""
-  rcol = r[:,np.newaxis]
-  rij = r-rcol
-  
-  n = len(rij)
-  rijS = [[SymSector(rij[i,j]) for j in range(n)] for i in range(n)]
-  
-  g_dic = {}
-  g_mx = np.zeros([n,n],dtype=complex)
-  for i in range(n):
-    for j in range(n):
-      key = tuple(rijS[i][j])
-      try:
-	g_mx[i,j] = g_dic[key]
-      except KeyError:
-	g_mx[i,j] = g_dic[key] = ListGF(E,key)
-  
-  return g_mx
-
-
-def CenterGen2(r,E):
-  """Another function that should calculate the appropriate matrix for a bunch of bulk positions. Very much in the testing phase."""
-  rcol = r[:,np.newaxis]
-  rij = r-rcol
-  n = len(rij)
-  rflat = rij.reshape(n*n,3)
-  rSflat = map(SymSector,rflat)
-  rUnique = set(map(tuple,rSflat))
-  dic = {k:ListGF(E,k) for k in rUnique}
-  gflat = np.array([dic[tuple(r)] for r in rSflat])
-  g_mx = gflat.reshape(n,n)  
-  return g_mx
 
 
 if __name__ == "__main__":  
-  m,n,E = 3,3,1.6+1j*eta
-  print CenterTest(m,n,E)
-  r1,r2,E = [0,1,1],[1,-3,1],3.2+1j*eta
-  print Top3Test(r1,r2,E)
-  r1,E = [3,1,1],1.5+1j*eta
-  print SubsTest(r1,E)
+  m,n,E = 3,1,2.6+1j*eta
+  print gBulkCenterMx(m,n,E) - CenterMx(m,n,E)
