@@ -94,11 +94,11 @@ def JBulkSubsMx(m,n,s):
   return C[0]
 
 
-def JBulkTop3(r1,r2):
+def JBulkTop3(r0,r1,r2):
   """A routine for calculating the Bulk Coupling for top adsorbed impurities with 3 atoms. 
   Been tested a little. Acutally seems alright."""
   def GF(y):
-    return gBulkTop3Mx(r1,r2,EF+1j*y)
+    return gBulkTop3Mx(r0,r1,r2,EF+1j*y)
   def integrand(y):
     VRot = np.array([[-2*Vup,0],[0,-2*Vdown]])
     g = np.array([[Dyson(GF(y),Vup)[2,2],0],[0,Dyson(GF(y),Vdown)[2,2]]])
@@ -212,5 +212,5 @@ def Line_CouplingSPA(DA):
 
 
 if __name__ == "__main__":
-  m,n = 3,7
-  print JBulkCenter(m,n)
+  r0,r1,r2 = [[0,0,0],[1,0,0],[5,0,1]]
+  print JBulkTop3(r0,r1,r2)

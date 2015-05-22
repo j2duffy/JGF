@@ -91,21 +91,12 @@ def gBulkTopMx(m,n,s,E):
   return G[2:4,2:4]
 
 
-def gBulkTop3Mx(r1,r2,E):
-  """An attempt to do the top adsorbed for 3 impurities.
-  Tested to see that it reduces to the 2 impurity case in appropriate conditions.
-  No attempt has yet been made to account for symmetries"""
-  r0 = np.array([0,0,0])
-  r1 = np.array(r1)
-  r2 = np.array(r2)
-  
-  r = [r0,r1,r2]
+def gBulkTop3Mx(r0,r1,r2,E):
+  """Should calculate the appropriate mx for 3 Top Adsorbed impurities in bulk graphene"""
+  r = np.array([r0,r1,r2])
   
   g = np.zeros((6,6),dtype=complex)
-  # This is the least pythonic way in which to do this. You should change it whenever you can think of something better. 
-  for i in range(3):
-    for j in range(3):
-      g[i,j] = ListGF(E,r[j] - r[i])
+  g[:3,:3] = CenterGen(r,E)
 
   #Introduce the impurity GFs
   g_impurity = 1.0/(E-eps_imp)
@@ -250,41 +241,6 @@ def gTubeSubsMx(nC,m,n,s,E):
   return g
 
 
-# Some testing functions that utilise our routine for calculating general impurities.
-def Top3Test(r1,r2,E):
-  """Should calculate the appropriate mx for 3 Top Adsorbed impurities. VERY VERY much in the testing phase"""
-  r0 = [0,0,0]
-  r1 = r1
-  r2 = r2
-  r = np.array([r0,r1,r2])
-  
-  g = np.zeros((6,6),dtype=complex)
-  g[:3,:3] = CenterGen(r,E)
-
-  #Introduce the impurity GFs
-  g_impurity = 1.0/(E-eps_imp)
-  g[3,3],g[4,4],g[5,5] = 3*(g_impurity,)
-  
-  # The peturbation connects the impurities to the lattice
-  V = np.zeros([6,6],dtype=complex)
-  V[3,0],V[0,3],V[1,4],V[4,1],V[2,5],V[5,2] = 6*(tau,)
-  
-  G = Dyson(g,V)
-  
-  # Return the part of the matrix that governs the impurity behaviour. 
-  return G[3:6,3:6]
-
-
-def SubsTest(r1,E):
-  """Testing function that returns the GF matrix for two atomic sites in bulk graphene.
-    Hasn't yet incorporated a way of determining sublattice"""
-  r0 = [0,0,0]
-  r1 = r1
-  r = np.array([r0,r1])
-  return CenterGen2(r,E)
-
-
-
 if __name__ == "__main__":  
-  m,n,E = 3,1,2.6+1j*eta
-  print gBulkCenterMx(m,n,E) - CenterMx(m,n,E)
+  r0,r1,r2,E = [[0,0,0],[1,0,1],[3,3,1],-1.1+1j*eta]
+  print gBulkTop3Mx(r0,r1,r2,E)
