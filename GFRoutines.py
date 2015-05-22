@@ -8,7 +8,7 @@ def Dyson(g,V):
   return inv( np.eye(len(g)) - g.dot(V) ).dot(g)	# If V inputted as scalar, automatically multiplies by identity
 
 
-def ListGF(E,r):
+def gBulkList(E,r):
   """Calculates the GF from the Energy and a list.
   Really just a convenience function for all of those Center_gen codes
   Although this is probably how every GF should be done.
@@ -36,7 +36,7 @@ def BulkMxGen(r,E):
   rflat = rij.reshape(n*n,3)
   rSflat = map(SymSector,rflat)
   rUnique = set(map(tuple,rSflat))
-  dic = {k:ListGF(E,k) for k in rUnique}
+  dic = {k:gBulkList(E,k) for k in rUnique}
   gflat = np.array([dic[tuple(r)] for r in rSflat])
   g_mx = gflat.reshape(n,n)  
   return g_mx
@@ -58,7 +58,7 @@ def BulkMxGen2(r,E):
       try:
 	g_mx[i,j] = g_dic[key]
       except KeyError:
-	g_mx[i,j] = g_dic[key] = ListGF(E,key)
+	g_mx[i,j] = g_dic[key] = gBulkList(E,key)
   
   return g_mx
 
@@ -155,7 +155,7 @@ def gBulkCenterMxMulti(m,n,E):
   rSflat = map(SymSector,rflat)
   rUnique = list(set(map(tuple,map(SymSector,rflat))))		# Needs to be ordered for the map
   
-  g = partial(ListGF,E)
+  g = partial(gBulkList,E)
   pool = multiprocessing.Pool()
   gS = pool.map(g,rUnique)
   pool.close()
