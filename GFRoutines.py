@@ -28,7 +28,7 @@ def SymSector(r):
   return [m,n,s]
 
 
-def CenterGen(r,E):
+def BulkMxGen(r,E):
   """Given a list of positions in bulk graphene, calculates the relevant matrix of GFs"""
   rcol = r[:,np.newaxis]
   rij = r-rcol
@@ -42,8 +42,8 @@ def CenterGen(r,E):
   return g_mx
 
 
-def CenterGen2(r,E):
-  """Just a different way of doing CenterGen"""
+def BulkMxGen2(r,E):
+  """Just a different way of doing BulkMxGen"""
   rcol = r[:,np.newaxis]
   rij = r-rcol
   
@@ -96,7 +96,7 @@ def gBulkTop3Mx(r0,r1,r2,E):
   r = np.array([r0,r1,r2])
   
   g = np.zeros((6,6),dtype=complex)
-  g[:3,:3] = CenterGen(r,E)
+  g[:3,:3] = BulkMxGen(r,E)
 
   #Introduce the impurity GFs
   g_impurity = 1.0/(E-eps_imp)
@@ -120,7 +120,7 @@ def gBulkCenterMx(m,n,E):
   r = np.concatenate((hex1,hex2))
   
   g_mx = np.zeros([14,14],dtype=complex)
-  g_mx[:12,:12] = CenterGen(r,E)
+  g_mx[:12,:12] = BulkMxGen(r,E)
   g_impurity = 1.0/(E-eps_imp)
   g_mx[12,12] = g_mx[13,13] = g_impurity
 
