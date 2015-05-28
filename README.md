@@ -10,4 +10,4 @@ Coupling.py has a bunch of functions for calculating the IEC for different syste
 
 The FORTRAN module is compiled using
 f2py --fcompiler=gfortran --opt=-O -c -m FMod FMod.f95 
-Bear in mind that capital letters do not work in f2py, or at least the version that I'm using.
+I avoid capital letters while using f2py, since this seems to avoid the name mangling issue.
