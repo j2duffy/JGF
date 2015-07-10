@@ -5,7 +5,7 @@ from scipy.integrate		import quad
 from scipy.optimize		import newton
 import numpy 			as np
 import pylab 			as pl
-from numpy.linalg		import inv	# np.linalg?
+from numpy.linalg		import inv
 from cmath			import sin, cos, log, acos, asin, sqrt, exp, pi
 from math			import copysign
 from functools import partial
@@ -42,7 +42,8 @@ def gLin_Chain(n,E):
 
 def gBulk_kZ(m,n,s,E,E0=0.0):
   """The Graphene Green's function
-    The kZ integration is performed last"""
+    The kZ integration is performed last
+    The E0 is actually kind of useless and starting to annoy me"""
   GF = partial(FMod.gbulk_kz_int,m,n,s,E,E0,t)
   return C_int(GF,-pi/2,pi/2)
 
@@ -82,7 +83,7 @@ def gBulk_kA(m,n,s,E):
 
 def gRib_Arm(nE,m1,n1,m2,n2,s,E,E0=0.0):
   """An interace to the FORTRAN armchair ribbon GF.
-  There is little computational cost to having this interface, but also little advantage. Do as you like"""
+  The E0 is starting to annoy me."""
   GF = FMod.grib_arm(nE,m1,n1,m2,n2,s,E,E0,t)
   return GF
 

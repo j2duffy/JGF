@@ -242,5 +242,12 @@ def gTubeSubsMx(nC,m,n,s,E):
 
 
 if __name__ == "__main__":  
-  r0,r1,r2,E = [[0,0,0],[1,0,1],[3,3,1],-1.1+1j*eta]
-  print gBulkTop3Mx(r0,r1,r2,E)
+  nE = 6
+  m1 = 3
+  n1 = 0
+  m2 = 6
+  n2 = 3
+  s = 1
+ 
+  E = 1.2 + 1j*eta
+  print gGNRTopMx(nE,m1,n1,m2,n2,s,E)
