@@ -36,6 +36,15 @@ class memoized(object):
 
 def HArmStrip(N):
   """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon).
+  Uses the N numbering convention."""
+  if N%2 == 0:
+    return HArmStripEven(N)
+  else:
+    return HArmStripOdd(N)
+
+
+def HArmStripOdd(N):
+  """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon).
   Only works for odd nanoribbons.
   Uses the N numbering convention."""
   H = np.zeros([2*N,2*N])
@@ -392,6 +401,7 @@ def KuboSubs(N,p,Imp_List,E):
 
 
 if __name__ == "__main__":
-  N = 6
-  H = HArmStripEven(N)
-  print H
+  N = 7
+  p = 1
+  for E in np.linspace(-3.0,3.0,201):
+    print E.real, Kubo(E).real
