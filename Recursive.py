@@ -35,7 +35,8 @@ class memoized(object):
 
 
 def HArmStrip(N):
-  """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon.
+  """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon).
+  Only works for odd nanoribbons.
   Uses the N numbering convention."""
   H = np.zeros([2*N,2*N])
   for i in range(N-1):
@@ -46,6 +47,18 @@ def HArmStrip(N):
     H[i,N+i], H[N+i,i] = 2*(t,)
   return H
 
+def HArmStripEven(N):
+  """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon).
+  Only works for even nanoribbons.
+  Uses the N numbering convention."""
+  H = np.zeros([2*N,2*N])
+  for i in range(0,N-1):
+    H[i,i+1], H[i+1,i] = 2*(t,)
+  for i in range(N,2*N-1):
+    H[i,i+1], H[i+1,i] = 2*(t,)
+  for i in range(0,N-1,2):
+    H[i,i+N], H[i+N,i] = 2*(t,)
+  return H
 
 def HArmStripOld(N):
   """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon).
@@ -62,7 +75,8 @@ def HArmStripOld(N):
 
 def gArmStrip(E,N):
   """Calculates the GF of an armchair strip.
-  Uses the N numbering convention"""
+  Uses the N numbering convention
+  Might cost a bit to calculate the hamiltonian every time"""
   return inv(E*np.eye(2*N) - HArmStrip(N))
 
 
@@ -85,7 +99,7 @@ def HBigArmStrip(N,p):
   return H
 
 
-def HBigArmStripSubs(N,p,k):
+def HBigArmStripSubs(N,p,Imp_List):
   """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
   Populates the strip with k impurities at randomly chosen sites.
   It uses the N numbering convention."""
@@ -96,7 +110,7 @@ def HBigArmStripSubs(N,p,k):
   for i in range(0,2*N*p-N,2):
     H[i,i+N], H[i+N,i] = 2*(t,)
   
-  for i in random.sample(range(2*N*p),k):
+  for i in Imp_List:
     H[i,i] = 1.0	# Should replace this with some constant
     
   return H
@@ -126,9 +140,9 @@ def gBigArmStrip(E,N,p):
   return inv(E*np.eye(2*N*p) - HBigArmStrip(N,p))
 
 
-def gBigArmStripSubs(E,N,p,k):
+def gBigArmStripSubs(E,N,p,Imp_List):
   """Calculates the GF for a large armchair strip with k randomly distributed substitutional impurities"""
-  return inv(E*np.eye(2*N*p) - HBigArmStrip(N,p))
+  return inv(E*np.eye(2*N*p) - HBigArmStripSubs(N,p,Imp_List))
 
 
 def VArmStrip(N):
@@ -140,7 +154,7 @@ def VArmStrip(N):
   return VLR, VRL
 
 
-def VArmStripOld(N):
+def VArmStripS(N):
   """Calculates the LR and RL connection matrices for the armchair strip.
   Uses the S numbering convention"""
   VLR, VRL = np.zeros([2*N,2*N]),np.zeros([2*N,2*N])	# Done this way for a reason, using tuple properties produces views, not copies.
@@ -149,9 +163,54 @@ def VArmStripOld(N):
   return VLR, VRL
 
 
+def VArmStripBigSmall(N,p):
+  """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip.
+  N numbering convention."""
+  VLR = np.zeros((2*N*p,2*N))
+  VRL = np.zeros((2*N,2*N*p))
+  for i in range(1,N-1,2):
+    VLR[(2*p-1)*N+i,i] = t
+    VRL[i,(2*p-1)*N+i] = t
+  return VLR, VRL
+   
+   
+def VArmStripSmallBig(N,p):
+  """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip.
+  Uses the N numbering convention."""
+  VLR = np.zeros((2*N,2*N*p))
+  VRL = np.zeros((2*N*p,2*N))
+  for i in range(1,N,2):
+    VLR[N+i,i], VRL[i,N+i] = 2*(t,)
+  return VLR, VRL
+    
+    
+def VArmStripSmallBig2(N,p):
+  """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip.
+  Calculates the connection matrices for the small strips and then puts them in the appropriate place in a big matrix.
+  Slower."""
+  VLR = np.zeros((2*N,2*N*p))
+  VRL = np.zeros((2*N*p,2*N))
+  VLRsmall, VRLsmall = VArmStrip(N)
+  VLR[:2*N,:2*N] = VLRsmall
+  VRL[:2*N,:2*N] = VRLsmall
+  return VLR, VRL
+
+
+def VArmStripBigSmall2(N,p):
+  """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip.
+  Embeds the smaller connection matrix in the appropriate part of a larger matrix.
+  In some ways more tidy, but also slower."""
+  VLR = np.zeros((2*N*p,2*N))
+  VRL = np.zeros((2*N,2*N*p))
+  VLRsmall, VRLsmall = VArmStrip(N)
+  VLR[2*N*p-2*N:,:] = VLRsmall
+  VRL[:,2*N*p-2*N:] = VRLsmall
+  return VLR, VRL
+
+
 def RecAdd(g00,g11,V01,V10):
   """Add a cell g11 to g00 recursively using the Dyson Formula, get a cell G11"""
-  return dot(inv(np.eye(2*N)-dot(dot(g11,V10), dot(g00,V01))),g11)
+  return dot(inv(np.eye(g11.shape[0])-dot(dot(g11,V10), dot(g00,V01))),g11)
 
 
 def gEdge(gC,V01,V10,tol=1.0e-4):
@@ -256,9 +315,83 @@ def gRibArmRecursive(N,E):
   return RecAdd(gR,gL,VLR,VRL)
 
 
-if __name__ == "__main__":
-  N = 3
-  p = 2
-  k = 2
+def Kubo(E):
+  def KuboMxs(E): 
+    """Gets the appropriate matrices for the Kubo formula.
+    Cell 0 is the leftmost cell (regular strip size) and cell 1 is an adjacent cell on the right (BigStrip size)"""
+    gC = gArmStrip(E,N)
+    gL = RubioSancho(gC,VRLs,VLRs)
+    gR = RubioSancho(gC,VLRs,VRLs)
+    gM = gBigArmStrip(E,N,p)
+    GM = RecAdd(gR,gM,VRLbs,VLRbs)
+    G11, G10, G01, G00 = gOffDiagonal(GM,gL,gL,gL,gL,VLRsb,VRLsb)
+    return G11, G10, G01, G00
+
+  def Gtilde(E):
+    """Calculates Gtilde, the difference between advanced and retarded GFs"""
+    G11A, G10A, G01A, G00A = KuboMxs(E+1j*eta)
+    G11R, G10R, G01R, G00R = KuboMxs(E-1j*eta)
+    
+    G11T = 1.0/(2.0*1j)*(G11A-G11R)
+    G10T = 1.0/(2.0*1j)*(G10A-G10R)
+    G01T = 1.0/(2.0*1j)*(G01A-G01R)
+    G00T = 1.0/(2.0*1j)*(G00A-G00R)
+    
+    return G11T, G10T, G01T, G00T
   
-  print HBigArmStrip(N,p)
+  VLRs, VRLs = VArmStrip(N)
+  VLRbs, VRLbs = VArmStripBigSmall2(N,p)
+  VLRsb, VRLsb = VArmStripSmallBig(N,p)
+  
+  G11T, G10T, G01T, G00T = Gtilde(E)
+  G11 = G11T[:2*N,:2*N]
+  G10 = G10T[:2*N,:2*N]
+  G01 = G01T[:2*N,:2*N]
+  G00 = G00T[:2*N,:2*N]
+  V01, V10 = VArmStrip(N)
+  
+  return np.trace( dot(dot(-G10,V01),dot(G10,V01)) + dot(dot(G00,V01),dot(G11,V10)) + dot(dot(G11,V10),dot(G00,V01)) - dot(dot(G01,V10),dot(G01,V10)) )
+
+
+def KuboSubs(N,p,Imp_List,E):
+  def KuboMxs(E): 
+    """Gets the appropriate matrices for the Kubo formula.
+    Cell 0 is the leftmost cell (regular strip size) and cell 1 is an adjacent cell on the right (BigStrip size)"""
+    gC = gArmStrip(E,N)
+    gL = RubioSancho(gC,VRLs,VLRs)
+    gR = RubioSancho(gC,VLRs,VRLs)
+    gM = gBigArmStripSubs(E,N,p,Imp_List)
+    GM = RecAdd(gR,gM,VRLbs,VLRbs)
+    G11, G10, G01, G00 = gOffDiagonal(GM,gL,gL,gL,gL,VLRsb,VRLsb)
+    return G11, G10, G01, G00
+
+  def Gtilde(E):
+    """Calculates Gtilde, the difference between advanced and retarded GFs"""
+    G11A, G10A, G01A, G00A = KuboMxs(E+1j*eta)
+    G11R, G10R, G01R, G00R = KuboMxs(E-1j*eta)
+    
+    G11T = 1.0/(2.0*1j)*(G11A-G11R)
+    G10T = 1.0/(2.0*1j)*(G10A-G10R)
+    G01T = 1.0/(2.0*1j)*(G01A-G01R)
+    G00T = 1.0/(2.0*1j)*(G00A-G00R)
+    
+    return G11T, G10T, G01T, G00T
+  
+  VLRs, VRLs = VArmStrip(N)
+  VLRbs, VRLbs = VArmStripBigSmall2(N,p)
+  VLRsb, VRLsb = VArmStripSmallBig(N,p)
+  
+  G11T, G10T, G01T, G00T = Gtilde(E)
+  G11 = G11T[:2*N,:2*N]
+  G10 = G10T[:2*N,:2*N]
+  G01 = G01T[:2*N,:2*N]
+  G00 = G00T[:2*N,:2*N]
+  V01, V10 = VArmStrip(N)
+  
+  return np.trace( dot(dot(-G10,V01),dot(G10,V01)) + dot(dot(G00,V01),dot(G11,V10)) + dot(dot(G11,V10),dot(G00,V01)) - dot(dot(G01,V10),dot(G01,V10)) )
+
+
+if __name__ == "__main__":
+  N = 6
+  H = HArmStripEven(N)
+  print H
