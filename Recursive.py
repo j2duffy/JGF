@@ -82,13 +82,34 @@ def gArmStrip(E,N):
 def HBigArmStrip(N,p):
   """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
   It uses the N numbering convention."""
+  if N%2 == 0:
+    return HBigArmStripEven(N,p)
+  else:
+    return HBigArmStripOdd(N,p)
+
+
+def HBigArmStripOdd(N,p):
+  """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
+  It uses the N numbering convention."""
   H = np.zeros((2*N*p,2*N*p))
   for j in range(1,2*p+1):
     for i in range((j-1)*N,j*N-1):
       H[i,i+1], H[i+1,i] = 2*(t,)
   for i in range(0,2*N*p-N,2):
     H[i,i+N], H[i+N,i] = 2*(t,)
-    
+  return H
+
+
+def HBigArmStripEven(N,p):
+  """Creates the Hamiltonian for an EVEN armchair strip N atoms in width and p unit cells in length.
+  Uses the N numbering convention."""
+  H = np.zeros((2*N*p,2*N*p))
+  for j in range(0,2*p*N-N+1,N):
+    for i in range(j,j+N-1):
+      H[i,i+1], H[i+1,i] = 2*(t,)
+  for j in range(0,2*p*N-2*N+1,2*N):
+    for i in range(j,j+N-1,2):
+      H[i,i+N], H[i+N,i] = 2*(t,)
   return H
 
 
@@ -168,6 +189,24 @@ def VArmStripEven(N):
 def VArmStripBigSmall(N,p):
   """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip.
   N numbering convention."""
+  if N%2 == 0:
+    return VArmStripBigSmallEven(N,p)
+  else:
+    return VArmStripBigSmallOdd(N,p)
+   
+   
+def VArmStripSmallBig(N,p):
+  """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip.
+  Uses the N numbering convention."""
+  if N%2 == 0:
+    return VArmStripSmallBigEven(N,p)
+  else:
+    return VArmStripSmallBigOdd(N,p)
+
+
+def VArmStripBigSmallOdd(N,p):
+  """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip.
+  N numbering convention."""
   VLR = np.zeros((2*N*p,2*N))
   VRL = np.zeros((2*N,2*N*p))
   for i in range(1,N-1,2):
@@ -176,12 +215,36 @@ def VArmStripBigSmall(N,p):
   return VLR, VRL
    
    
-def VArmStripSmallBig(N,p):
+def VArmStripSmallBigOdd(N,p):
   """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip.
   Uses the N numbering convention."""
   VLR = np.zeros((2*N,2*N*p))
   VRL = np.zeros((2*N*p,2*N))
   for i in range(1,N,2):
+    VLR[N+i,i], VRL[i,N+i] = 2*(t,)
+  return VLR, VRL
+
+
+def VArmStripBigSmallEven(N,p):
+  """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip.
+  Works for strips with EVEN N.
+  Absolutely identical to the odd version.
+  N numbering convention."""
+  VLR = np.zeros((2*N*p,2*N))
+  VRL = np.zeros((2*N,2*N*p))
+  for i in range(1,N-1,2):
+    VLR[2*p*N-N+i,i] = t
+    VRL[i,2*p*N-N+i] = t
+  return VLR, VRL
+
+
+def VArmStripSmallBigEven(N,p):
+  """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip.
+  Works for strips with even N.
+  Uses the N numbering convention."""
+  VLR = np.zeros((2*N,2*N*p))
+  VRL = np.zeros((2*N*p,2*N))
+  for i in range(1,N-1,2):
     VLR[N+i,i], VRL[i,N+i] = 2*(t,)
   return VLR, VRL
     
@@ -328,10 +391,15 @@ def KuboSubs(N,p,Imp_List,E):
 
 
 
+
+
+
+
 if __name__ == "__main__":
   N = 7
-  p = 3
+  p = 1
   for E in np.linspace(-3.0,3.0,201):
     print E.real, Kubo(N,p,E).real
+
 
     
