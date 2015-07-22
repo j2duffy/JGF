@@ -6,6 +6,7 @@ import functools
 from operator import mul
 import random
 
+rtol = 1.0e-4
 
 class memoized(object):
    '''Decorator. Caches a function's return value each time it is called.
@@ -71,30 +72,11 @@ def HArmStripEven(N):
   return H
 
 
-def HArmStripOld(N):
-  """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon).
-  Uses the S numbering convention."""
-  H = np.zeros([2*N,2*N])
-  for i in range(N-1):
-    H[i,i+1], H[i+1,i] = 2*(t,)
-  for i in range(N,2*N-1):
-    H[i,i+1], H[i+1,i] = 2*(t,)
-  for i in range(0,N,2):
-    H[i,2*N-1-i], H[2*N-1-i,i] = 2*(t,)
-  return H
-
-
 def gArmStrip(E,N):
   """Calculates the GF of an armchair strip.
   Uses the N numbering convention
   Might cost a bit to calculate the hamiltonian every time"""
   return inv(E*np.eye(2*N) - HArmStrip(N))
-
-
-def gArmStripOld(E,N):
-  """Calculates the GF of an armchair strip.
-  Uses the S numbering convention"""
-  return inv(E*np.eye(2*N) - HArmStripOld(N))
 
 
 def HBigArmStrip(N,p):
@@ -209,7 +191,7 @@ def RecAdd(g00,g11,V01,V10):
   return dot(inv(np.eye(g11.shape[0])-dot(dot(g11,V10), dot(g00,V01))),g11)
 
 
-def gEdge(gC,V01,V10,tol=1.0e-4):
+def gEdge(gC,V01,V10,tol=rtol):
   """Obtain a semi-infinite lead by simple recusive addition (in the 1 direction)"""
   g11 = gC.copy()
   gtemp = np.zeros(2*N)
@@ -229,7 +211,7 @@ def gOffDiagonal(g22,g11,g10,g01,g00,V12,V21):
   return G22, G20, G02, G00
 
 
-def RubioSancho(g00,V01,V10,tol=1.0e-4):
+def RubioSancho(g00,V01,V10,tol=rtol):
   """Uses the Rubio Sancho method to get the GF at the end of a semi-infinite lead.
   Borrowed directly from FORTRAN."""
   smx = dot(g00,V01)
@@ -294,7 +276,7 @@ def Kubo(N,p,E):
     return G11T, G10T, G01T, G00T
   
   VLRs, VRLs = VArmStrip(N)
-  VLRbs, VRLbs = VArmStripBigSmall2(N,p)
+  VLRbs, VRLbs = VArmStripBigSmall(N,p)
   VLRsb, VRLsb = VArmStripSmallBig(N,p)
   
   G11T, G10T, G01T, G00T = Gtilde(E)
