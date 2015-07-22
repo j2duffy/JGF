@@ -56,6 +56,7 @@ def HArmStripOdd(N):
     H[i,N+i], H[N+i,i] = 2*(t,)
   return H
 
+
 def HArmStripEven(N):
   """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon).
   Only works for even nanoribbons.
@@ -68,6 +69,7 @@ def HArmStripEven(N):
   for i in range(0,N-1,2):
     H[i,i+N], H[i+N,i] = 2*(t,)
   return H
+
 
 def HArmStripOld(N):
   """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon).
@@ -157,9 +159,27 @@ def gBigArmStripSubs(E,N,p,Imp_List):
 def VArmStrip(N):
   """Calculates the LR and RL connection matrices for the armchair strip.
   Uses the N numbering convention."""
+  if N%2 == 0:
+    return VArmStripEven(N)
+  else:
+    return VArmStripOdd(N)
+
+
+def VArmStripOdd(N):
+  """Calculates the LR and RL connection matrices for the odd armchair strip.
+  Uses the N numbering convention."""
   VLR, VRL = np.zeros([2*N,2*N]),np.zeros([2*N,2*N])	# Done this way for a reason, using tuple properties produces views, not copies.
   for i in range(1,N,2):
     VLR[N+i,i], VRL[i,N+i] = 2*(t,)
+  return VLR, VRL
+
+
+def VArmStripEven(N):
+  """Calculates the LR and RL connection matrices for even the armchair strip.
+  Uses the N numbering convention."""
+  VLR, VRL = np.zeros([2*N,2*N]),np.zeros([2*N,2*N])	# Done this way for a reason, using tuple properties produces views, not copies.
+  for i in range(1,N,2):
+    VLR[N+i,i], VRL[i,N+i] = 2*(t,) 
   return VLR, VRL
 
 
@@ -324,7 +344,10 @@ def gRibArmRecursive(N,E):
   return RecAdd(gR,gL,VLR,VRL)
 
 
-def Kubo(E):
+def Kubo(N,p,E):
+  """Calculates the Kubo formula for a GNR.
+  The GNR is built by connecting a strip to a big strip to another strip.
+  This is somewhat pointless for the pristine case, and this is here mainly as a useful exercise."""
   def KuboMxs(E): 
     """Gets the appropriate matrices for the Kubo formula.
     Cell 0 is the leftmost cell (regular strip size) and cell 1 is an adjacent cell on the right (BigStrip size)"""
@@ -400,8 +423,11 @@ def KuboSubs(N,p,Imp_List,E):
   return np.trace( dot(dot(-G10,V01),dot(G10,V01)) + dot(dot(G00,V01),dot(G11,V10)) + dot(dot(G11,V10),dot(G00,V01)) - dot(dot(G01,V10),dot(G01,V10)) )
 
 
+
 if __name__ == "__main__":
   N = 7
-  p = 1
+  p = 3
   for E in np.linspace(-3.0,3.0,201):
-    print E.real, Kubo(E).real
+    print E.real, Kubo(N,p,E).real
+
+    
