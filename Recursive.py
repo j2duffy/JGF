@@ -183,15 +183,6 @@ def VArmStripEven(N):
   return VLR, VRL
 
 
-def VArmStripS(N):
-  """Calculates the LR and RL connection matrices for the armchair strip.
-  Uses the S numbering convention"""
-  VLR, VRL = np.zeros([2*N,2*N]),np.zeros([2*N,2*N])	# Done this way for a reason, using tuple properties produces views, not copies.
-  for i in range(1,N,2):	# Think this should be N-1
-    VLR[2*N-1-i,i], VRL[i,2*N-1-i] = 2*(t,)
-  return VLR, VRL
-
-
 def VArmStripBigSmall(N,p):
   """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip.
   N numbering convention."""
@@ -212,30 +203,6 @@ def VArmStripSmallBig(N,p):
     VLR[N+i,i], VRL[i,N+i] = 2*(t,)
   return VLR, VRL
     
-    
-def VArmStripSmallBig2(N,p):
-  """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip.
-  Calculates the connection matrices for the small strips and then puts them in the appropriate place in a big matrix.
-  Slower."""
-  VLR = np.zeros((2*N,2*N*p))
-  VRL = np.zeros((2*N*p,2*N))
-  VLRsmall, VRLsmall = VArmStrip(N)
-  VLR[:2*N,:2*N] = VLRsmall
-  VRL[:2*N,:2*N] = VRLsmall
-  return VLR, VRL
-
-
-def VArmStripBigSmall2(N,p):
-  """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip.
-  Embeds the smaller connection matrix in the appropriate part of a larger matrix.
-  In some ways more tidy, but also slower."""
-  VLR = np.zeros((2*N*p,2*N))
-  VRL = np.zeros((2*N,2*N*p))
-  VLRsmall, VRLsmall = VArmStrip(N)
-  VLR[2*N*p-2*N:,:] = VLRsmall
-  VRL[:,2*N*p-2*N:] = VRLsmall
-  return VLR, VRL
-
 
 def RecAdd(g00,g11,V01,V10):
   """Add a cell g11 to g00 recursively using the Dyson Formula, get a cell G11"""
@@ -287,51 +254,6 @@ def RubioSancho(g00,V01,V10,tol=1.0e-4):
     # Update s
     smx = dot( temp,  dot(smx,smx) )
   return dot( inv( identity - dot( dot(g00,V01) , Transf)) ,  g00 ) 
-
-
-def RubioSanchoTest(g00,V01,V10):
-  """An absolutely insane verison of the Rubio Sancho method that implements all kinds of recursive/dynamic programming madness."""
-  Imx = np.eye(g00.shape[0]) 
-  
-  @memoized
-  def s(i):
-    if i == 0:
-      return dot(g00,V01)
-    else:
-      s0 = s(i-1)
-      t0 = t(i-1)
-      return dot( inv( Imx - dot(t0,s0) - dot(s0,t0)) , dot(s0,s0) )
-      
-  @memoized
-  def t(i):
-    if i == 0:
-      return dot(g00,V10)
-    else:
-      s0 = s(i-1)
-      t0 = t(i-1)
-      return dot( inv( Imx - dot(t0,s0) - dot(s0,t0)) , dot(t0,t0) )
-    
-  #@memoized
-  def T(n):
-    if n==0:
-      return t(0)
-    else:
-      sprod = s(0)
-      for i in range(1,n):
-	sprod = dot(sprod,s(i))
-      return dot(sprod,t(n))
-    
-  Transf = T(0)
-  T(1),T(2),T(3)
-  Transf_Old = 0.0
-  i = 1
-  while np.linalg.norm(Transf - Transf_Old) > 1.0e-4:
-    #print i, T(i)
-    Transf_Old = Transf.copy()
-    Transf += T(i)
-    i += 1
-    
-  return dot(inv(Imx-dot(g00,dot(V01,Transf))),g00)
 
 
 def gRibArmRecursive(N,E):
