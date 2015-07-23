@@ -8,6 +8,7 @@ import random
 
 rtol = 1.0e-4
 
+
 class memoized(object):
    '''Decorator. Caches a function's return value each time it is called.
    If called later with the same arguments, the cached value is returned
@@ -110,10 +111,24 @@ def HBigArmStripEven(N,p):
   for j in range(0,2*p*N-2*N+1,2*N):
     for i in range(j,j+N-1,2):
       H[i,i+N], H[i+N,i] = 2*(t,)
+  for j in range(N,2*p*N-3*N+1,2*N):
+    for i in range(j+1,j+N,2):
+      H[i,i+N], H[i+N,i] = 2*(t,)
   return H
 
 
 def HBigArmStripSubs(N,p,Imp_List):
+  """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
+  Populates the strip with k impurities at randomly chosen sites.
+  It uses the N numbering convention."""
+  if N%2 == 0:
+    return HBigArmStripSubsEven(N,p)
+  else:
+    return HBigArmStripSubsOdd(N,p)
+  return H
+
+
+def HBigArmStripSubsOdd(N,p,Imp_List):
   """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
   Populates the strip with k impurities at randomly chosen sites.
   It uses the N numbering convention."""
@@ -126,7 +141,24 @@ def HBigArmStripSubs(N,p,Imp_List):
   
   for i in Imp_List:
     H[i,i] = 1.0	# Should replace this with some constant
-    
+  return H
+
+
+def HBigArmStripSubsEven(N,p):
+  """Creates the Hamiltonian for an EVEN armchair strip N atoms in width and p unit cells in length.
+  Uses the N numbering convention."""
+  H = np.zeros((2*N*p,2*N*p))
+  for j in range(0,2*p*N-N+1,N):
+    for i in range(j,j+N-1):
+      H[i,i+1], H[i+1,i] = 2*(t,)
+  for j in range(0,2*p*N-2*N+1,2*N):
+    for i in range(j,j+N-1,2):
+      H[i,i+N], H[i+N,i] = 2*(t,)
+  for j in range(N,2*p*N-3*N+1,2*N):
+    for i in range(j+1,j+N,2):
+      H[i,i+N], H[i+N,i] = 2*(t,)
+  for i in Imp_List:
+    H[i,i] = 1.0	# Should replace this with some constant
   return H
 
 
@@ -204,6 +236,19 @@ def VArmStripSmallBig(N,p):
     return VArmStripSmallBigOdd(N,p)
 
 
+def VArmStripBigSmallEven(N,p):
+  """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip.
+  Works for strips with EVEN N.
+  Absolutely identical to the odd version.
+  N numbering convention."""
+  VLR = np.zeros((2*N*p,2*N))
+  VRL = np.zeros((2*N,2*N*p))
+  for i in range(1,N,2):
+    VLR[2*p*N-N+i,i] = t
+    VRL[i,2*p*N-N+i] = t
+  return VLR, VRL
+
+
 def VArmStripBigSmallOdd(N,p):
   """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip.
   N numbering convention."""
@@ -213,41 +258,28 @@ def VArmStripBigSmallOdd(N,p):
     VLR[(2*p-1)*N+i,i] = t
     VRL[i,(2*p-1)*N+i] = t
   return VLR, VRL
-   
-   
-def VArmStripSmallBigOdd(N,p):
-  """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip.
-  Uses the N numbering convention."""
-  VLR = np.zeros((2*N,2*N*p))
-  VRL = np.zeros((2*N*p,2*N))
-  for i in range(1,N,2):
-    VLR[N+i,i], VRL[i,N+i] = 2*(t,)
-  return VLR, VRL
-
-
-def VArmStripBigSmallEven(N,p):
-  """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip.
-  Works for strips with EVEN N.
-  Absolutely identical to the odd version.
-  N numbering convention."""
-  VLR = np.zeros((2*N*p,2*N))
-  VRL = np.zeros((2*N,2*N*p))
-  for i in range(1,N-1,2):
-    VLR[2*p*N-N+i,i] = t
-    VRL[i,2*p*N-N+i] = t
-  return VLR, VRL
-
-
+  
+  
 def VArmStripSmallBigEven(N,p):
   """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip.
   Works for strips with even N.
   Uses the N numbering convention."""
   VLR = np.zeros((2*N,2*N*p))
   VRL = np.zeros((2*N*p,2*N))
-  for i in range(1,N-1,2):
+  for i in range(1,N,2):
     VLR[N+i,i], VRL[i,N+i] = 2*(t,)
   return VLR, VRL
     
+    
+def VArmStripSmallBigOdd(N,p):
+  """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip.
+  Uses the N numbering convention."""
+  VLR = np.zeros((2*N,2*N*p))
+  VRL = np.zeros((2*N*p,2*N))
+  for i in range(1,N,2):	# This N is a bit questionalbe
+    VLR[N+i,i], VRL[i,N+i] = 2*(t,)
+  return VLR, VRL
+
 
 def RecAdd(g00,g11,V01,V10):
   """Add a cell g11 to g00 recursively using the Dyson Formula, get a cell G11"""
@@ -377,7 +409,7 @@ def KuboSubs(N,p,Imp_List,E):
     return G11T, G10T, G01T, G00T
   
   VLRs, VRLs = VArmStrip(N)
-  VLRbs, VRLbs = VArmStripBigSmall2(N,p)
+  VLRbs, VRLbs = VArmStripBigSmall(N,p)
   VLRsb, VRLsb = VArmStripSmallBig(N,p)
   
   G11T, G10T, G01T, G00T = Gtilde(E)
@@ -391,15 +423,11 @@ def KuboSubs(N,p,Imp_List,E):
 
 
 
-
-
-
-
 if __name__ == "__main__":
-  N = 7
-  p = 1
-  for E in np.linspace(-3.0,3.0,201):
-    print E.real, Kubo(N,p,E).real
-
+  N = 8
+  p = 2
+  Imp_List = [0]
+  for E in np.linspace(-3.0,3.0,2001):
+    print E.real, KuboSubs(N,p,Imp_List,E).real
 
     
