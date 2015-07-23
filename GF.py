@@ -20,7 +20,7 @@ eta = 1.0e-4
 t = -1.0
 EF = 0.0
 wf=EF	# This needs a lot of thought/work
-eps_imp = 0.0
+eps_imp = -0.5
 tau = -1.0
 U = 10.0
 dtol = 1.0e-6		# Stands for "default tolerance". Could be better
@@ -221,8 +221,6 @@ def gSIZigtest(DA1,DA2,DZ,s_lat,E):		# You need to change the sublattice notatio
     else: print 's_lat not a valid character'
   
   return C_int(int_temp,-pi/2,pi/2)
-
-
 
 
 

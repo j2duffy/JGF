@@ -1,3 +1,6 @@
+# Contains a set of routines for building recursive structures.
+# Mostly focused on armchair nanoribbons
+# The N numbering convention is used everywhere unless noted.
 import numpy as np
 from numpy import dot
 from GF import *
@@ -6,7 +9,7 @@ import functools
 from operator import mul
 import random
 
-rtol = 1.0e-4
+rtol = 1.0e-4		# Default tolerance for recursive methods.
 
 
 class memoized(object):
@@ -37,8 +40,7 @@ class memoized(object):
 
 
 def HArmStrip(N):
-  """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon).
-  Uses the N numbering convention."""
+  """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon)."""
   if N%2 == 0:
     return HArmStripEven(N)
   else:
@@ -46,9 +48,7 @@ def HArmStrip(N):
 
 
 def HArmStripOdd(N):
-  """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon).
-  Only works for odd nanoribbons.
-  Uses the N numbering convention."""
+  """Creates the Hamiltonian of an odd armchair strip."""
   H = np.zeros([2*N,2*N])
   for i in range(N-1):
     H[i,i+1], H[i+1,i] = 2*(t,)
@@ -60,9 +60,7 @@ def HArmStripOdd(N):
 
 
 def HArmStripEven(N):
-  """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon).
-  Only works for even nanoribbons.
-  Uses the N numbering convention."""
+  """Creates the Hamiltonian of an even armchair strip."""
   H = np.zeros([2*N,2*N])
   for i in range(0,N-1):
     H[i,i+1], H[i+1,i] = 2*(t,)
@@ -73,16 +71,8 @@ def HArmStripEven(N):
   return H
 
 
-def gArmStrip(E,N):
-  """Calculates the GF of an armchair strip.
-  Uses the N numbering convention
-  Might cost a bit to calculate the hamiltonian every time"""
-  return inv(E*np.eye(2*N) - HArmStrip(N))
-
-
 def HBigArmStrip(N,p):
-  """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
-  It uses the N numbering convention."""
+  """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width."""
   if N%2 == 0:
     return HBigArmStripEven(N,p)
   else:
@@ -90,8 +80,7 @@ def HBigArmStrip(N,p):
 
 
 def HBigArmStripOdd(N,p):
-  """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
-  It uses the N numbering convention."""
+  """Creates the Hamiltonian for an odd armchair strip N atoms across and p "unit cells" in width."""
   H = np.zeros((2*N*p,2*N*p))
   for j in range(1,2*p+1):
     for i in range((j-1)*N,j*N-1):
@@ -102,8 +91,7 @@ def HBigArmStripOdd(N,p):
 
 
 def HBigArmStripEven(N,p):
-  """Creates the Hamiltonian for an EVEN armchair strip N atoms in width and p unit cells in length.
-  Uses the N numbering convention."""
+  """Creates the Hamiltonian for an even armchair strip N atoms in width and p unit cells in length."""
   H = np.zeros((2*N*p,2*N*p))
   for j in range(0,2*p*N-N+1,N):
     for i in range(j,j+N-1):
@@ -119,8 +107,7 @@ def HBigArmStripEven(N,p):
 
 def HBigArmStripSubs(N,p,Imp_List):
   """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
-  Populates the strip with k impurities at randomly chosen sites.
-  It uses the N numbering convention."""
+  Adds an impurity with energy eps_imp at ever site in Imp_List."""
   if N%2 == 0:
     return HBigArmStripSubsEven(N,p)
   else:
@@ -129,24 +116,20 @@ def HBigArmStripSubs(N,p,Imp_List):
 
 
 def HBigArmStripSubsOdd(N,p,Imp_List):
-  """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
-  Populates the strip with k impurities at randomly chosen sites.
-  It uses the N numbering convention."""
+  """Creates the Hamiltonian for the large odd armchair strip with impurities"""
   H = np.zeros((2*N*p,2*N*p))
   for j in range(1,2*p+1):
     for i in range((j-1)*N,j*N-1):
       H[i,i+1], H[i+1,i] = 2*(t,)
   for i in range(0,2*N*p-N,2):
     H[i,i+N], H[i+N,i] = 2*(t,)
-  
   for i in Imp_List:
-    H[i,i] = 1.0	# Should replace this with some constant
+    H[i,i] = eps_imp
   return H
 
 
 def HBigArmStripSubsEven(N,p):
-  """Creates the Hamiltonian for an EVEN armchair strip N atoms in width and p unit cells in length.
-  Uses the N numbering convention."""
+  """Creates the Hamiltonian for the even large odd armchair strip with impurities"""
   H = np.zeros((2*N*p,2*N*p))
   for j in range(0,2*p*N-N+1,N):
     for i in range(j,j+N-1):
@@ -158,7 +141,7 @@ def HBigArmStripSubsEven(N,p):
     for i in range(j+1,j+N,2):
       H[i,i+N], H[i+N,i] = 2*(t,)
   for i in Imp_List:
-    H[i,i] = 1.0	# Should replace this with some constant
+    H[i,i] = eps_imp
   return H
 
 
@@ -174,11 +157,17 @@ def HBigArmStripTop(N,p,k):
     H[i,i+N], H[i+N,i] = 2*(t,)
   
   for i,k in enumerate(random.sample(range(2*N*p),k)):
-    H[2*N*p+i,k] = t
-    H[k,2*N*p+i] = t
-    H[2*N*p+i,2*N*p+i] = 1.0	# Again that random constant
+    H[2*N*p+i,k] = tau
+    H[k,2*N*p+i] = tau
+    H[2*N*p+i,2*N*p+i] = eps_imp
     
   return H
+
+
+def gArmStrip(E,N):
+  """Calculates the GF of an armchair strip.
+  Might cost a bit to calculate the hamiltonian every time"""
+  return inv(E*np.eye(2*N) - HArmStrip(N))
 
 
 def gBigArmStrip(E,N,p):
@@ -187,13 +176,12 @@ def gBigArmStrip(E,N,p):
 
 
 def gBigArmStripSubs(E,N,p,Imp_List):
-  """Calculates the GF for a large armchair strip with k randomly distributed substitutional impurities"""
+  """Calculates the GF for a large armchair strip with substituational impurities at the sites specified in Imp_List."""
   return inv(E*np.eye(2*N*p) - HBigArmStripSubs(N,p,Imp_List))
 
 
 def VArmStrip(N):
-  """Calculates the LR and RL connection matrices for the armchair strip.
-  Uses the N numbering convention."""
+  """Calculates the LR and RL connection matrices for the armchair strip."""
   if N%2 == 0:
     return VArmStripEven(N)
   else:
@@ -201,8 +189,7 @@ def VArmStrip(N):
 
 
 def VArmStripOdd(N):
-  """Calculates the LR and RL connection matrices for the odd armchair strip.
-  Uses the N numbering convention."""
+  """Calculates the LR and RL connection matrices for the odd armchair strip."""
   VLR, VRL = np.zeros([2*N,2*N]),np.zeros([2*N,2*N])	# Done this way for a reason, using tuple properties produces views, not copies.
   for i in range(1,N,2):
     VLR[N+i,i], VRL[i,N+i] = 2*(t,)
@@ -210,8 +197,7 @@ def VArmStripOdd(N):
 
 
 def VArmStripEven(N):
-  """Calculates the LR and RL connection matrices for even the armchair strip.
-  Uses the N numbering convention."""
+  """Calculates the LR and RL connection matrices for even the armchair strip."""
   VLR, VRL = np.zeros([2*N,2*N]),np.zeros([2*N,2*N])	# Done this way for a reason, using tuple properties produces views, not copies.
   for i in range(1,N,2):
     VLR[N+i,i], VRL[i,N+i] = 2*(t,) 
@@ -219,8 +205,7 @@ def VArmStripEven(N):
 
 
 def VArmStripBigSmall(N,p):
-  """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip.
-  N numbering convention."""
+  """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip."""
   if N%2 == 0:
     return VArmStripBigSmallEven(N,p)
   else:
@@ -228,8 +213,7 @@ def VArmStripBigSmall(N,p):
    
    
 def VArmStripSmallBig(N,p):
-  """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip.
-  Uses the N numbering convention."""
+  """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip."""
   if N%2 == 0:
     return VArmStripSmallBigEven(N,p)
   else:
@@ -239,8 +223,7 @@ def VArmStripSmallBig(N,p):
 def VArmStripBigSmallEven(N,p):
   """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip.
   Works for strips with EVEN N.
-  Absolutely identical to the odd version.
-  N numbering convention."""
+  Absolutely identical to the odd version."""
   VLR = np.zeros((2*N*p,2*N))
   VRL = np.zeros((2*N,2*N*p))
   for i in range(1,N,2):
@@ -250,8 +233,7 @@ def VArmStripBigSmallEven(N,p):
 
 
 def VArmStripBigSmallOdd(N,p):
-  """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip.
-  N numbering convention."""
+  """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip."""
   VLR = np.zeros((2*N*p,2*N))
   VRL = np.zeros((2*N,2*N*p))
   for i in range(1,N-1,2):
@@ -262,8 +244,7 @@ def VArmStripBigSmallOdd(N,p):
   
 def VArmStripSmallBigEven(N,p):
   """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip.
-  Works for strips with even N.
-  Uses the N numbering convention."""
+  Works for strips with even N."""
   VLR = np.zeros((2*N,2*N*p))
   VRL = np.zeros((2*N*p,2*N))
   for i in range(1,N,2):
@@ -272,8 +253,7 @@ def VArmStripSmallBigEven(N,p):
     
     
 def VArmStripSmallBigOdd(N,p):
-  """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip.
-  Uses the N numbering convention."""
+  """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip."""
   VLR = np.zeros((2*N,2*N*p))
   VRL = np.zeros((2*N*p,2*N))
   for i in range(1,N,2):	# This N is a bit questionalbe
@@ -297,8 +277,8 @@ def gEdge(gC,V01,V10,tol=rtol):
 
 
 def gOffDiagonal(g22,g11,g10,g01,g00,V12,V21):
-  """Connects a cell 2 to a lead ending in cell 1 and connected to cell 0.
-  Returns off diagonal elements G22, G20, G02, G00 """
+  """Connects a cell 2 to a lead ending in cell 1 also containing a cell 0.
+  Returns the off diagonal elements G22, G20, G02, G00 """
   G22 = dot(inv(np.eye(g22.shape[0])  - dot(dot(g22,V21),dot(g11,V12)) ),g22)
   G20 = dot(G22,dot(V21,g10))
   G00 = g00 + dot(g01,dot(V12,G20))
@@ -307,8 +287,7 @@ def gOffDiagonal(g22,g11,g10,g01,g00,V12,V21):
 
 
 def RubioSancho(g00,V01,V10,tol=rtol):
-  """Uses the Rubio Sancho method to get the GF at the end of a semi-infinite lead.
-  Borrowed directly from FORTRAN."""
+  """Uses the Rubio Sancho method to get the GF at the end of a semi-infinite lead."""
   smx = dot(g00,V01)
   tmx = dot(g00,V10)
   identity = np.eye(g00.shape[0]) 
@@ -335,7 +314,7 @@ def RubioSancho(g00,V01,V10,tol=rtol):
 
 def gRibArmRecursive(N,E):
   """Calculates the GF (in a single unit cell) recursively. 
-  Probably should be thrown out once you have better routines"""
+  Probably should be thrown out once you have better routines."""
   VLR, VRL = VArmStrip(N)	# Takes up a little bit of space since this has to be done every E, but really shouldn't have much effect on performance
   gC = gArmStrip(E,N)
   gR = RubioSancho(gC,VRL,VLR)	# The RIGHTMOST cell, not the cell on the right when we add
@@ -426,7 +405,7 @@ def KuboSubs(N,p,Imp_List,E):
 if __name__ == "__main__":
   N = 8
   p = 2
-  Imp_List = [0]
+  Imp_List = [2]
   for E in np.linspace(-3.0,3.0,2001):
     print E.real, KuboSubs(N,p,Imp_List,E).real
 
