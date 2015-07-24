@@ -82,9 +82,11 @@ def HBigArmStrip(N,p):
 def HBigArmStripOdd(N,p):
   """Creates the Hamiltonian for an odd armchair strip N atoms across and p "unit cells" in width."""
   H = np.zeros((2*N*p,2*N*p))
-  for j in range(1,2*p+1):
-    for i in range((j-1)*N,j*N-1):
+  # nn elements
+  for j in range(0,2*p*N-N+1,N):
+    for i in range(j,j+N-1):
       H[i,i+1], H[i+1,i] = 2*(t,)
+  # off diagonal elements
   for i in range(0,2*N*p-N,2):
     H[i,i+N], H[i+N,i] = 2*(t,)
   return H
@@ -164,6 +166,7 @@ def HBigArmStripTop(N,p,k):
   return H
 
 
+
 def gArmStrip(E,N):
   """Calculates the GF of an armchair strip.
   Might cost a bit to calculate the hamiltonian every time"""
@@ -180,83 +183,30 @@ def gBigArmStripSubs(E,N,p,Imp_List):
   return inv(E*np.eye(2*N*p) - HBigArmStripSubs(N,p,Imp_List))
 
 
+
 def VArmStrip(N):
   """Calculates the LR and RL connection matrices for the armchair strip."""
-  if N%2 == 0:
-    return VArmStripEven(N)
-  else:
-    return VArmStripOdd(N)
-
-
-def VArmStripOdd(N):
-  """Calculates the LR and RL connection matrices for the odd armchair strip."""
-  VLR, VRL = np.zeros([2*N,2*N]),np.zeros([2*N,2*N])	# Done this way for a reason, using tuple properties produces views, not copies.
+  VLR, VRL = np.zeros([2*N,2*N]),np.zeros([2*N,2*N])
   for i in range(1,N,2):
     VLR[N+i,i], VRL[i,N+i] = 2*(t,)
   return VLR, VRL
 
 
-def VArmStripEven(N):
-  """Calculates the LR and RL connection matrices for even the armchair strip."""
-  VLR, VRL = np.zeros([2*N,2*N]),np.zeros([2*N,2*N])	# Done this way for a reason, using tuple properties produces views, not copies.
-  for i in range(1,N,2):
-    VLR[N+i,i], VRL[i,N+i] = 2*(t,) 
-  return VLR, VRL
-
-
 def VArmStripBigSmall(N,p):
   """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip."""
-  if N%2 == 0:
-    return VArmStripBigSmallEven(N,p)
-  else:
-    return VArmStripBigSmallOdd(N,p)
-   
-   
-def VArmStripSmallBig(N,p):
-  """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip."""
-  if N%2 == 0:
-    return VArmStripSmallBigEven(N,p)
-  else:
-    return VArmStripSmallBigOdd(N,p)
-
-
-def VArmStripBigSmallEven(N,p):
-  """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip.
-  Works for strips with EVEN N.
-  Absolutely identical to the odd version."""
   VLR = np.zeros((2*N*p,2*N))
   VRL = np.zeros((2*N,2*N*p))
   for i in range(1,N,2):
     VLR[2*p*N-N+i,i] = t
     VRL[i,2*p*N-N+i] = t
   return VLR, VRL
-
-
-def VArmStripBigSmallOdd(N,p):
-  """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip."""
-  VLR = np.zeros((2*N*p,2*N))
-  VRL = np.zeros((2*N,2*N*p))
-  for i in range(1,N-1,2):
-    VLR[(2*p-1)*N+i,i] = t
-    VRL[i,(2*p-1)*N+i] = t
-  return VLR, VRL
-  
-  
-def VArmStripSmallBigEven(N,p):
-  """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip.
-  Works for strips with even N."""
-  VLR = np.zeros((2*N,2*N*p))
-  VRL = np.zeros((2*N*p,2*N))
-  for i in range(1,N,2):
-    VLR[N+i,i], VRL[i,N+i] = 2*(t,)
-  return VLR, VRL
-    
-    
-def VArmStripSmallBigOdd(N,p):
+   
+   
+def VArmStripSmallBig(N,p):
   """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip."""
   VLR = np.zeros((2*N,2*N*p))
   VRL = np.zeros((2*N*p,2*N))
-  for i in range(1,N,2):	# This N is a bit questionalbe
+  for i in range(1,N,2):
     VLR[N+i,i], VRL[i,N+i] = 2*(t,)
   return VLR, VRL
 
@@ -403,10 +353,9 @@ def KuboSubs(N,p,Imp_List,E):
 
 
 if __name__ == "__main__":
-  N = 8
+  N = 9
   p = 2
-  Imp_List = [2]
-  for E in np.linspace(-3.0,3.0,2001):
-    print E.real, KuboSubs(N,p,Imp_List,E).real
+  for E in np.linspace(-3.0,3.0,201):
+    print E.real, Kubo(N,p,E).real
 
     
