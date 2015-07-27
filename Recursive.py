@@ -111,9 +111,9 @@ def HBigArmStripSubs(N,p,Imp_List):
   """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
   Adds an impurity with energy eps_imp at ever site in Imp_List."""
   if N%2 == 0:
-    return HBigArmStripSubsEven(N,p)
+    return HBigArmStripSubsEven(N,p,Imp_List)
   else:
-    return HBigArmStripSubsOdd(N,p)
+    return HBigArmStripSubsOdd(N,p,Imp_List)
   return H
 
 
@@ -130,8 +130,8 @@ def HBigArmStripSubsOdd(N,p,Imp_List):
   return H
 
 
-def HBigArmStripSubsEven(N,p):
-  """Creates the Hamiltonian for the even large odd armchair strip with impurities"""
+def HBigArmStripSubsEven(N,p,Imp_List):
+  """Creates the Hamiltonian for the large even armchair strip with impurities"""
   H = np.zeros((2*N*p,2*N*p))
   for j in range(0,2*p*N-N+1,N):
     for i in range(j,j+N-1):
@@ -147,23 +147,58 @@ def HBigArmStripSubsEven(N,p):
   return H
 
 
-def HBigArmStripTop(N,p,k):
-  """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
-  Populates the strip with k Top-Adsorbed impurities which connect to randomly chosen sites.
+def HBigArmStripTop(N,p,Imp_List):
+  """Creates the Hamiltonian for an odd armchair strip N atoms across and p "unit cells" in width.
+  Populates the strip with a number of top-adsorbed impurities given in Imp_list. These are added in the higher elements of the mx.
   It uses the N numbering convention."""
-  H = np.zeros((2*N*p+k,2*N*p+k))
+  if N%2 == 0:
+    return HBigArmStripTopOdd(N,p,Imp_List)
+  else:
+    return HBigArmStripSubsOdd(N,p,Imp_List)
+  return H
+
+
+def HBigArmStripTopOdd(N,p,Imp_List):
+  """Creates the Hamiltonian for an odd armchair strip N atoms across and p "unit cells" in width.
+  Populates the strip with a number of top-adsorbed impurities given in Imp_list. These are added in the higher elements of the mx.
+  It uses the N numbering convention."""
+  nimp = len(Imp_List)
+  H = np.zeros((2*N*p+nimp,2*N*p+nimp))
   for j in range(1,2*p+1):
     for i in range((j-1)*N,j*N-1):
       H[i,i+1], H[i+1,i] = 2*(t,)
   for i in range(0,2*N*p-N,2):
     H[i,i+N], H[i+N,i] = 2*(t,)
   
-  for i,k in enumerate(random.sample(range(2*N*p),k)):
+  for i,k in enumerate(Imp_List):
     H[2*N*p+i,k] = tau
     H[k,2*N*p+i] = tau
     H[2*N*p+i,2*N*p+i] = eps_imp
-    
   return H
+
+
+def HBigArmStripTopEven(N,p,Imp_List):
+  """Creates the Hamiltonian for an even armchair strip N atoms across and p "unit cells" in width.
+  Populates the strip with a number of top-adsorbed impurities given in Imp_list. These are added in the higher elements of the mx.
+  It uses the N numbering convention."""
+  nimp = len(Imp_List)
+  H = np.zeros((2*N*p+nimp,2*N*p+nimp))
+  for j in range(0,2*p*N-N+1,N):
+    for i in range(j,j+N-1):
+      H[i,i+1], H[i+1,i] = 2*(t,)
+  for j in range(0,2*p*N-2*N+1,2*N):
+    for i in range(j,j+N-1,2):
+      H[i,i+N], H[i+N,i] = 2*(t,)
+  for j in range(N,2*p*N-3*N+1,2*N):
+    for i in range(j+1,j+N,2):
+      H[i,i+N], H[i+N,i] = 2*(t,)
+  
+  for i,k in enumerate(Imp_List):
+    H[2*N*p+i,k] = tau
+    H[k,2*N*p+i] = tau
+    H[2*N*p+i,2*N*p+i] = eps_imp
+  return H
+
 
 
 
@@ -209,6 +244,7 @@ def VArmStripSmallBig(N,p):
   for i in range(1,N,2):
     VLR[N+i,i], VRL[i,N+i] = 2*(t,)
   return VLR, VRL
+
 
 
 def RecAdd(g00,g11,V01,V10):
@@ -353,9 +389,16 @@ def KuboSubs(N,p,Imp_List,E):
 
 
 if __name__ == "__main__":
-  N = 9
+  N = 4
   p = 2
-  for E in np.linspace(-3.0,3.0,201):
-    print E.real, Kubo(N,p,E).real
+  
+  El = np.linspace(-3.0,3.0,201)
+  for i in range(5):
+    Imp_List = [i]
+    Kl = [KuboSubs(N,p,Imp_List,E).real for E in El]
+    pl.plot(El,Kl)
+    pl.savefig('%g.jpg' % (i,))
+    pl.close()
+
 
     
