@@ -6,7 +6,8 @@ Numerical integration is done in python, since I could not find a FORTRAN versio
 
 GF.py contains basic Green's Functions.
 GFRoutines.py constains utility functions (generally mx population routines).
-Coupling.py has a bunch of functions for calculating the IEC for different systems and impurity conformations..
+Coupling.py has a bunch of functions for calculating the IEC for different systems and impurity conformations.
+Recursive.py builds armchair nanoribbons recursively, and also calculates the conductance for same.
 
 The FORTRAN module is compiled using
 f2py --fcompiler=gfortran --opt=-O -c -m FMod FMod.f95 
