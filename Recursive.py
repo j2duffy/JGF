@@ -152,9 +152,9 @@ def HBigArmStripTop(N,p,Imp_List):
   Populates the strip with a number of top-adsorbed impurities given in Imp_list. These are added in the higher elements of the mx.
   It uses the N numbering convention."""
   if N%2 == 0:
-    return HBigArmStripTopOdd(N,p,Imp_List)
+    return HBigArmStripTopEven(N,p,Imp_List)
   else:
-    return HBigArmStripSubsOdd(N,p,Imp_List)
+    return HBigArmStripTopOdd(N,p,Imp_List)
   return H
 
 
@@ -200,6 +200,57 @@ def HBigArmStripTopEven(N,p,Imp_List):
   return H
 
 
+def HBigArmStripCenter(N,p,Imp_List):
+  """Creates the Hamiltonian for an odd armchair strip N atoms across and p "unit cells" in width.
+  Populates the strip with a number of center-adsorbed impurities given in Imp_list. These are added in the higher elements of the mx."""
+  if N%2 == 0:
+    return HBigArmStripCenterEven(N,p,Imp_List)
+  else:
+    return HBigArmStripCenterOdd(N,p,Imp_List)
+  return H
+
+
+def HBigArmStripCenterOdd(N,p,Imp_List):
+  """Creates the Hamiltonian for an odd armchair strip N atoms across and p "unit cells" in width.
+  Populates the strip with a number of center-adsorbed impurities given in Imp_list. These are added in the higher elements of the mx."""
+  nimp = len(Imp_List)
+  H = np.zeros((2*N*p+nimp,2*N*p+nimp))
+  for j in range(1,2*p+1):
+    for i in range((j-1)*N,j*N-1):
+      H[i,i+1], H[i+1,i] = 2*(t,)
+  for i in range(0,2*N*p-N,2):
+    H[i,i+N], H[i+N,i] = 2*(t,)
+  
+  for i,k in enumerate(Imp_List):
+    for j in range(3) + range(N,N+3):
+      H[2*N*p+i,k+j] = tau
+      H[k+j,2*N*p+i] = tau
+    H[2*N*p+i,2*N*p+i] = eps_imp
+  return H
+
+
+def HBigArmStripCenterEven(N,p,Imp_List):
+  """Creates the Hamiltonian for an even armchair strip N atoms across and p "unit cells" in width.
+  Populates the strip with a number of center-adsorbed impurities given in Imp_list. These are added in the higher elements of the mx."""
+  nimp = len(Imp_List)
+  H = np.zeros((2*N*p+nimp,2*N*p+nimp))
+  for j in range(0,2*p*N-N+1,N):
+    for i in range(j,j+N-1):
+      H[i,i+1], H[i+1,i] = 2*(t,)
+  for j in range(0,2*p*N-2*N+1,2*N):
+    for i in range(j,j+N-1,2):
+      H[i,i+N], H[i+N,i] = 2*(t,)
+  for j in range(N,2*p*N-3*N+1,2*N):
+    for i in range(j+1,j+N,2):
+      H[i,i+N], H[i+N,i] = 2*(t,)
+  
+  for i,k in enumerate(Imp_List):
+    for j in range(3) + range(N,N+3):
+      H[2*N*p+i,k+j] = tau
+      H[k+j,2*N*p+i] = tau
+    H[2*N*p+i,2*N*p+i] = eps_imp
+  return H
+
 
 
 def gArmStrip(E,N):
@@ -216,6 +267,18 @@ def gBigArmStrip(E,N,p):
 def gBigArmStripSubs(E,N,p,Imp_List):
   """Calculates the GF for a large armchair strip with substituational impurities at the sites specified in Imp_List."""
   return inv(E*np.eye(2*N*p) - HBigArmStripSubs(N,p,Imp_List))
+
+
+def gBigArmStripTop(E,N,p,Imp_List):
+  """Calculates the GF for a large armchair strip with top adsorbed impurities at the sites specified in Imp_List."""
+  nimp = len(Imp_List)
+  return inv(E*np.eye(2*N*p+nimp) - HBigArmStripTop(N,p,Imp_List))
+
+
+def gBigArmStripCenter(E,N,p,Imp_List):
+  nimp = len(Imp_List)
+  """Calculates the GF for a large armchair strip with center adsorbed impurities at the sites specified in Imp_List."""
+  return inv(E*np.eye(2*N*p+nimp) - HBigArmStripCenter(N,p,Imp_List))
 
 
 
@@ -387,18 +450,56 @@ def KuboSubs(N,p,Imp_List,E):
   return np.trace( dot(dot(-G10,V01),dot(G10,V01)) + dot(dot(G00,V01),dot(G11,V10)) + dot(dot(G11,V10),dot(G00,V01)) - dot(dot(G01,V10),dot(G01,V10)) )
 
 
+def KuboTop(N,p,Imp_List,E):
+  def KuboMxs(E): 
+    """Gets the appropriate matrices for the Kubo formula.
+    Cell 0 is the leftmost cell (regular strip size) and cell 1 is an adjacent cell on the right (BigStrip size)"""
+    gC = gArmStrip(E,N)
+    gL = RubioSancho(gC,VRLs,VLRs)
+    gR = RubioSancho(gC,VLRs,VRLs)
+    gM = gBigArmStripTop(E,N,p,Imp_List)
+    GM = RecAdd(gR,gM,VRLbs,VLRbs)
+    G11, G10, G01, G00 = gOffDiagonal(GM,gL,gL,gL,gL,VLRsb,VRLsb)
+    return G11, G10, G01, G00
+
+  def Gtilde(E):
+    """Calculates Gtilde, the difference between advanced and retarded GFs"""
+    G11A, G10A, G01A, G00A = KuboMxs(E+1j*eta)
+    G11R, G10R, G01R, G00R = KuboMxs(E-1j*eta)
+    
+    G11T = 1.0/(2.0*1j)*(G11A-G11R)
+    G10T = 1.0/(2.0*1j)*(G10A-G10R)
+    G01T = 1.0/(2.0*1j)*(G01A-G01R)
+    G00T = 1.0/(2.0*1j)*(G00A-G00R)
+    
+    return G11T, G10T, G01T, G00T
+  
+  VLRs, VRLs = VArmStrip(N)
+  VLRbs, VRLbs = VArmStripBigSmall(N,p)
+  VLRsb, VRLsb = VArmStripSmallBig(N,p)
+  
+  G11T, G10T, G01T, G00T = Gtilde(E)
+  G11 = G11T[:2*N,:2*N]
+  G10 = G10T[:2*N,:2*N]
+  G01 = G01T[:2*N,:2*N]
+  G00 = G00T[:2*N,:2*N]
+  V01, V10 = VArmStrip(N)
+  
+  return np.trace( dot(dot(-G10,V01),dot(G10,V01)) + dot(dot(G00,V01),dot(G11,V10)) + dot(dot(G11,V10),dot(G00,V01)) - dot(dot(G01,V10),dot(G01,V10)) )
+
 
 if __name__ == "__main__":
-  N = 4
+  N = 5
   p = 2
-  
-  El = np.linspace(-3.0,3.0,201)
-  for i in range(5):
-    Imp_List = [i]
-    Kl = [KuboSubs(N,p,Imp_List,E).real for E in El]
-    pl.plot(El,Kl)
-    pl.savefig('%g.jpg' % (i,))
-    pl.close()
+  El = np.linspace(-3.0,3.0,2001)
+  Imp_List = [0]
+  Kl = [KuboTop(N,p,Imp_List,E).real for E in El]
+  pl.plot(El,Kl)
+  pl.show()
+  #pl.savefig('%g.jpg' % (i,))
+  #pl.clf()
+
+
 
 
     
