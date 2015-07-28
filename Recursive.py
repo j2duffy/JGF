@@ -41,33 +41,13 @@ class memoized(object):
 
 def HArmStrip(N):
   """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon)."""
-  if N%2 == 0:
-    return HArmStripEven(N)
-  else:
-    return HArmStripOdd(N)
-
-
-def HArmStripOdd(N):
-  """Creates the Hamiltonian of an odd armchair strip."""
   H = np.zeros([2*N,2*N])
   for i in range(N-1):
     H[i,i+1], H[i+1,i] = 2*(t,)
   for i in range(N,2*N-1):
     H[i,i+1], H[i+1,i] = 2*(t,)
-  for i in range(0,N,2):
+  for i in range(0,N,2):	# Works for both odd/even 
     H[i,N+i], H[N+i,i] = 2*(t,)
-  return H
-
-
-def HArmStripEven(N):
-  """Creates the Hamiltonian of an even armchair strip."""
-  H = np.zeros([2*N,2*N])
-  for i in range(0,N-1):
-    H[i,i+1], H[i+1,i] = 2*(t,)
-  for i in range(N,2*N-1):
-    H[i,i+1], H[i+1,i] = 2*(t,)
-  for i in range(0,N-1,2):
-    H[i,i+N], H[i+N,i] = 2*(t,)
   return H
 
 
@@ -489,15 +469,8 @@ def KuboTop(N,p,Imp_List,E):
 
 
 if __name__ == "__main__":
-  N = 5
-  p = 2
-  El = np.linspace(-3.0,3.0,2001)
-  Imp_List = [0]
-  Kl = [KuboTop(N,p,Imp_List,E).real for E in El]
-  pl.plot(El,Kl)
-  pl.show()
-  #pl.savefig('%g.jpg' % (i,))
-  #pl.clf()
+  N = 4
+  print HArmStrip(N)
 
 
 
