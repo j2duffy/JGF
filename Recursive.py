@@ -28,37 +28,24 @@ def HArmStrip(N):
 
 def HBigArmStrip(N,p):
   """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width."""
-  if N%2 == 0:
-    return HBigArmStripEven(N,p)
-  else:
-    return HBigArmStripOdd(N,p)
-
-
-def HBigArmStripOdd(N,p):
-  """Creates the Hamiltonian for an odd armchair strip N atoms across and p "unit cells" in width."""
   H = np.zeros((2*N*p,2*N*p))
   # nn elements
   for j in range(0,2*p*N-N+1,N):
     for i in range(j,j+N-1):
       H[i,i+1], H[i+1,i] = 2*(t,)
-  # off diagonal elements
-  for i in range(0,2*N*p-N,2):
-    H[i,i+N], H[i+N,i] = 2*(t,)
-  return H
-
-
-def HBigArmStripEven(N,p):
-  """Creates the Hamiltonian for an even armchair strip N atoms in width and p unit cells in length."""
-  H = np.zeros((2*N*p,2*N*p))
-  for j in range(0,2*p*N-N+1,N):
-    for i in range(j,j+N-1):
-      H[i,i+1], H[i+1,i] = 2*(t,)
-  for j in range(0,2*p*N-2*N+1,2*N):
-    for i in range(j,j+N-1,2):
+  if N%2 == 0:
+    # Other elements even
+    for j in range(0,2*p*N-2*N+1,2*N):
+      for i in range(j,j+N-1,2):
+	H[i,i+N], H[i+N,i] = 2*(t,)
+    for j in range(N,2*p*N-3*N+1,2*N):
+      for i in range(j+1,j+N,2):
+	H[i,i+N], H[i+N,i] = 2*(t,)
+  else:
+    # Other elements odd
+    for i in range(0,2*N*p-N,2):
       H[i,i+N], H[i+N,i] = 2*(t,)
-  for j in range(N,2*p*N-3*N+1,2*N):
-    for i in range(j+1,j+N,2):
-      H[i,i+N], H[i+N,i] = 2*(t,)
+      
   return H
 
 
@@ -405,12 +392,12 @@ def KuboSubs(N,p,E,Imp_List):
 
 if __name__ == "__main__":
   N = 12
-  p = 1
-  Imp_List = [1]
-  El = np.linspace(-3.0,3.0,201)
-  Kl = [KuboSubs(N,p,E,Imp_List) for E in El]
-  pl.plot(El,Kl)
-  pl.show()
+  p = 2
+  for N in [6,7,8]:
+    El = np.linspace(-3.0,3.0,201)
+    Kl = [Kubo(N,p,E) for E in El]
+    pl.plot(El,Kl)
+    pl.show()
 
 
 
