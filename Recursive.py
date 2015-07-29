@@ -12,41 +12,16 @@ import random
 rtol = 1.0e-4		# Default tolerance for recursive methods.
 
 
-class memoized(object):
-   '''Decorator. Caches a function's return value each time it is called.
-   If called later with the same arguments, the cached value is returned
-   (not reevaluated).
-   '''
-   def __init__(self, func):
-      self.func = func
-      self.cache = {}
-   def __call__(self, *args):
-      if not isinstance(args, collections.Hashable):
-         # uncacheable. a list, for instance.
-         # better to not cache than blow up.
-         return self.func(*args)
-      if args in self.cache:
-         return self.cache[args]
-      else:
-         value = self.func(*args)
-         self.cache[args] = value
-         return value
-   def __repr__(self):
-      '''Return the function's docstring.'''
-      return self.func.__doc__
-   def __get__(self, obj, objtype):
-      '''Support instance methods.'''
-      return functools.partial(self.__call__, obj)
-
-
 def HArmStrip(N):
   """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon)."""
   H = np.zeros([2*N,2*N])
+  # Adject elements
   for i in range(N-1):
     H[i,i+1], H[i+1,i] = 2*(t,)
   for i in range(N,2*N-1):
     H[i,i+1], H[i+1,i] = 2*(t,)
-  for i in range(0,N,2):	# Works for both odd/even 
+  # Other elements
+  for i in range(0,N,2):
     H[i,N+i], H[N+i,i] = 2*(t,)
   return H
 
@@ -352,6 +327,44 @@ def gRibArmRecursive(N,E):
 
 
 def Kubo(N,p,E):
+  """Calculates the conductance of a pristine GNR using the Kubo Formula
+  This is calculated by connecting a small strip to a big strip to a small strip, which is utterly pointless for the pristine case, and here mainly as an exercise.
+  Probably should at some point update this so that it just takes regular strips"""
+  def KuboMxs(E): 
+    """Gets the appropriate matrices for the Kubo formula.
+    Cell 0 on left and cell 1 on the right.
+    We need only take the first 2Nx2N matrix in BigStrip to calculate the conductance"""
+    gC = gArmStrip(E,N)
+    gL = RubioSancho(gC,VsRsL,VsLsR)
+    gR = RubioSancho(gC,VsLsR,VsRsL)
+    gM = gBigArmStrip(E,N,p)
+    GM = RecAdd(gR,gM,VsRbL,VbLsR)
+    G11, G10, G01, G00 = gOffDiagonal(GM,gL,gL,gL,gL,VsLbR,VbRsL)
+    return G11, G10, G01, G00
+
+  def Gtilde(E):
+    """Calculates Gtilde, the difference between advanced and retarded GFs, mulitplied by some stupid complex constant"""
+    G11A, G10A, G01A, G00A = KuboMxs(E+1j*eta)
+    G11R, G10R, G01R, G00R = KuboMxs(E-1j*eta)
+    
+    G11T = -1j/2.0*(G11A-G11R)
+    G10T = -1j/2.0*(G10A-G10R)
+    G01T = -1j/2.0*(G01A-G01R)
+    G00T = -1j/2.0*(G00A-G00R)
+    
+    return G11T[:2*N,:2*N], G10T[:2*N,:2*N], G01T[:2*N,:2*N], G00T[:2*N,:2*N]
+  
+  VsLsR, VsRsL = VArmStrip(N)		# Notation VsLsR means that a small strip on the left connects to a small strip on the right
+  VbLsR, VsRbL = VArmStripBigSmall(N,p)
+  VsLbR, VbRsL = VArmStripSmallBig(N,p)
+  
+  G11T, G10T, G01T, G00T = Gtilde(E)
+  V01, V10 = VArmStrip(N)
+  
+  return np.trace( dot(dot(-G10T,V01),dot(G10T,V01)) + dot(dot(G00T,V01),dot(G11T,V10)) + dot(dot(G11T,V10),dot(G00T,V01)) - dot(dot(G01T,V10),dot(G01T,V10)) )
+
+
+def KuboSubs(N,p,Imp_List,E):
   """Calculates the Kubo formula for a GNR.
   The GNR is built by connecting a strip to a big strip to another strip.
   This is somewhat pointless for the pristine case, and this is here mainly as a useful exercise."""
@@ -359,49 +372,11 @@ def Kubo(N,p,E):
     """Gets the appropriate matrices for the Kubo formula.
     Cell 0 is the leftmost cell (regular strip size) and cell 1 is an adjacent cell on the right (BigStrip size)"""
     gC = gArmStrip(E,N)
-    gL = RubioSancho(gC,VRLs,VLRs)
-    gR = RubioSancho(gC,VLRs,VRLs)
-    gM = gBigArmStrip(E,N,p)
-    GM = RecAdd(gR,gM,VRLbs,VLRbs)
-    G11, G10, G01, G00 = gOffDiagonal(GM,gL,gL,gL,gL,VLRsb,VRLsb)
-    return G11, G10, G01, G00
-
-  def Gtilde(E):
-    """Calculates Gtilde, the difference between advanced and retarded GFs"""
-    G11A, G10A, G01A, G00A = KuboMxs(E+1j*eta)
-    G11R, G10R, G01R, G00R = KuboMxs(E-1j*eta)
-    
-    G11T = 1.0/(2.0*1j)*(G11A-G11R)
-    G10T = 1.0/(2.0*1j)*(G10A-G10R)
-    G01T = 1.0/(2.0*1j)*(G01A-G01R)
-    G00T = 1.0/(2.0*1j)*(G00A-G00R)
-    
-    return G11T, G10T, G01T, G00T
-  
-  VLRs, VRLs = VArmStrip(N)
-  VLRbs, VRLbs = VArmStripBigSmall(N,p)
-  VLRsb, VRLsb = VArmStripSmallBig(N,p)
-  
-  G11T, G10T, G01T, G00T = Gtilde(E)
-  G11 = G11T[:2*N,:2*N]
-  G10 = G10T[:2*N,:2*N]
-  G01 = G01T[:2*N,:2*N]
-  G00 = G00T[:2*N,:2*N]
-  V01, V10 = VArmStrip(N)
-  
-  return np.trace( dot(dot(-G10,V01),dot(G10,V01)) + dot(dot(G00,V01),dot(G11,V10)) + dot(dot(G11,V10),dot(G00,V01)) - dot(dot(G01,V10),dot(G01,V10)) )
-
-
-def KuboSubs(N,p,Imp_List,E):
-  def KuboMxs(E): 
-    """Gets the appropriate matrices for the Kubo formula.
-    Cell 0 is the leftmost cell (regular strip size) and cell 1 is an adjacent cell on the right (BigStrip size)"""
-    gC = gArmStrip(E,N)
-    gL = RubioSancho(gC,VRLs,VLRs)
-    gR = RubioSancho(gC,VLRs,VRLs)
+    gL = RubioSancho(gC,VsRsL,VsLsR)
+    gR = RubioSancho(gC,VsLsR,VsRsL)
     gM = gBigArmStripSubs(E,N,p,Imp_List)
-    GM = RecAdd(gR,gM,VRLbs,VLRbs)
-    G11, G10, G01, G00 = gOffDiagonal(GM,gL,gL,gL,gL,VLRsb,VRLsb)
+    GM = RecAdd(gR,gM,VsRbL,VbLsR)
+    G11, G10, G01, G00 = gOffDiagonal(GM,gL,gL,gL,gL,VsLbR,VbRsL)
     return G11, G10, G01, G00
 
   def Gtilde(E):
@@ -416,9 +391,9 @@ def KuboSubs(N,p,Imp_List,E):
     
     return G11T, G10T, G01T, G00T
   
-  VLRs, VRLs = VArmStrip(N)
-  VLRbs, VRLbs = VArmStripBigSmall(N,p)
-  VLRsb, VRLsb = VArmStripSmallBig(N,p)
+  VsLsR, VsRsL = VArmStrip(N)
+  VbLsR, VsRbL = VArmStripBigSmall(N,p)
+  VsLbR, VbRsL = VArmStripSmallBig(N,p)
   
   G11T, G10T, G01T, G00T = Gtilde(E)
   G11 = G11T[:2*N,:2*N]
@@ -469,10 +444,15 @@ def KuboTop(N,p,Imp_List,E):
 
 
 if __name__ == "__main__":
-  N = 4
-  print HArmStrip(N)
+  #N = 12
+  p = 4
+  for N in [6,7,8,9]:
+    El = np.linspace(-3.0,3.0,201)
+    Kl = [Kubo(N,p,E) for E in El]
+    pl.plot(El,Kl)
+    pl.show()
 
 
 
 
-    
+      
