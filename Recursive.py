@@ -15,14 +15,12 @@ rtol = 1.0e-4		# Default tolerance for recursive methods.
 def HArmStrip(N):
   """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon)."""
   H = np.zeros([2*N,2*N])
-  # Adject elements
-  for i in range(N-1):
-    H[i,i+1], H[i+1,i] = 2*(t,)
-  for i in range(N,2*N-1):
-    H[i,i+1], H[i+1,i] = 2*(t,)
+  # Adjacent elements
+  for i in range(N-1) + range(N,2*N-1):
+    H[i,i+1] = H[i+1,i] = t
   # Other elements
   for i in range(0,N,2):
-    H[i,N+i], H[N+i,i] = 2*(t,)
+    H[i,N+i] = H[N+i,i] = t
   return H
 
 
@@ -32,26 +30,26 @@ def HBigArmStrip(N,p):
   # nn elements
   for j in range(0,2*p*N-N+1,N):
     for i in range(j,j+N-1):
-      H[i,i+1], H[i+1,i] = 2*(t,)
+      H[i,i+1] = H[i+1,i] = t
   if N%2 == 0:
     # Other elements even
     for j in range(0,2*p*N-2*N+1,2*N):
       for i in range(j,j+N-1,2):
-	H[i,i+N], H[i+N,i] = 2*(t,)
+	H[i,i+N] = H[i+N,i] = t
     for j in range(N,2*p*N-3*N+1,2*N):
       for i in range(j+1,j+N,2):
-	H[i,i+N], H[i+N,i] = 2*(t,)
+	H[i,i+N] = H[i+N,i] = t
   else:
     # Other elements odd
     for i in range(0,2*N*p-N,2):
-      H[i,i+N], H[i+N,i] = 2*(t,)
+      H[i,i+N] = H[i+N,i] = t
       
   return H
 
 
 def HBigArmStripSubs(N,p,Imp_List):
   """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
-  Adds an impurity with energy eps_imp at ever site in Imp_List."""
+  Adds an impurity with energy eps_imp at every site in Imp_List."""
   H = HBigArmStrip(N,p)
   for i in Imp_List:
     H[i,i] = eps_imp
@@ -60,31 +58,32 @@ def HBigArmStripSubs(N,p,Imp_List):
 
 def HBigArmStripTop(N,p,Imp_List):
   """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
-  Populates the strip with a number of top-adsorbed impurities given in Imp_list. These are added in the higher elements of the mx."""
+  Populates the strip with a number of top-adsorbed impurities given in Imp_list. 
+  These are added in the higher elements of the mx."""
   nimp = len(Imp_List)
   H = np.zeros((2*N*p+nimp,2*N*p+nimp))
   H[:2*N*p,:2*N*p] = HBigArmStrip(N,p)
   
   for i,k in enumerate(Imp_List):
-    H[2*N*p+i,k] = tau
-    H[k,2*N*p+i] = tau
+    H[2*N*p+i,k] = H[k,2*N*p+i] = tau
     H[2*N*p+i,2*N*p+i] = eps_imp
   return H
 
 
 def HBigArmStripCenter(N,p,Imp_List):
   """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
-  Populates the strip with a number of center-adsorbed impurities given in Imp_list. These are added in the higher elements of the mx."""
+  Populates the strip with a number of center-adsorbed impurities given in Imp_list. 
+  These are added in the higher elements of the mx."""
   nimp = len(Imp_List)
   H = np.zeros((2*N*p+nimp,2*N*p+nimp))
   H[:2*N*p,:2*N*p] = HBigArmStrip(N,p)
   
   for i,k in enumerate(Imp_List):
     for j in range(3) + range(N,N+3):
-      H[2*N*p+i,k+j] = tau
-      H[k+j,2*N*p+i] = tau
+      H[2*N*p+i,k+j] = H[k+j,2*N*p+i] = tau
     H[2*N*p+i,2*N*p+i] = eps_imp
   return H
+
 
 
 def gGen(E,H):
@@ -92,11 +91,12 @@ def gGen(E,H):
   return inv(E*np.eye(H.shape[0]) - H)
 
 
+
 def VArmStrip(N):
   """Calculates the LR and RL connection matrices for the armchair strip."""
   VLR, VRL = np.zeros([2*N,2*N]),np.zeros([2*N,2*N])
   for i in range(1,N,2):
-    VLR[N+i,i], VRL[i,N+i] = 2*(t,)
+    VLR[N+i,i] = VRL[i,N+i] = t
   return VLR, VRL
 
 
@@ -105,8 +105,7 @@ def VArmStripBigSmall(N,p):
   VLR = np.zeros((2*N*p,2*N))
   VRL = np.zeros((2*N,2*N*p))
   for i in range(1,N,2):
-    VLR[2*p*N-N+i,i] = t
-    VRL[i,2*p*N-N+i] = t
+    VLR[2*p*N-N+i,i] = VRL[i,2*p*N-N+i] = t
   return VLR, VRL
    
    
@@ -115,7 +114,7 @@ def VArmStripSmallBig(N,p):
   VLR = np.zeros((2*N,2*N*p))
   VRL = np.zeros((2*N*p,2*N))
   for i in range(1,N,2):
-    VLR[N+i,i], VRL[i,N+i] = 2*(t,)
+    VLR[N+i,i] = VRL[i,N+i] = t
   return VLR, VRL
 
 
@@ -180,6 +179,7 @@ def gRibArmRecursive(N,E):
   gR = RubioSancho(gC,VRL,VLR)	# The RIGHTMOST cell, not the cell on the right when we add
   gL = RubioSancho(gC,VLR,VRL)
   return RecAdd(gR,gL,VLR,VRL)
+
 
 
 def Kubo(N,p,E):
@@ -264,10 +264,13 @@ def KuboSubs(N,p,E,Imp_List):
 
 
 if __name__ == "__main__":
-  N = 8
-  p = 3
-  Imp_List = [1,2,3]
-  print HBigArmStripCenter(N,p,Imp_List)
+  N = 12
+  p = 2
+  Imp_List = [0]
+  El = np.linspace(-3.0,3.0,201)
+  Kl = [KuboSubs(N,p,E,Imp_List).real for E in El]
+  pl.plot(El,Kl)
+  pl.show()
 
 
 
