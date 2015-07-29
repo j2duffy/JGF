@@ -195,33 +195,9 @@ def HBigArmStripCenterEven(N,p,Imp_List):
 
 
 
-def gArmStrip(E,N):
-  """Calculates the GF of an armchair strip.
-  Might cost a bit to calculate the hamiltonian every time"""
-  return inv(E*np.eye(2*N) - HArmStrip(N))
-
-
-def gBigArmStrip(E,N,p):
-  """Calculates the GF for the large armchair strip"""
-  return inv(E*np.eye(2*N*p) - HBigArmStrip(N,p))
-
-
-def gBigArmStripSubs(E,N,p,Imp_List):
-  """Calculates the GF for a large armchair strip with substituational impurities at the sites specified in Imp_List."""
-  return inv(E*np.eye(2*N*p) - HBigArmStripSubs(N,p,Imp_List))
-
-
-def gBigArmStripTop(E,N,p,Imp_List):
-  """Calculates the GF for a large armchair strip with top adsorbed impurities at the sites specified in Imp_List."""
-  nimp = len(Imp_List)
-  return inv(E*np.eye(2*N*p+nimp) - HBigArmStripTop(N,p,Imp_List))
-
-
-def gBigArmStripCenter(E,N,p,Imp_List):
-  nimp = len(Imp_List)
-  """Calculates the GF for a large armchair strip with center adsorbed impurities at the sites specified in Imp_List."""
-  return inv(E*np.eye(2*N*p+nimp) - HBigArmStripCenter(N,p,Imp_List))
-
+def gGen(E,H):
+  """Calculates the GF given a Hamiltonian"""
+  return inv(E*np.eye(H.shape[0]) - H)
 
 
 def VArmStrip(N):
@@ -307,7 +283,8 @@ def gRibArmRecursive(N,E):
   """Calculates the GF (in a single unit cell) recursively. 
   Probably should be thrown out once you have better routines."""
   VLR, VRL = VArmStrip(N)	# Takes up a little bit of space since this has to be done every E, but really shouldn't have much effect on performance
-  gC = gArmStrip(E,N)
+  HC = HArmStrip(N)
+  gC = gGen(E,HC)
   gR = RubioSancho(gC,VRL,VLR)	# The RIGHTMOST cell, not the cell on the right when we add
   gL = RubioSancho(gC,VLR,VRL)
   return RecAdd(gR,gL,VLR,VRL)
@@ -321,10 +298,10 @@ def Kubo(N,p,E):
     """Gets the appropriate matrices for the Kubo formula.
     Cell 0 on left and cell 1 on the right.
     We need only take the first 2Nx2N matrix in BigStrip to calculate the conductance"""
-    gC = gArmStrip(E,N)
+    gC = gGen(E,HC)
     gL = RubioSancho(gC,VsRsL,VsLsR)
     gR = RubioSancho(gC,VsLsR,VsRsL)
-    gM = gBigArmStrip(E,N,p)
+    gM = gGen(E,HM)
     GM = RecAdd(gR,gM,VsRbL,VbLsR)
     G11, G10, G01, G00 = gOffDiagonal(GM,gL,gL,gL,gL,VsLbR,VbRsL)
     return G11, G10, G01, G00
@@ -341,6 +318,8 @@ def Kubo(N,p,E):
     
     return G11T[:2*N,:2*N], G10T[:2*N,:2*N], G01T[:2*N,:2*N], G00T[:2*N,:2*N]
   
+  HC = HArmStrip(N)
+  HM = HBigArmStrip(N,p)
   VsLsR, VsRsL = VArmStrip(N)		# Notation VsLsR means that a small strip on the left connects to a small strip on the right
   VbLsR, VsRbL = VArmStripBigSmall(N,p)
   VsLbR, VbRsL = VArmStripSmallBig(N,p)
@@ -359,10 +338,10 @@ def KuboSubs(N,p,E,Imp_List):
     """Gets the appropriate matrices for the Kubo formula.
     Cell 0 on left and cell 1 on the right.
     We need only take the first 2Nx2N matrix in BigStrip to calculate the conductance"""
-    gC = gArmStrip(E,N)
+    gC = gGen(E,HC)
     gL = RubioSancho(gC,VsRsL,VsLsR)
     gR = RubioSancho(gC,VsLsR,VsRsL)
-    gM = gBigArmStripSubs(E,N,p,Imp_List)
+    gM = gGen(E,HM)
     GM = RecAdd(gR,gM,VsRbL,VbLsR)
     G11, G10, G01, G00 = gOffDiagonal(GM,gL,gL,gL,gL,VsLbR,VbRsL)
     return G11, G10, G01, G00
@@ -378,7 +357,9 @@ def KuboSubs(N,p,E,Imp_List):
     G00T = -1j/2.0*(G00A-G00R)
     
     return G11T[:2*N,:2*N], G10T[:2*N,:2*N], G01T[:2*N,:2*N], G00T[:2*N,:2*N]
-  
+
+  HC = HArmStrip(N)
+  HM = HBigArmStripSubs(N,p,Imp_List)
   VsLsR, VsRsL = VArmStrip(N)		# Notation VsLsR means that a small strip on the left connects to a small strip on the right
   VbLsR, VsRbL = VArmStripBigSmall(N,p)
   VsLbR, VbRsL = VArmStripSmallBig(N,p)
@@ -392,12 +373,9 @@ def KuboSubs(N,p,E,Imp_List):
 
 if __name__ == "__main__":
   N = 12
-  p = 2
-  for N in [6,7,8]:
-    El = np.linspace(-3.0,3.0,201)
-    Kl = [Kubo(N,p,E) for E in El]
-    pl.plot(El,Kl)
-    pl.show()
+  for E in np.linspace(-3.0+1j*eta,3.0+1j*eta,5001):
+    g = gRibArmRecursive(N,E)[0,0]
+    print E.real, g.real, g.imag
 
 
 
