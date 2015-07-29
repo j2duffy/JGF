@@ -1,13 +1,9 @@
 # Contains a set of routines for building recursive structures.
 # Mostly focused on armchair nanoribbons
 # The N numbering convention is used everywhere unless noted.
-import numpy as np
 from numpy import dot
 from GF import *
-import collections
-import functools
 from operator import mul
-import random
 
 rtol = 1.0e-4		# Default tolerance for recursive methods.
 
