@@ -5,7 +5,8 @@ from numpy import dot
 from GF import *
 from operator import mul
 
-rtol = 1.0e-4		# Default tolerance for recursive methods.
+rtol = 1.0e-8		# Default tolerance for recursive methods.
+# This tolerance is chosen to eliminate the zero, and is picked purely by observation. 
 
 
 def HArmStrip(N):
@@ -149,7 +150,7 @@ def RubioSancho(g00,V01,V10,tol=rtol):
 
   Transf = tmx.copy()
   Transf_Old = np.zeros(g00.shape[0])	# Broadcasts to correct shape
-  while np.linalg.norm(Transf - Transf_Old)/np.linalg.norm(Transf) > tol:	# this condition is well dodge, surely you want, like, the relative error?
+  while np.linalg.norm(Transf - Transf_Old)/np.linalg.norm(Transf) > tol:
     # Update t
     temp = inv( identity - dot(tmx,smx) - dot(smx,tmx))
     tmx = dot( temp, dot(tmx,tmx) )
@@ -258,16 +259,104 @@ def KuboSubs(N,p,E,Imp_List):
   return np.trace( dot(dot(-G10T,V01),dot(G10T,V01)) + dot(dot(G00T,V01),dot(G11T,V10)) + dot(dot(G11T,V10),dot(G00T,V01)) - dot(dot(G01T,V10),dot(G01T,V10)) )
 
 
+def KuboTop(N,p,E,Imp_List):
+  """Calculates the conductance of a GNR with substitutional impurities using the Kubo Formula.
+  This is calculated by connecting a small strip to a big strip to a small strip, which is utterly pointless for the pristine case, and here mainly as an exercise.
+  Probably should at some point update this so that it just takes regular strips"""
+  def KuboMxs(E): 
+    """Gets the appropriate matrices for the Kubo formula.
+    Cell 0 on left and cell 1 on the right.
+    We need only take the first 2Nx2N matrix in BigStrip to calculate the conductance"""
+    gC = gGen(E,HC)
+    gL = RubioSancho(gC,VsRsL,VsLsR)
+    gR = RubioSancho(gC,VsLsR,VsRsL)
+    gM = gGen(E,HM)
+    GM = RecAdd(gR,gM,VsRbL,VbLsR)
+    G11, G10, G01, G00 = gOffDiagonal(GM,gL,gL,gL,gL,VsLbR,VbRsL)
+    return G11, G10, G01, G00
+
+  def Gtilde(E):
+    """Calculates Gtilde, the difference between advanced and retarded GFs, mulitplied by some stupid complex constant"""
+    G11A, G10A, G01A, G00A = KuboMxs(E+1j*eta)
+    G11R, G10R, G01R, G00R = KuboMxs(E-1j*eta)
+    
+    G11T = -1j/2.0*(G11A-G11R)
+    G10T = -1j/2.0*(G10A-G10R)
+    G01T = -1j/2.0*(G01A-G01R)
+    G00T = -1j/2.0*(G00A-G00R)
+    
+    return G11T[:2*N,:2*N], G10T[:2*N,:2*N], G01T[:2*N,:2*N], G00T[:2*N,:2*N]
+
+  nimp = len(Imp_List)
+
+  HC = HArmStrip(N)
+  HM = HBigArmStripTop(N,p,Imp_List)
+  VsLsR, VsRsL = VArmStrip(N)		# Notation VsLsR means that a small strip on the left connects to a small strip on the right
+  
+  VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
+  VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
+  VbLsR[:2*N*p,:2*N], VsRbL[:2*N,:2*N*p] = VArmStripBigSmall(N,p)
+  VsLbR[:2*N,:2*N*p], VbRsL[:2*N*p,:2*N] = VArmStripSmallBig(N,p)
+  
+  G11T, G10T, G01T, G00T = Gtilde(E)
+  V01, V10 = VArmStrip(N)
+  
+  return np.trace( dot(dot(-G10T,V01),dot(G10T,V01)) + dot(dot(G00T,V01),dot(G11T,V10)) + dot(dot(G11T,V10),dot(G00T,V01)) - dot(dot(G01T,V10),dot(G01T,V10)) )
+
+
+def KuboCenter(N,p,E,Imp_List):
+  """Calculates the conductance of a GNR with substitutional impurities using the Kubo Formula.
+  This is calculated by connecting a small strip to a big strip to a small strip, which is utterly pointless for the pristine case, and here mainly as an exercise.
+  Probably should at some point update this so that it just takes regular strips"""
+  def KuboMxs(E): 
+    """Gets the appropriate matrices for the Kubo formula.
+    Cell 0 on left and cell 1 on the right.
+    We need only take the first 2Nx2N matrix in BigStrip to calculate the conductance"""
+    gC = gGen(E,HC)
+    gL = RubioSancho(gC,VsRsL,VsLsR)
+    gR = RubioSancho(gC,VsLsR,VsRsL)
+    gM = gGen(E,HM)
+    GM = RecAdd(gR,gM,VsRbL,VbLsR)
+    G11, G10, G01, G00 = gOffDiagonal(GM,gL,gL,gL,gL,VsLbR,VbRsL)
+    return G11, G10, G01, G00
+
+  def Gtilde(E):
+    """Calculates Gtilde, the difference between advanced and retarded GFs, mulitplied by some stupid complex constant"""
+    G11A, G10A, G01A, G00A = KuboMxs(E+1j*eta)
+    G11R, G10R, G01R, G00R = KuboMxs(E-1j*eta)
+    
+    G11T = -1j/2.0*(G11A-G11R)
+    G10T = -1j/2.0*(G10A-G10R)
+    G01T = -1j/2.0*(G01A-G01R)
+    G00T = -1j/2.0*(G00A-G00R)
+    
+    return G11T[:2*N,:2*N], G10T[:2*N,:2*N], G01T[:2*N,:2*N], G00T[:2*N,:2*N]
+
+  nimp = len(Imp_List)
+
+  HC = HArmStrip(N)
+  HM = HBigArmStripCenter(N,p,Imp_List)
+  VsLsR, VsRsL = VArmStrip(N)		# Notation VsLsR means that a small strip on the left connects to a small strip on the right
+  
+  VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
+  VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
+  VbLsR[:2*N*p,:2*N], VsRbL[:2*N,:2*N*p] = VArmStripBigSmall(N,p)
+  VsLbR[:2*N,:2*N*p], VbRsL[:2*N*p,:2*N] = VArmStripSmallBig(N,p)
+  
+  G11T, G10T, G01T, G00T = Gtilde(E)
+  V01, V10 = VArmStrip(N)
+  
+  return np.trace( dot(dot(-G10T,V01),dot(G10T,V01)) + dot(dot(G00T,V01),dot(G11T,V10)) + dot(dot(G11T,V10),dot(G00T,V01)) - dot(dot(G01T,V10),dot(G01T,V10)) )
+
 
 if __name__ == "__main__":
-  N = 12
-  p = 2
-  Imp_List = [0]
+  N = 8
+  p = 6
+  Imp_List = [2]
   El = np.linspace(-3.0,3.0,201)
   Kl = [KuboSubs(N,p,E,Imp_List).real for E in El]
   pl.plot(El,Kl)
   pl.show()
-
 
 
 
