@@ -217,8 +217,47 @@ def Kubo(N,p,E):
   G11T, G10T, G01T, G00T = Gtilde(E)
   V01, V10 = VArmStrip(N)
   
-  return np.trace( dot(dot(-G10T,V01),dot(G10T,V01)) + dot(dot(G00T,V01),dot(G11T,V10)) + dot(dot(G11T,V10),dot(G00T,V01)) - dot(dot(G01T,V10),dot(G01T,V10)) )
+  return np.trace( dot(dot(-G10T,V01),dot(G10T,V01)) + dot(dot(G00T,V01),dot(G11T,V10)) + dot(dot(G11T,V10),dot(G00T,V01)) - dot(dot(G01T,V10),dot(G01T,V10)) ).real
 
+
+def KuboNew(N,p,E):
+  """Calculates the conductance of a pristine GNR using the Kubo Formula
+  This is calculated by connecting a small strip to a big strip to a small strip, which is utterly pointless for the pristine case, and here mainly as an exercise.
+  Probably should at some point update this so that it just takes regular strips"""
+  def KuboMxs(E): 
+    """Gets the appropriate matrices for the Kubo formula.
+    Cell 0 on left and cell 1 on the right.
+    We need only take the first 2Nx2N matrix in BigStrip to calculate the conductance"""
+    gC = gGen(E,HC)
+    gL = RubioSancho(gC,VsRsL,VsLsR)
+    gR = RubioSancho(gC,VsLsR,VsRsL)
+    gM = gGen(E,HM)
+    GM = RecAdd(gR,gM,VsRbL,VbLsR)
+    G11, G10, G01, G00 = gOffDiagonal(GM,gL,gL,gL,gL,VsLbR,VbRsL)
+    return G11, G10, G01, G00
+
+  def Gtilde(E):
+    """Calculates Gtilde, the difference between advanced and retarded GFs, mulitplied by some stupid complex constant"""
+    G11A, G10A, G01A, G00A = KuboMxs(E+1j*eta)
+    G11R, G10R, G01R, G00R = KuboMxs(E-1j*eta)
+    
+    G11T = -1j/2.0*(G11A-G11R)
+    G10T = -1j/2.0*(G10A-G10R)
+    G01T = -1j/2.0*(G01A-G01R)
+    G00T = -1j/2.0*(G00A-G00R)
+    
+    return G11T[:2*N,:2*N], G10T[:2*N,:2*N], G01T[:2*N,:2*N], G00T[:2*N,:2*N]
+  
+  HC = HArmStrip(N)
+  HM = HBigArmStrip(N,p)
+  VsLsR, VsRsL = VArmStrip(N)		# Notation VsLsR means that a small strip on the left connects to a small strip on the right
+  VbLsR, VsRbL = VArmStripBigSmall(N,p)
+  VsLbR, VbRsL = VArmStripSmallBig(N,p)
+  
+  G11T, G10T, G01T, G00T = Gtilde(E)
+  V01, V10 = VArmStrip(N)
+  
+  return np.trace( dot(dot(-G10T,V01),dot(G10T,V01)) + dot(dot(G00T,V01),dot(G11T,V10)) + dot(dot(G11T,V10),dot(G00T,V01)) - dot(dot(G01T,V10),dot(G01T,V10)) ).real
 
 def KuboSubs(N,p,E,Imp_List):
   """Calculates the conductance of a GNR with substitutional impurities using the Kubo Formula.
@@ -353,6 +392,10 @@ def KuboCenter(N,p,E,Imp_List):
 if __name__ == "__main__":
   N = 8
   p = 3
+  E = 1.2
+  print Kubo(N,p,E)
+  print KuboNew(N,p,E)
+  
   #nimp = 6
   
   #def KGen(E,niter):
@@ -369,18 +412,18 @@ if __name__ == "__main__":
   #pl.clf()
     
     
-  Imp_List = [0,10,11,32]
-  El = np.linspace(-3.0,3.0,201)
-  KlC = [KuboCenter(N,p,E,Imp_List) for E in El]
-  Imp_List = [1,15,17,29]
-  KlT = [KuboTop(N,p,E,Imp_List) for E in El]
-  KlS = [KuboSubs(N,p,E,Imp_List) for E in El]
-  pl.plot(El,KlC,label='Center')
-  pl.plot(El,KlS,label='Subs')
-  pl.plot(El,KlT,label='Top')
-  pl.legend()
+  #Imp_List = [0,10,11,32]
+  #El = np.linspace(-3.0,3.0,201)
+  #KlC = [KuboCenter(N,p,E,Imp_List) for E in El]
+  #Imp_List = [1,15,17,29]
+  #KlT = [KuboTop(N,p,E,Imp_List) for E in El]
+  #KlS = [KuboSubs(N,p,E,Imp_List) for E in El]
+  #pl.plot(El,KlC,label='Center')
+  #pl.plot(El,KlS,label='Subs')
+  #pl.plot(El,KlT,label='Top')
+  #pl.legend()
   #pl.savefig('comp.jpg')
-  pl.show()
+  #pl.show()
 
 
 
