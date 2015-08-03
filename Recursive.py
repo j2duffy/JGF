@@ -184,80 +184,35 @@ def Kubo(N,p,E):
   """Calculates the conductance of a pristine GNR using the Kubo Formula
   This is calculated by connecting a small strip to a big strip to a small strip, which is utterly pointless for the pristine case, and here mainly as an exercise.
   Probably should at some point update this so that it just takes regular strips"""
-  def KuboMxs(E): 
-    """Gets the appropriate matrices for the Kubo formula.
-    Cell 0 on left and cell 1 on the right.
-    We need only take the first 2Nx2N matrix in BigStrip to calculate the conductance"""
-    gC = gGen(E,HC)
-    gL = RubioSancho(gC,VsRsL,VsLsR)
-    gR = RubioSancho(gC,VsLsR,VsRsL)
-    gM = gGen(E,HM)
-    GM = RecAdd(gR,gM,VsRbL,VbLsR)
-    G11, G10, G01, G00 = gOffDiagonal(GM,gL,gL,gL,gL,VsLbR,VbRsL)
-    return G11, G10, G01, G00
-
-  def Gtilde(E):
-    """Calculates Gtilde, the difference between advanced and retarded GFs, mulitplied by some stupid complex constant"""
-    G11A, G10A, G01A, G00A = KuboMxs(E+1j*eta)
-    G11R, G10R, G01R, G00R = KuboMxs(E-1j*eta)
-    
-    G11T = -1j/2.0*(G11A-G11R)
-    G10T = -1j/2.0*(G10A-G10R)
-    G01T = -1j/2.0*(G01A-G01R)
-    G00T = -1j/2.0*(G00A-G00R)
-    
-    return G11T[:2*N,:2*N], G10T[:2*N,:2*N], G01T[:2*N,:2*N], G00T[:2*N,:2*N]
   
+  # Get the hamiltonians and connection matrices
   HC = HArmStrip(N)
   HM = HBigArmStrip(N,p)
-  VsLsR, VsRsL = VArmStrip(N)		# Notation VsLsR means that a small strip on the left connects to a small strip on the right
-  VbLsR, VsRbL = VArmStripBigSmall(N,p)
+  VLR, VRL = VArmStrip(N)		# Connection matrices for the small strips
+  VbLsR, VsRbL = VArmStripBigSmall(N,p)	# Notation VbLsR means a big strip on the left connects to a small strip on the right
   VsLbR, VbRsL = VArmStripSmallBig(N,p)
-  
-  G11T, G10T, G01T, G00T = Gtilde(E)
-  V01, V10 = VArmStrip(N)
-  
-  return np.trace( dot(dot(-G10T,V01),dot(G10T,V01)) + dot(dot(G00T,V01),dot(G11T,V10)) + dot(dot(G11T,V10),dot(G00T,V01)) - dot(dot(G01T,V10),dot(G01T,V10)) ).real
 
+  # Calculate the advanced GFs
+  # SHOULD THE ADVANCED MX NOT HAVE -1J*ETA??!
+  gC = gGen(E-1j*eta,HC)
+  gL = RubioSancho(gC,VRL,VLR)
+  gR = RubioSancho(gC,VLR,VRL)
+  gM = gGen(E-1j*eta,HM)
+  GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
+  GRRa, GRLa, GLRa, GLLa = gOffDiagonal(GR,gL,gL,gL,gL,VLR,VRL)
 
-def KuboNew(N,p,E):
-  """Calculates the conductance of a pristine GNR using the Kubo Formula
-  This is calculated by connecting a small strip to a big strip to a small strip, which is utterly pointless for the pristine case, and here mainly as an exercise.
-  Probably should at some point update this so that it just takes regular strips"""
-  def KuboMxs(E): 
-    """Gets the appropriate matrices for the Kubo formula.
-    Cell 0 on left and cell 1 on the right.
-    We need only take the first 2Nx2N matrix in BigStrip to calculate the conductance"""
-    gC = gGen(E,HC)
-    gL = RubioSancho(gC,VsRsL,VsLsR)
-    gR = RubioSancho(gC,VsLsR,VsRsL)
-    gM = gGen(E,HM)
-    GM = RecAdd(gR,gM,VsRbL,VbLsR)
-    G11, G10, G01, G00 = gOffDiagonal(GM,gL,gL,gL,gL,VsLbR,VbRsL)
-    return G11, G10, G01, G00
+  # Get the retarded GFs by conjugating (not transposing) the advanced matrices
+  # This is justified by a tricky proof you have somewhere
+  GRRr, GRLr, GLRr, GLLr = GRRa.conj(), GRLa.conj(), GLRa.conj(), GLLa.conj()
+  
+  # Calculates Gtilde, the difference between advanced and retarded GFs, mulitplied by some stupid complex constant. This is probably some actual complex thing
+  GRRt = -1j/2.0*(GRRa-GRRr)
+  GRLt = -1j/2.0*(GRLa-GRLr)
+  GLRt = -1j/2.0*(GLRa-GLRr)
+  GLLt = -1j/2.0*(GLLa-GLLr)
+  
+  return np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) ).real
 
-  def Gtilde(E):
-    """Calculates Gtilde, the difference between advanced and retarded GFs, mulitplied by some stupid complex constant"""
-    G11A, G10A, G01A, G00A = KuboMxs(E+1j*eta)
-    G11R, G10R, G01R, G00R = KuboMxs(E-1j*eta)
-    
-    G11T = -1j/2.0*(G11A-G11R)
-    G10T = -1j/2.0*(G10A-G10R)
-    G01T = -1j/2.0*(G01A-G01R)
-    G00T = -1j/2.0*(G00A-G00R)
-    
-    return G11T[:2*N,:2*N], G10T[:2*N,:2*N], G01T[:2*N,:2*N], G00T[:2*N,:2*N]
-  
-  HC = HArmStrip(N)
-  HM = HBigArmStrip(N,p)
-  VsLsR, VsRsL = VArmStrip(N)		# Notation VsLsR means that a small strip on the left connects to a small strip on the right
-  VbLsR, VsRbL = VArmStripBigSmall(N,p)
-  VsLbR, VbRsL = VArmStripSmallBig(N,p)
-  
-  G11T, G10T, G01T, G00T = Gtilde(E)
-  V01, V10 = VArmStrip(N)
-  
-  return np.trace( dot(dot(-G10T,V01),dot(G10T,V01)) + dot(dot(G00T,V01),dot(G11T,V10)) + dot(dot(G11T,V10),dot(G00T,V01)) - dot(dot(G01T,V10),dot(G01T,V10)) ).real
 
 def KuboSubs(N,p,E,Imp_List):
   """Calculates the conductance of a GNR with substitutional impurities using the Kubo Formula.
@@ -277,6 +232,7 @@ def KuboSubs(N,p,E,Imp_List):
 
   def Gtilde(E):
     """Calculates Gtilde, the difference between advanced and retarded GFs, mulitplied by some stupid complex constant"""
+    # Here, retarded and advanced have the opposite signs to the ones they're supposed to.
     G11A, G10A, G01A, G00A = KuboMxs(E+1j*eta)
     G11R, G10R, G01R, G00R = KuboMxs(E-1j*eta)
     
@@ -389,12 +345,17 @@ def KuboCenter(N,p,E,Imp_List):
   return np.trace( dot(dot(-G10T,V01),dot(G10T,V01)) + dot(dot(G00T,V01),dot(G11T,V10)) + dot(dot(G11T,V10),dot(G00T,V01)) - dot(dot(G01T,V10),dot(G01T,V10)) ).real
 
 
+
+
 if __name__ == "__main__":
   N = 8
   p = 3
   E = 1.2
-  print Kubo(N,p,E)
-  print KuboNew(N,p,E)
+  for N in [5,11,13]:
+    for p in [1,4,9]:
+      for E in [1.2,3.0,-1.1,-5.0]:
+	Ko = Kubo(N,p,E)
+	print Ko
   
   #nimp = 6
   
