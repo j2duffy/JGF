@@ -20,8 +20,8 @@ eta = 1.0e-4
 t = -1.0
 EF = 0.0
 wf=EF	# This needs a lot of thought/work
-eps_imp = -0.5
-tau = -1.0
+eps_imp = -5.0
+tau = -0.5
 U = 10.0
 dtol = 1.0e-6		# Stands for "default tolerance". Could be better
 

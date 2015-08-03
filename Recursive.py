@@ -4,6 +4,7 @@
 from numpy import dot
 from GF import *
 from operator import mul
+import random
 
 rtol = 1.0e-8		# Default tolerance for recursive methods.
 # This tolerance is chosen to eliminate the zero, and is picked purely by observation. 
@@ -256,7 +257,7 @@ def KuboSubs(N,p,E,Imp_List):
   G11T, G10T, G01T, G00T = Gtilde(E)
   V01, V10 = VArmStrip(N)
   
-  return np.trace( dot(dot(-G10T,V01),dot(G10T,V01)) + dot(dot(G00T,V01),dot(G11T,V10)) + dot(dot(G11T,V10),dot(G00T,V01)) - dot(dot(G01T,V10),dot(G01T,V10)) )
+  return np.trace( dot(dot(-G10T,V01),dot(G10T,V01)) + dot(dot(G00T,V01),dot(G11T,V10)) + dot(dot(G11T,V10),dot(G00T,V01)) - dot(dot(G01T,V10),dot(G01T,V10)) ).real
 
 
 def KuboTop(N,p,E,Imp_List):
@@ -301,7 +302,7 @@ def KuboTop(N,p,E,Imp_List):
   G11T, G10T, G01T, G00T = Gtilde(E)
   V01, V10 = VArmStrip(N)
   
-  return np.trace( dot(dot(-G10T,V01),dot(G10T,V01)) + dot(dot(G00T,V01),dot(G11T,V10)) + dot(dot(G11T,V10),dot(G00T,V01)) - dot(dot(G01T,V10),dot(G01T,V10)) )
+  return np.trace( dot(dot(-G10T,V01),dot(G10T,V01)) + dot(dot(G00T,V01),dot(G11T,V10)) + dot(dot(G11T,V10),dot(G00T,V01)) - dot(dot(G01T,V10),dot(G01T,V10)) ).real
 
 
 def KuboCenter(N,p,E,Imp_List):
@@ -346,16 +347,39 @@ def KuboCenter(N,p,E,Imp_List):
   G11T, G10T, G01T, G00T = Gtilde(E)
   V01, V10 = VArmStrip(N)
   
-  return np.trace( dot(dot(-G10T,V01),dot(G10T,V01)) + dot(dot(G00T,V01),dot(G11T,V10)) + dot(dot(G11T,V10),dot(G00T,V01)) - dot(dot(G01T,V10),dot(G01T,V10)) )
+  return np.trace( dot(dot(-G10T,V01),dot(G10T,V01)) + dot(dot(G00T,V01),dot(G11T,V10)) + dot(dot(G11T,V10),dot(G00T,V01)) - dot(dot(G01T,V10),dot(G01T,V10)) ).real
 
 
 if __name__ == "__main__":
   N = 8
-  p = 6
-  Imp_List = [2]
+  p = 3
+  #nimp = 6
+  
+  #def KGen(E,niter):
+    #KG = 0
+    #for i in range(niter):
+      #Imp_List = random.sample(range(2*N*p),nimp)
+      #KG += KuboTop(N,p,E,Imp_List).real
+    #return KG/niter
+    
+  #El = np.linspace(-3.0,3.0,201)
+  #Kl = [KGen(E,1000) for E in El]
+  #pl.plot(El,Kl)
+  #pl.savefig('MonteCarlo.jpg')
+  #pl.clf()
+    
+    
+  Imp_List = [0,10,11,32]
   El = np.linspace(-3.0,3.0,201)
-  Kl = [KuboSubs(N,p,E,Imp_List).real for E in El]
-  pl.plot(El,Kl)
+  KlC = [KuboCenter(N,p,E,Imp_List) for E in El]
+  Imp_List = [1,15,17,29]
+  KlT = [KuboTop(N,p,E,Imp_List) for E in El]
+  KlS = [KuboSubs(N,p,E,Imp_List) for E in El]
+  pl.plot(El,KlC,label='Center')
+  pl.plot(El,KlS,label='Subs')
+  pl.plot(El,KlT,label='Top')
+  pl.legend()
+  #pl.savefig('comp.jpg')
   pl.show()
 
 
