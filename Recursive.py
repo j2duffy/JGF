@@ -371,17 +371,38 @@ def ConfigAvTopTotal(N,p,nimp,E):
   return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
 
 
+def CenterPositions(N,p):
+  """Returns all valid positions for center adsorbed impurities in a BigArmStrip(N,p)
+  Positions are NOT in logical order"""
+  l = []
+  # Short strip first 
+  for j in range(0,2*N*p-2*N+1,2*N):
+    for i in range(j,j+N-2,2):
+      l.append(i)
+  # Long strip
+  for j in range(N,2*N*p-3*N+1,2*N):
+    for i in range(j+1,j+N-2,2):
+      l.append(i)
+  return l
+
+
+def CenterPositionsNew(N,p):
+  """Returns all valid positions for center adsorbed impurities in a BigArmStrip(N,p)
+  Positions are NOT in logical order"""
+  l = []
+  # Short strip first 
+  ss = [i for j in range(0,2*N*p-2*N+1,2*N) for i in range(j,j+N-2,2) ]
+  # Long strip
+  ls = [i for j in range(N,2*N*p-3*N+1,2*N) for i in range(j+1,j+N-2,2) ]
+  return ss + ls
+
+
 if __name__ == "__main__":
-  N = 5
-  p = 1
-  nimp = 2
-  
-  El = np.linspace(-3.0,3.0,201)
-  Kl1 = [ConfigAvTopTotal(N,p,nimp,E) for E in El]
-  Kl2 = [ConfigAvTopTotal(N,p,nimp,E) for E in El]
-  pl.plot(El,Kl1)
-  pl.plot(El,Kl2,'o')
-  pl.show()
+  N = 7
+  p = 2
+
+  print CenterPositions(N,p)
+  print CenterPositionsNew(N,p)
   
   #nimp = 6
   
