@@ -5,9 +5,24 @@ from numpy import dot
 from GF import *
 from operator import mul
 import random
+from itertools import combinations
 
 rtol = 1.0e-8		# Default tolerance for recursive methods.
 # This tolerance is chosen to eliminate the zero, and is picked purely by observation. 
+
+
+def choose(n, k):
+    """A fast way to calculate binomial coefficients by Andrew Dalke (contrib)."""
+    if 0 <= k <= n:
+        ntok = 1
+        ktok = 1
+        for t in xrange(1, min(k, n - k) + 1):
+            ntok *= n
+            ktok *= t
+            n -= 1
+        return ntok // ktok
+    else:
+        return 0
 
 
 def HArmStrip(N):
@@ -281,13 +296,22 @@ def KuboCenter(N,p,E,Imp_List):
   return np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
 
 
+def ConfigAvSubsTotal(N,p,nimp,E):
+  KT = 0
+  for Imp_List in combinations(range(2*N*p),nimp):	# For every possible combination of positions
+    Kl = KuboSubs(N,p,E,Imp_List)
+    KT += Kl
+  return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
+
 if __name__ == "__main__":
-  N = 11
-  #p = 2
+  N = 5
+  p = 1
+  nimp = 2
   
   El = np.linspace(-3.0,3.0,201)
-  Kl = [Kubo(N,E) for E in El]
+  Kl = [ConfigAvSubsTotal(N,p,nimp,E) for E in El]
   pl.plot(El,Kl)
+  pl.savefig('2.jpg')
   pl.show()
   
   #nimp = 6
