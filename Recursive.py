@@ -376,21 +376,6 @@ def CenterPositions(N,p):
   Positions are NOT in logical order"""
   l = []
   # Short strip first 
-  for j in range(0,2*N*p-2*N+1,2*N):
-    for i in range(j,j+N-2,2):
-      l.append(i)
-  # Long strip
-  for j in range(N,2*N*p-3*N+1,2*N):
-    for i in range(j+1,j+N-2,2):
-      l.append(i)
-  return l
-
-
-def CenterPositionsNew(N,p):
-  """Returns all valid positions for center adsorbed impurities in a BigArmStrip(N,p)
-  Positions are NOT in logical order"""
-  l = []
-  # Short strip first 
   ss = [i for j in range(0,2*N*p-2*N+1,2*N) for i in range(j,j+N-2,2) ]
   # Long strip
   ls = [i for j in range(N,2*N*p-3*N+1,2*N) for i in range(j+1,j+N-2,2) ]
@@ -402,7 +387,7 @@ if __name__ == "__main__":
   p = 2
 
   print CenterPositions(N,p)
-  print CenterPositionsNew(N,p)
+  print CenterPositions(N,p)
   
   #nimp = 6
   
