@@ -180,30 +180,21 @@ def gRibArmRecursive(N,E):
 
 
 
-def Kubo(N,p,E):
+def Kubo(N,E):
   """Calculates the conductance of a pristine GNR using the Kubo Formula"""
-  
   # Leads 
   HC = HArmStrip(N)
   VLR, VRL = VArmStrip(N)	
-  gC = gGen(E-1j*eta,HC)	# Get the advanced GF first
+  gC = gGen(E-1j*eta,HC)	# The advanced GF
   gL = RubioSancho(gC,VRL,VLR)
   gR = RubioSancho(gC,VLR,VRL)
 
-  # Scattering region and connection matrices 
-  HM = HBigArmStrip(N,p)
-  gM = gGen(E-1j*eta,HM)
-  VbLsR, VsRbL = VArmStripBigSmall(N,p)		# Notation VbLsR means a big strip on the left connects to a small strip on the right
-  VsLbR, VbRsL = VArmStripSmallBig(N,p)
-
-  # Calculate the advanced GFs
-  GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
-  GRRa, GRLa, GLRa, GLLa = gOffDiagonal(GR,gL,gL,gL,gL,VLR,VRL)
+  GRRa, GRLa, GLRa, GLLa = gOffDiagonal(gR,gL,gL,gL,gL,VLR,VRL)
   
-  # Calculates Gtilde, the difference between advanced and retarded GFs, mulitplied by some stupid complex constant. This is probably some actual complex thing
+  # Calculates Gtilde, the imaginary part of the advanced GF
   GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
   
-  return np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) ).real
+  return np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
 
 
 def KuboSubs(N,p,E,Imp_List):
@@ -214,7 +205,7 @@ def KuboSubs(N,p,E,Imp_List):
   # Leads 
   HC = HArmStrip(N)
   VLR, VRL = VArmStrip(N)	
-  gC = gGen(E-1j*eta,HC)	# Get the advanced GF first
+  gC = gGen(E-1j*eta,HC)	# The advanced GF
   gL = RubioSancho(gC,VRL,VLR)
   gR = RubioSancho(gC,VLR,VRL)
 
@@ -228,10 +219,10 @@ def KuboSubs(N,p,E,Imp_List):
   GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
   GRRa, GRLa, GLRa, GLLa = gOffDiagonal(GR,gL,gL,gL,gL,VLR,VRL)
   
-  # Calculates Gtilde, the difference between advanced and retarded GFs, mulitplied by some stupid complex constant. This is probably some actual complex thing
+  # Calculates Gtilde, the imaginary part of the advanced GF
   GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
   
-  return np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) ).real
+  return np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
 
 
 def KuboTop(N,p,E,Imp_List):
@@ -240,7 +231,7 @@ def KuboTop(N,p,E,Imp_List):
   # Leads 
   HC = HArmStrip(N)
   VLR, VRL = VArmStrip(N)	
-  gC = gGen(E-1j*eta,HC)	# Get the advanced GF first
+  gC = gGen(E-1j*eta,HC)	# The advanced GF
   gL = RubioSancho(gC,VRL,VLR)
   gR = RubioSancho(gC,VLR,VRL)
 
@@ -256,10 +247,10 @@ def KuboTop(N,p,E,Imp_List):
   GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
   GRRa, GRLa, GLRa, GLLa = gOffDiagonal(GR,gL,gL,gL,gL,VLR,VRL)
   
-  # Calculates Gtilde, the difference between advanced and retarded GFs, mulitplied by some stupid complex constant. This is probably some actual complex thing
+  # Calculates Gtilde, the imaginary part of the advanced GF
   GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
   
-  return np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) ).real
+  return np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
 
 
 def KuboCenter(N,p,E,Imp_List):
@@ -268,7 +259,7 @@ def KuboCenter(N,p,E,Imp_List):
   # Leads 
   HC = HArmStrip(N)
   VLR, VRL = VArmStrip(N)	
-  gC = gGen(E-1j*eta,HC)	# Get the advanced GF first
+  gC = gGen(E-1j*eta,HC)	# The advanced GF
   gL = RubioSancho(gC,VRL,VLR)
   gR = RubioSancho(gC,VLR,VRL)
 
@@ -284,15 +275,20 @@ def KuboCenter(N,p,E,Imp_List):
   GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
   GRRa, GRLa, GLRa, GLLa = gOffDiagonal(GR,gL,gL,gL,gL,VLR,VRL)
   
-  # Calculates Gtilde, the difference between advanced and retarded GFs, mulitplied by some stupid complex constant. This is probably some actual complex thing
+  # Calculates Gtilde, the imaginary part of the advanced GF
   GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
   
-  return np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) ).real
+  return np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
 
 
 if __name__ == "__main__":
-  N = 8
-  p = 3
+  N = 11
+  #p = 2
+  
+  El = np.linspace(-3.0,3.0,201)
+  Kl = [Kubo(N,E) for E in El]
+  pl.plot(El,Kl)
+  pl.show()
   
   #nimp = 6
   
@@ -308,20 +304,18 @@ if __name__ == "__main__":
   #pl.plot(El,Kl)
   #pl.savefig('MonteCarlo.jpg')
   #pl.clf()
-    
-    
-  Imp_List = [0,10,11,32]
-  El = np.linspace(-3.0,3.0,201)
-  KlC = [KuboCenter(N,p,E,Imp_List) for E in El]
-  Imp_List = [1,15,17,29]
-  KlT = [KuboTop(N,p,E,Imp_List) for E in El]
-  KlS = [KuboSubs(N,p,E,Imp_List) for E in El]
-  pl.plot(El,KlC,label='Center')
-  pl.plot(El,KlS,label='Subs')
-  pl.plot(El,KlT,label='Top')
-  pl.legend()
-  pl.savefig('comp.jpg')
-  pl.show()
+       
+  #Imp_List = [0,2,4,9,20]
+  #El = np.linspace(-3.0,3.0,201)
+  #KlC = [KuboCenter(N,p,E,Imp_List) for E in El]
+  ##Imp_List = [1]
+  #KlT = [KuboTop(N,p,E,Imp_List) for E in El]
+  #KlS = [KuboSubs(N,p,E,Imp_List) for E in El]
+  #pl.plot(El,KlC,label='Center')
+  #pl.plot(El,KlS,label='Subs')
+  #pl.plot(El,KlT,label='Top')
+  #pl.legend()
+  #pl.show()
 
 
 
