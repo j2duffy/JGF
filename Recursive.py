@@ -25,6 +25,18 @@ def choose(n, k):
         return 0
 
 
+def CenterPositions(N,p):
+  """Returns all valid positions for center adsorbed impurities in a BigArmStrip(N,p)
+  Positions are NOT in logical order"""
+  l = []
+  # Short strip first 
+  ss = [i for j in range(0,2*N*p-2*N+1,2*N) for i in range(j,j+N-2,2) ]
+  # Long strip
+  ls = [i for j in range(N,2*N*p-3*N+1,2*N) for i in range(j+1,j+N-2,2) ]
+  return ss + ls
+
+
+
 def HArmStrip(N):
   """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon)."""
   H = np.zeros([2*N,2*N])
@@ -296,6 +308,7 @@ def KuboCenter(N,p,E,Imp_List):
   return np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
 
 
+
 def ConfigAvSubsTotal(N,p,nimp,E):
   """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p).
   Averages all cases.
@@ -326,15 +339,6 @@ def ConfigAvSubsTotal(N,p,nimp,E):
     KT += K
   return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
 
-
-#def ConfigAvTopTotal(N,p,nimp,E):
-  #"""Calculates the Kubo Formula for every possible case of nimp top adsorbed impurities in a ribbon of (N,p).
-  #Averages all cases."""
-  #KT = 0
-  #for Imp_List in combinations(range(2*N*p),nimp):	# For every possible combination of positions
-    #Kl = KuboTop(N,p,E,Imp_List)
-    #KT += Kl
-  #return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
   
 
 def ConfigAvTopTotal(N,p,nimp,E):
@@ -371,23 +375,27 @@ def ConfigAvTopTotal(N,p,nimp,E):
   return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
 
 
-def CenterPositions(N,p):
-  """Returns all valid positions for center adsorbed impurities in a BigArmStrip(N,p)
-  Positions are NOT in logical order"""
-  l = []
-  # Short strip first 
-  ss = [i for j in range(0,2*N*p-2*N+1,2*N) for i in range(j,j+N-2,2) ]
-  # Long strip
-  ls = [i for j in range(N,2*N*p-3*N+1,2*N) for i in range(j+1,j+N-2,2) ]
-  return ss + ls
+def ConfigAvCenterTotal(N,p,nimp,E):
+  """Calculates the Kubo Formula for every possible case of nimp center adsorbed impurities in a ribbon of (N,p).
+  Averages all cases."""
+  KT = 0
+  # Should have this escape clause in any case, should also probably raise and exception
+  if nimp > len(CenterPositions(N,p)): 
+    print "Too many impurities!"
+    return
+  
+  for Imp_List in combinations(CenterPositions(N,p),nimp):	# For every possible combination of positions
+    Kl = KuboCenter(N,p,E,Imp_List)
+    KT += Kl
+  return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
 
 
 if __name__ == "__main__":
   N = 7
   p = 2
-
-  print CenterPositions(N,p)
-  print CenterPositions(N,p)
+  nimp = 1
+  E = 1.2
+  print ConfigAvCenterTotal(N,p,nimp,E)
   
   #nimp = 6
   
