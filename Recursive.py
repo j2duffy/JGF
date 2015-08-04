@@ -327,15 +327,48 @@ def ConfigAvSubsTotal(N,p,nimp,E):
   return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
 
 
+#def ConfigAvTopTotal(N,p,nimp,E):
+  #"""Calculates the Kubo Formula for every possible case of nimp top adsorbed impurities in a ribbon of (N,p).
+  #Averages all cases."""
+  #KT = 0
+  #for Imp_List in combinations(range(2*N*p),nimp):	# For every possible combination of positions
+    #Kl = KuboTop(N,p,E,Imp_List)
+    #KT += Kl
+  #return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
+  
+
 def ConfigAvTopTotal(N,p,nimp,E):
-  """Calculates the Kubo Formula for every possible case of nimp top adsorbed impurities in a ribbon of (N,p).
-  Averages all cases."""
+  """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p).
+  Averages all cases.
+  Way faster due to leaving the calculation of the leads out of the loop body"""
+  # Leads 
+  HC = HArmStrip(N)
+  VLR, VRL = VArmStrip(N)	
+  gC = gGen(E-1j*eta,HC)	# The advanced GF
+  gL = RubioSancho(gC,VRL,VLR)
+  gR = RubioSancho(gC,VLR,VRL)
+  
   KT = 0
   for Imp_List in combinations(range(2*N*p),nimp):	# For every possible combination of positions
-    Kl = KuboTop(N,p,E,Imp_List)
-    KT += Kl
-  return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
+    # Scattering region and connection matrices 
+    HM = HBigArmStripTop(N,p,Imp_List)
+    gM = gGen(E-1j*eta,HM)
+    VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
+    VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
+    VbLsR[:2*N*p,:2*N], VsRbL[:2*N,:2*N*p] = VArmStripBigSmall(N,p)
+    VsLbR[:2*N,:2*N*p], VbRsL[:2*N*p,:2*N] = VArmStripSmallBig(N,p)
 
+    # Calculate the advanced GFs
+    GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
+    GRRa, GRLa, GLRa, GLLa = gOffDiagonal(GR,gL,gL,gL,gL,VLR,VRL)
+    
+    # Calculates Gtilde, the imaginary part of the advanced GF
+    GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
+  
+    K = np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
+
+    KT += K
+  return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
 
 
 if __name__ == "__main__":
@@ -344,7 +377,8 @@ if __name__ == "__main__":
   nimp = 2
   
   El = np.linspace(-3.0,3.0,201)
-  Kl1 = [ConfigAvSubsTotal(N,p,nimp,E) for E in El]
+  Kl1 = [ConfigAvTopTotal(N,p,nimp,E) for E in El]
+  Kl2 = [ConfigAvTopTotal(N,p,nimp,E) for E in El]
   pl.plot(El,Kl1)
   pl.plot(El,Kl2,'o')
   pl.show()
