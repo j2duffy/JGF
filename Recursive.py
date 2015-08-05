@@ -221,7 +221,7 @@ def Kubo(N,E):
   # Calculates Gtilde, the imaginary part of the advanced GF
   GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
   
-  return np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
+  return 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
 
 
 def KuboSubs(N,p,E,Imp_List):
@@ -249,7 +249,7 @@ def KuboSubs(N,p,E,Imp_List):
   # Calculates Gtilde, the imaginary part of the advanced GF
   GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
   
-  return np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
+  return 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
 
 
 def KuboTop(N,p,E,Imp_List):
@@ -277,7 +277,7 @@ def KuboTop(N,p,E,Imp_List):
   # Calculates Gtilde, the imaginary part of the advanced GF
   GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
   
-  return np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
+  return 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
 
 
 def KuboCenter(N,p,E,Imp_List):
@@ -305,7 +305,7 @@ def KuboCenter(N,p,E,Imp_List):
   # Calculates Gtilde, the imaginary part of the advanced GF
   GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
   
-  return np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
+  return 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
 
 
 
@@ -335,7 +335,7 @@ def ConfigAvSubsTotal(N,p,nimp,E):
     # Calculates Gtilde, the imaginary part of the advanced GF
     GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
   
-    K =  np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
+    K =  2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
     KT += K
   return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
 
@@ -368,7 +368,7 @@ def ConfigAvTopTotal(N,p,nimp,E):
     # Calculates Gtilde, the imaginary part of the advanced GF
     GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
   
-    K = np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
+    K = 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
 
     KT += K
   return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
@@ -407,50 +407,26 @@ def ConfigAvCenterTotal(N,p,nimp,E):
     # Calculates Gtilde, the imaginary part of the advanced GF
     GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
   
-    K = np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
+    K = 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
 
     KT += K
   return  KT/choose(len(CenterPositions(N,p)),nimp)		# Choose should give the size of our list of combinations
 
 
 if __name__ == "__main__":
-  N = 8
-  p = 1
-  nimp = 3
+  N = 5
+  p = 2
   
+  #Imp_List = [0,12]
+  nimp = 5
   El = np.linspace(-3.0,3.0,201)
-  CA = [ConfigAvCenterTotal(N,p,nimp,E) for E in El]
-  CAT = [ConfigAvCenterTotal(N,p,nimp,E) for E in El]
-  pl.plot(El,CA)
-  pl.plot(El,CAT,'o')
+  Kl = [Kubo(N,E) for E in El]
+  KlC = [ConfigAvCenterTotal(N,p,nimp,E) for E in El]
+  pl.plot(El,Kl,label='Pristine')
+  pl.plot(El,KlC,label='Center')
+  pl.legend()
+  pl.savefig('plot.jpg')
   pl.show()
-  
-  #nimp = 6
-  
-  #def KGen(E,niter):
-    #KG = 0
-    #for i in range(niter):
-      #Imp_List = random.sample(range(2*N*p),nimp)
-      #KG += KuboTop(N,p,E,Imp_List).real
-    #return KG/niter
-    
-  #El = np.linspace(-3.0,3.0,201)
-  #Kl = [KGen(E,1000) for E in El]
-  #pl.plot(El,Kl)
-  #pl.savefig('MonteCarlo.jpg')
-  #pl.clf()
-       
-  #Imp_List = [0,2,4,9,20]
-  #El = np.linspace(-3.0,3.0,201)
-  #KlC = [KuboCenter(N,p,E,Imp_List) for E in El]
-  ##Imp_List = [1]
-  #KlT = [KuboTop(N,p,E,Imp_List) for E in El]
-  #KlS = [KuboSubs(N,p,E,Imp_List) for E in El]
-  #pl.plot(El,KlC,label='Center')
-  #pl.plot(El,KlS,label='Subs')
-  #pl.plot(El,KlT,label='Top')
-  #pl.legend()
-  #pl.show()
 
 
 
