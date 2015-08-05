@@ -374,22 +374,6 @@ def ConfigAvTopTotal(N,p,nimp,E):
   return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
 
 
-#def ConfigAvCenterTotal(N,p,nimp,E):
-  #"""Calculates the Kubo Formula for every possible case of nimp center adsorbed impurities in a ribbon of (N,p).
-  #Averages all cases."""
-  #KT = 0
-  ## Should have this escape clause in any case, should also probably raise and exception
-  #if nimp > len(CenterPositions(N,p)): 
-    #print "Too many impurities!"
-    #return
-  
-  #for Imp_List in combinations(CenterPositions(N,p),nimp):	# For every possible combination of positions
-    #Kl = KuboCenter(N,p,E,Imp_List)
-    #KT += Kl
-  #return  KT/choose(len(CenterPositions(N,p)),nimp)		# Choose should give the size of our list of combinations
-
-
-
 def ConfigAvCenterTotal(N,p,nimp,E):
   """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p).
   Averages all cases.
