@@ -1,5 +1,4 @@
 """Green's functions for various systems"""
-
 import FMod
 from scipy.integrate		import quad
 from scipy.optimize		import newton
