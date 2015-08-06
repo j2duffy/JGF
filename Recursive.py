@@ -417,16 +417,17 @@ if __name__ == "__main__":
   N = 5
   p = 2
   
-  #Imp_List = [0,12]
-  nimp = 5
-  El = np.linspace(-3.0,3.0,201)
-  Kl = [Kubo(N,E) for E in El]
-  KlC = [ConfigAvCenterTotal(N,p,nimp,E) for E in El]
-  pl.plot(El,Kl,label='Pristine')
-  pl.plot(El,KlC,label='Center')
-  pl.legend()
-  pl.savefig('plot.jpg')
-  pl.show()
+  for N,p,nimp,eps_imp,tau in [[5, 2, 3, 5.0, -1.0],[8, 1, 2, 1.0, -0.1],[5, 3, 3, 10.0, -10.0],[11, 2, 4, 2.0, -2.0],[5, 3, 4, 0.1, -0.1]]:
+    El = np.linspace(-3.0,3.0,201)
+    KlC = [ConfigAvCenterTotal(N,p,nimp,E) for E in El]
+    KlS = [ConfigAvSubsTotal(N,p,nimp,E) for E in El]
+    KlT = [ConfigAvTopTotal(N,p,nimp,E) for E in El]
+    pl.plot(El,KlC,label='Center')
+    pl.plot(El,KlS,label='Subs')
+    pl.plot(El,KlT,label='Top')
+    pl.legend()
+    pl.savefig('N=%g,p=%g,nimp=%g,eps_imp=%g,tau=%g.jpg' % (N,p,nimp,eps_imp,tau))
+    pl.show()
 
 
 
