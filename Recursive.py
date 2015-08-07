@@ -195,17 +195,6 @@ def RubioSancho(g00,V01,V10,tol=rtol):
   return dot( inv( identity - dot( dot(g00,V01) , Transf)) ,  g00 ) 
 
 
-def gRibArmRecursive(N,E):
-  """Calculates the GF (in a single unit cell) recursively. 
-  Probably should be thrown out once you have better routines."""
-  VLR, VRL = VArmStrip(N)	# Takes up a little bit of space since this has to be done every E, but really shouldn't have much effect on performance
-  HC = HArmStrip(N)
-  gC = gGen(E,HC)
-  gR = RubioSancho(gC,VRL,VLR)	# The RIGHTMOST cell, not the cell on the right when we add
-  gL = RubioSancho(gC,VLR,VRL)
-  return RecAdd(gR,gL,VLR,VRL)
-
-
 
 def Kubo(N,E):
   """Calculates the conductance of a pristine GNR using the Kubo Formula"""
@@ -414,21 +403,33 @@ def ConfigAvCenterTotal(N,p,nimp,E):
 
 
 if __name__ == "__main__":
-  N = 5
-  p = 2
+  #N = 8
+  #p = 2
   
-  for N,p,nimp,eps_imp,tau in [[5, 2, 3, 5.0, -1.0],[8, 1, 2, 1.0, -0.1],[5, 3, 3, 10.0, -10.0],[11, 2, 4, 2.0, -2.0],[5, 3, 4, 0.1, -0.1]]:
-    El = np.linspace(-3.0,3.0,201)
-    KlC = [ConfigAvCenterTotal(N,p,nimp,E) for E in El]
-    KlS = [ConfigAvSubsTotal(N,p,nimp,E) for E in El]
-    KlT = [ConfigAvTopTotal(N,p,nimp,E) for E in El]
-    pl.plot(El,KlC,label='Center')
-    pl.plot(El,KlS,label='Subs')
-    pl.plot(El,KlT,label='Top')
-    pl.legend()
-    pl.savefig('N=%g,p=%g,nimp=%g,eps_imp=%g,tau=%g.jpg' % (N,p,nimp,eps_imp,tau))
-    pl.show()
+  #E = 0.0
+  #max_n = len(CenterPositions(N,p))
+  
+  #nimpl = range(1,max_n+1)
+  
+  #CAC = [ConfigAvCenterTotal(N,p,nimp,E) for nimp in nimpl]
+  #CAS = [ConfigAvSubsTotal(N,p,nimp,E) for nimp in nimpl]
+  #CAT = [ConfigAvTopTotal(N,p,nimp,E) for nimp in nimpl]
+  
+  #conc = [nimp/(2.0*N*p) for nimp in nimpl]
+  
+  #pl.plot(conc,CAC,label='Center')
+  #pl.plot(conc,CAS,label='Subs')
+  #pl.plot(conc,CAT,'o',label='Top')
+  #pl.legend()
+  #pl.savefig('plot.jpg')
+  #pl.show()
+  
+  N = 5
+  for E in np.linspace(-3.0+1j*eta,3.0+1j*eta,201):
+    g = gRibArmRecursive(N,E)[0,0]
+    print E.real, g.real, g.imag
+    
 
 
 
-      
+	
