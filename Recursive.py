@@ -25,6 +25,14 @@ def choose(n, k):
         return 0
 
 
+def random_combination(iterable, r):
+  "Random selection from itertools.combinations(iterable, r)"
+  pool = tuple(iterable)
+  n = len(pool)
+  indices = sorted(random.sample(xrange(n), r))
+  return tuple(pool[i] for i in indices)
+
+
 def CenterPositions(N,p):
   """Returns all valid positions for center adsorbed impurities in a BigArmStrip(N,p)
   Positions are NOT in logical order"""
@@ -145,7 +153,7 @@ def VArmStripSmallBig(N,p):
 
 
 def RecAdd(g00,g11,V01,V10):
-  """Add a cell g11 to g00 recursively using the Dyson Formula, get a cell G11"""
+  """Add a cell g11 to g00 using the Dyson Formula, get a cell G11"""
   return dot(inv(np.eye(g11.shape[0])-dot(dot(g11,V10), dot(g00,V01))),g11)
 
 
@@ -402,32 +410,30 @@ def ConfigAvCenterTotal(N,p,nimp,E):
   return  KT/choose(len(CenterPositions(N,p)),nimp)		# Choose should give the size of our list of combinations
 
 
+
+  
+  
 if __name__ == "__main__":
-  #N = 8
-  #p = 2
+  N = 8
+  p = 2
   
-  #E = 0.0
-  #max_n = len(CenterPositions(N,p))
+  E = 0.0
+  max_n = len(CenterPositions(N,p))
   
-  #nimpl = range(1,max_n+1)
+  nimpl = range(1,max_n+1)
   
-  #CAC = [ConfigAvCenterTotal(N,p,nimp,E) for nimp in nimpl]
-  #CAS = [ConfigAvSubsTotal(N,p,nimp,E) for nimp in nimpl]
-  #CAT = [ConfigAvTopTotal(N,p,nimp,E) for nimp in nimpl]
+  CAC = [ConfigAvCenterTotal(N,p,nimp,E) for nimp in nimpl]
+  CAS = [ConfigAvSubsTotal(N,p,nimp,E) for nimp in nimpl]
+  CAT = [ConfigAvTopTotal(N,p,nimp,E) for nimp in nimpl]
   
-  #conc = [nimp/(2.0*N*p) for nimp in nimpl]
+  conc = [nimp/(2.0*N*p) for nimp in nimpl]
   
-  #pl.plot(conc,CAC,label='Center')
-  #pl.plot(conc,CAS,label='Subs')
-  #pl.plot(conc,CAT,'o',label='Top')
-  #pl.legend()
-  #pl.savefig('plot.jpg')
-  #pl.show()
-  
-  N = 5
-  for E in np.linspace(-3.0+1j*eta,3.0+1j*eta,201):
-    g = gRibArmRecursive(N,E)[0,0]
-    print E.real, g.real, g.imag
+  pl.plot(conc,CAC,label='Center')
+  pl.plot(conc,CAS,label='Subs')
+  pl.plot(conc,CAT,'o',label='Top')
+  pl.legend()
+  pl.savefig('plot.jpg')
+  pl.show()
     
 
 
