@@ -133,7 +133,7 @@ def VArmStrip(N):
   return VLR, VRL
 
 
-def VArmStripBigSmall(N,p):
+def VArmStripBigLSmallR(N,p):
   """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip."""
   VLR = np.zeros((2*N*p,2*N))
   VRL = np.zeros((2*N,2*N*p))
@@ -142,7 +142,7 @@ def VArmStripBigSmall(N,p):
   return VLR, VRL
    
    
-def VArmStripSmallBig(N,p):
+def VArmStripSmallLBigR(N,p):
   """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip."""
   VLR = np.zeros((2*N,2*N*p))
   VRL = np.zeros((2*N*p,2*N))
@@ -236,8 +236,8 @@ def KuboSubs(N,p,E,Imp_List):
   # Scattering region and connection matrices 
   HM = HBigArmStripSubs(N,p,Imp_List)
   gM = gGen(E-1j*eta,HM)
-  VbLsR, VsRbL = VArmStripBigSmall(N,p)		# Notation VbLsR means a big strip on the left connects to a small strip on the right
-  VsLbR, VbRsL = VArmStripSmallBig(N,p)
+  VbLsR, VsRbL = VArmStripBigLSmallR(N,p)		# Notation VbLsR means a big strip on the left connects to a small strip on the right
+  VsLbR, VbRsL = VArmStripSmallLBigR(N,p)
 
   # Calculate the advanced GFs
   GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
@@ -264,8 +264,8 @@ def KuboTop(N,p,E,Imp_List):
   gM = gGen(E-1j*eta,HM)
   VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
   VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
-  VbLsR[:2*N*p,:2*N], VsRbL[:2*N,:2*N*p] = VArmStripBigSmall(N,p)
-  VsLbR[:2*N,:2*N*p], VbRsL[:2*N*p,:2*N] = VArmStripSmallBig(N,p)
+  VbLsR[:2*N*p,:2*N], VsRbL[:2*N,:2*N*p] = VArmStripBigLSmallR(N,p)
+  VsLbR[:2*N,:2*N*p], VbRsL[:2*N*p,:2*N] = VArmStripSmallLBigR(N,p)
 
   # Calculate the advanced GFs
   GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
@@ -292,8 +292,8 @@ def KuboCenter(N,p,E,Imp_List):
   gM = gGen(E-1j*eta,HM)
   VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
   VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
-  VbLsR[:2*N*p,:2*N], VsRbL[:2*N,:2*N*p] = VArmStripBigSmall(N,p)
-  VsLbR[:2*N,:2*N*p], VbRsL[:2*N*p,:2*N] = VArmStripSmallBig(N,p)
+  VbLsR[:2*N*p,:2*N], VsRbL[:2*N,:2*N*p] = VArmStripBigLSmallR(N,p)
+  VsLbR[:2*N,:2*N*p], VbRsL[:2*N*p,:2*N] = VArmStripSmallLBigR(N,p)
 
   # Calculate the advanced GFs
   GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
@@ -322,8 +322,8 @@ def ConfigAvSubsTotal(N,p,nimp,E):
     # Scattering region and connection matrices 
     HM = HBigArmStripSubs(N,p,Imp_List)
     gM = gGen(E-1j*eta,HM)
-    VbLsR, VsRbL = VArmStripBigSmall(N,p)		# Notation VbLsR means a big strip on the left connects to a small strip on the right
-    VsLbR, VbRsL = VArmStripSmallBig(N,p)
+    VbLsR, VsRbL = VArmStripBigLSmallR(N,p)		# Notation VbLsR means a big strip on the left connects to a small strip on the right
+    VsLbR, VbRsL = VArmStripSmallLBigR(N,p)
 
     # Calculate the advanced GFs
     GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
@@ -355,8 +355,8 @@ def ConfigAvTopTotal(N,p,nimp,E):
     gM = gGen(E-1j*eta,HM)
     VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
     VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
-    VbLsR[:2*N*p,:2*N], VsRbL[:2*N,:2*N*p] = VArmStripBigSmall(N,p)
-    VsLbR[:2*N,:2*N*p], VbRsL[:2*N*p,:2*N] = VArmStripSmallBig(N,p)
+    VbLsR[:2*N*p,:2*N], VsRbL[:2*N,:2*N*p] = VArmStripBigLSmallR(N,p)
+    VsLbR[:2*N,:2*N*p], VbRsL[:2*N*p,:2*N] = VArmStripSmallLBigR(N,p)
 
     # Calculate the advanced GFs
     GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
@@ -394,8 +394,8 @@ def ConfigAvCenterTotal(N,p,nimp,E):
     gM = gGen(E-1j*eta,HM)
     VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
     VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
-    VbLsR[:2*N*p,:2*N], VsRbL[:2*N,:2*N*p] = VArmStripBigSmall(N,p)
-    VsLbR[:2*N,:2*N*p], VbRsL[:2*N*p,:2*N] = VArmStripSmallBig(N,p)
+    VbLsR[:2*N*p,:2*N], VsRbL[:2*N,:2*N*p] = VArmStripBigLSmallR(N,p)
+    VsLbR[:2*N,:2*N*p], VbRsL[:2*N*p,:2*N] = VArmStripSmallLBigR(N,p)
 
     # Calculate the advanced GFs
     GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
@@ -410,30 +410,73 @@ def ConfigAvCenterTotal(N,p,nimp,E):
   return  KT/choose(len(CenterPositions(N,p)),nimp)		# Choose should give the size of our list of combinations
 
 
+def CASubsRandom(N,p,nimp,niter,E):
+  """Calculates the configurational average for nimp substitutional impurities in an armchair nanoribbons (N,p).
+  Randomly chooses niter configurations and returns a list of the results of the Kubo Formula applied in these iterations.
+  Samples WITH replacement, which is not ideal"""
+  HC = HArmStrip(N)
+  VLR, VRL = VArmStrip(N)	
+  gC = gGen(E-1j*eta,HC)	# The advanced GF
+  gL = RubioSancho(gC,VRL,VLR)
+  gR = RubioSancho(gC,VLR,VRL)
 
+  Klist = []
+  for i in range(niter):	# For every possible combination of positions
+    Imp_List = random.sample(range(2*N*p),nimp)		# Get a random sample of 
+    # Scattering region and connection matrices 
+    HM = HBigArmStripSubs(N,p,Imp_List)
+    gM = gGen(E-1j*eta,HM)
+    VbLsR, VsRbL = VArmStripBigLSmallR(N,p)		# Notation VbLsR means a big strip on the left connects to a small strip on the right
+    VsLbR, VbRsL = VArmStripSmallLBigR(N,p)
+
+    # Calculate the advanced GFs
+    GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
+    GRRa, GRLa, GLRa, GLLa = gOffDiagonal(GR,gL,gL,gL,gL,VLR,VRL)
+    
+    # Calculates Gtilde, the imaginary part of the advanced GF
+    GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
+  
+    K = 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
+    Klist.append(K)
+  return Klist
   
   
 if __name__ == "__main__":
   N = 8
   p = 2
-  
-  E = 0.0
-  max_n = len(CenterPositions(N,p))
-  
-  nimpl = range(1,max_n+1)
-  
-  CAC = [ConfigAvCenterTotal(N,p,nimp,E) for nimp in nimpl]
-  CAS = [ConfigAvSubsTotal(N,p,nimp,E) for nimp in nimpl]
-  CAT = [ConfigAvTopTotal(N,p,nimp,E) for nimp in nimpl]
-  
-  conc = [nimp/(2.0*N*p) for nimp in nimpl]
-  
-  pl.plot(conc,CAC,label='Center')
-  pl.plot(conc,CAS,label='Subs')
-  pl.plot(conc,CAT,'o',label='Top')
-  pl.legend()
-  pl.savefig('plot.jpg')
+  nimp = 3
+  niter = 100000
+  E = 1.2
+
+  CA = CASubsRandom(N,p,nimp,niter,E)
+  print np.average(np.array(CA)), np.std(np.array(CA))
+  pl.hist(CASubsRandom(N,p,nimp,niter,E),20)
+  pl.savefig('test.jpg')
   pl.show()
+  
+  print ConfigAvSubsTotal(N,p,nimp,E)
+
+  
+  #N = 8
+  #p = 2
+  
+  #E = 0.0
+  #max_n = len(CenterPositions(N,p))
+  
+  #nimpl = range(1,max_n+1)
+  
+  #CAC = [ConfigAvCenterTotal(N,p,nimp,E) for nimp in nimpl]
+  #CAS = [ConfigAvSubsTotal(N,p,nimp,E) for nimp in nimpl]
+  #CAT = [ConfigAvTopTotal(N,p,nimp,E) for nimp in nimpl]
+  
+  #conc = [nimp/(2.0*N*p) for nimp in nimpl]
+  
+  #pl.plot(conc,CAC,label='Center')
+  #pl.plot(conc,CAS,label='Subs')
+  #pl.plot(conc,CAT,'o',label='Top')
+  #pl.legend()
+  #pl.savefig('plot.jpg')
+  #pl.show()
     
 
 
