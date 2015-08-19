@@ -204,29 +204,29 @@ def RubioSancho(g00,V01,V10,tol=rtol):
 
 
 def Leads(N,E):
-  """Gets the semi-infinte leads for an armchair nanoribbon of width N"""
+  """Gets the semi-infinte leads for an armchair nanoribbon of width N.
+  Also returns the connection matrices, because we always seem to need them."""
   HC = HArmStrip(N)
   VLR, VRL = VArmStrip(N)	
   gC = gGen(E-1j*eta,HC)	# The advanced GF
   gL = RubioSancho(gC,VRL,VLR)
   gR = RubioSancho(gC,VLR,VRL)
-  return gL,gR
+  return gL,gR,VLR,VRL
 
 
-def KuboPristine(N,E):
-  """Calculates the conductance of a pristine GNR using the Kubo Formula"""
-  
-  # Connection matrices
-  VLR, VRL = VArmStrip(N)
-  # Leads 
-  gL, gR = Leads(N,E)
-
+def Kubo(gL,gR,VLR,VRL):
+  """Given left and right GF leads (advanced) calculated the Kubo Formula"""
   GRRa, GRLa, GLRa, GLLa = gOffDiagonal(gR,gL,gL,gL,gL,VLR,VRL)
   
   # Calculates Gtilde, the imaginary part of the advanced GF
   GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
   
   return 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
+
+def KuboPristine(N,E):
+  """Calculates the conductance of a pristine GNR using the Kubo Formula"""
+  gL,gR,VLR,VRL = Leads(N,E)
+  return Kubo(gL,gR,VLR,VRL)
 
 
 def KuboSubs(N,p,E,Imp_List):
