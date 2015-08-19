@@ -203,6 +203,15 @@ def RubioSancho(g00,V01,V10,tol=rtol):
   return dot( inv( identity - dot( dot(g00,V01) , Transf)) ,  g00 ) 
 
 
+def Leads(N,E):
+  """Gets the semi-infinte leads for an armchair nanoribbon of width N"""
+  HC = HArmStrip(N)
+  VLR, VRL = VArmStrip(N)	
+  gC = gGen(E-1j*eta,HC)	# The advanced GF
+  gL = RubioSancho(gC,VRL,VLR)
+  gR = RubioSancho(gC,VLR,VRL)
+  return gL,gR
+
 
 def Kubo(N,E):
   """Calculates the conductance of a pristine GNR using the Kubo Formula"""
@@ -442,26 +451,10 @@ def CASubsRandom(N,p,nimp,niter,E):
   
   
 if __name__ == "__main__":  
-  #N = 8
-  #p = 3
-  
-  #E = 0.0
-  #max_n = len(CenterPositions(N,p))
-  
-  #nimpl = range(1,max_n+1)
-  
-  #CAC = [ConfigAvCenterTotal(N,p,nimp,E) for nimp in nimpl]
-  #CAS = [ConfigAvSubsTotal(N,p,nimp,E) for nimp in nimpl]
-  #CAT = [ConfigAvTopTotal(N,p,nimp,E) for nimp in nimpl]
-  
-  #conc = [nimp/(2.0*N*p) for nimp in nimpl]
-  
-  #pl.plot(conc,CAC,label='Center')
-  #pl.plot(conc,CAS,label='Subs')
-  #pl.plot(conc,CAT,'o',label='Top')
-  #pl.legend()
-  #pl.savefig('plot.jpg')
-  #pl.show()
+  N = 5
+  p = 1
+  E = 1.2
+  print Leads(N,E)
     
 
 
