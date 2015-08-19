@@ -213,14 +213,13 @@ def Leads(N,E):
   return gL,gR
 
 
-def Kubo(N,E):
+def KuboPristine(N,E):
   """Calculates the conductance of a pristine GNR using the Kubo Formula"""
+  
+  # Connection matrices
+  VLR, VRL = VArmStrip(N)
   # Leads 
-  HC = HArmStrip(N)
-  VLR, VRL = VArmStrip(N)	
-  gC = gGen(E-1j*eta,HC)	# The advanced GF
-  gL = RubioSancho(gC,VRL,VLR)
-  gR = RubioSancho(gC,VLR,VRL)
+  gL, gR = Leads(N,E)
 
   GRRa, GRLa, GLRa, GLLa = gOffDiagonal(gR,gL,gL,gL,gL,VLR,VRL)
   
@@ -454,7 +453,7 @@ if __name__ == "__main__":
   N = 5
   p = 1
   E = 1.2
-  print Leads(N,E)
+  print KuboPristine(N,E)
     
 
 
