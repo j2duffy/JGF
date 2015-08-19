@@ -445,20 +445,18 @@ if __name__ == "__main__":
   N = 8
   p = 2
   nimp = 3
-  niter = 100000
+  niter = 10000
   E = 1.2
 
   CA = CASubsRandom(N,p,nimp,niter,E)
   print np.average(np.array(CA)), np.std(np.array(CA))
-  pl.hist(CASubsRandom(N,p,nimp,niter,E),20)
-  pl.savefig('test.jpg')
-  pl.show()
-  
-  print ConfigAvSubsTotal(N,p,nimp,E)
+  #pl.hist(CASubsRandom(N,p,nimp,niter,E),20)
+  #pl.savefig('test.jpg')
+  #pl.show()
 
   
   #N = 8
-  #p = 2
+  #p = 3
   
   #E = 0.0
   #max_n = len(CenterPositions(N,p))
