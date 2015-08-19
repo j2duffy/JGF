@@ -223,6 +223,7 @@ def Kubo(gL,gR,VLR,VRL):
   
   return 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
 
+
 def KuboPristine(N,E):
   """Calculates the conductance of a pristine GNR using the Kubo Formula"""
   gL,gR,VLR,VRL = Leads(N,E)
@@ -233,13 +234,8 @@ def KuboSubs(N,p,E,Imp_List):
   """Calculates the conductance of a GNR with substitutional impurities using the Kubo Formula.
   This is calculated by connecting a small strip to a big strip to a small strip, which is utterly pointless for the pristine case, and here mainly as an exercise.
   Probably should at some point update this so that it just takes regular strips"""
-  
-  # Leads 
-  HC = HArmStrip(N)
-  VLR, VRL = VArmStrip(N)	
-  gC = gGen(E-1j*eta,HC)	# The advanced GF
-  gL = RubioSancho(gC,VRL,VLR)
-  gR = RubioSancho(gC,VLR,VRL)
+
+  gL,gR,VLR,VRL = Leads(N,E)
 
   # Scattering region and connection matrices 
   HM = HBigArmStripSubs(N,p,Imp_List)
@@ -249,23 +245,14 @@ def KuboSubs(N,p,E,Imp_List):
 
   # Calculate the advanced GFs
   GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
-  GRRa, GRLa, GLRa, GLLa = gOffDiagonal(GR,gL,gL,gL,gL,VLR,VRL)
   
-  # Calculates Gtilde, the imaginary part of the advanced GF
-  GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
-  
-  return 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
+  return Kubo(gL,GR,VLR,VRL)
 
 
 def KuboTop(N,p,E,Imp_List):
   """Calculates the conductance of a GNR with top-adsorbed impurities using the Kubo Formula."""
   nimp = len(Imp_List)
-  # Leads 
-  HC = HArmStrip(N)
-  VLR, VRL = VArmStrip(N)	
-  gC = gGen(E-1j*eta,HC)	# The advanced GF
-  gL = RubioSancho(gC,VRL,VLR)
-  gR = RubioSancho(gC,VLR,VRL)
+  gL,gR,VLR,VRL = Leads(N,E)
 
   # Scattering region and connection matrices 
   HM = HBigArmStripTop(N,p,Imp_List)
@@ -277,23 +264,15 @@ def KuboTop(N,p,E,Imp_List):
 
   # Calculate the advanced GFs
   GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
-  GRRa, GRLa, GLRa, GLLa = gOffDiagonal(GR,gL,gL,gL,gL,VLR,VRL)
   
-  # Calculates Gtilde, the imaginary part of the advanced GF
-  GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
-  
-  return 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
+  return Kubo(gL,GR,VLR,VRL)
 
 
 def KuboCenter(N,p,E,Imp_List):
   """Calculates the conductance of a GNR with top-adsorbed impurities using the Kubo Formula."""
   nimp = len(Imp_List)
   # Leads 
-  HC = HArmStrip(N)
-  VLR, VRL = VArmStrip(N)	
-  gC = gGen(E-1j*eta,HC)	# The advanced GF
-  gL = RubioSancho(gC,VRL,VLR)
-  gR = RubioSancho(gC,VLR,VRL)
+  gL,gR,VLR,VRL = Leads(N,E)
 
   # Scattering region and connection matrices 
   HM = HBigArmStripCenter(N,p,Imp_List)
@@ -305,12 +284,8 @@ def KuboCenter(N,p,E,Imp_List):
 
   # Calculate the advanced GFs
   GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
-  GRRa, GRLa, GLRa, GLLa = gOffDiagonal(GR,gL,gL,gL,gL,VLR,VRL)
   
-  # Calculates Gtilde, the imaginary part of the advanced GF
-  GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
-  
-  return 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
+  return Kubo(gL,GR,VLR,VRL)
 
 
 
@@ -318,12 +293,7 @@ def ConfigAvSubsTotal(N,p,nimp,E):
   """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p).
   Averages all cases.
   Way faster due to leaving the calculation of the leads out of the loop body"""
-  # Leads 
-  HC = HArmStrip(N)
-  VLR, VRL = VArmStrip(N)	
-  gC = gGen(E-1j*eta,HC)	# The advanced GF
-  gL = RubioSancho(gC,VRL,VLR)
-  gR = RubioSancho(gC,VLR,VRL)
+  gL,gR,VLR,VRL = Leads(N,E)
   
   KT = 0
   for Imp_List in combinations(range(2*N*p),nimp):	# For every possible combination of positions
@@ -335,13 +305,8 @@ def ConfigAvSubsTotal(N,p,nimp,E):
 
     # Calculate the advanced GFs
     GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
-    GRRa, GRLa, GLRa, GLLa = gOffDiagonal(GR,gL,gL,gL,gL,VLR,VRL)
-    
-    # Calculates Gtilde, the imaginary part of the advanced GF
-    GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
-  
-    K =  2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
-    KT += K
+
+    KT += Kubo(gL,GR,VLR,VRL)
   return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
 
 
@@ -349,12 +314,8 @@ def ConfigAvTopTotal(N,p,nimp,E):
   """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p).
   Averages all cases.
   Way faster due to leaving the calculation of the leads out of the loop body"""
-  # Leads 
-  HC = HArmStrip(N)
-  VLR, VRL = VArmStrip(N)	
-  gC = gGen(E-1j*eta,HC)	# The advanced GF
-  gL = RubioSancho(gC,VRL,VLR)
-  gR = RubioSancho(gC,VLR,VRL)
+
+  gL,gR,VLR,VRL = Leads(N,E)
   
   KT = 0
   for Imp_List in combinations(range(2*N*p),nimp):	# For every possible combination of positions
@@ -368,14 +329,8 @@ def ConfigAvTopTotal(N,p,nimp,E):
 
     # Calculate the advanced GFs
     GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
-    GRRa, GRLa, GLRa, GLLa = gOffDiagonal(GR,gL,gL,gL,gL,VLR,VRL)
-    
-    # Calculates Gtilde, the imaginary part of the advanced GF
-    GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
-  
-    K = 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
 
-    KT += K
+    KT += Kubo(gL,GR,VLR,VRL)
   return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
 
 
@@ -383,12 +338,7 @@ def ConfigAvCenterTotal(N,p,nimp,E):
   """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p).
   Averages all cases.
   Way faster due to leaving the calculation of the leads out of the loop body"""
-  # Leads 
-  HC = HArmStrip(N)
-  VLR, VRL = VArmStrip(N)	
-  gC = gGen(E-1j*eta,HC)	# The advanced GF
-  gL = RubioSancho(gC,VRL,VLR)
-  gR = RubioSancho(gC,VLR,VRL)
+  gL,gR,VLR,VRL = Leads(N,E)
   
   # Should have this escape clause in any case, should probably raise an exception
   if nimp > len(CenterPositions(N,p)): 
@@ -407,26 +357,17 @@ def ConfigAvCenterTotal(N,p,nimp,E):
 
     # Calculate the advanced GFs
     GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
-    GRRa, GRLa, GLRa, GLLa = gOffDiagonal(GR,gL,gL,gL,gL,VLR,VRL)
-    
-    # Calculates Gtilde, the imaginary part of the advanced GF
-    GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
-  
-    K = 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
 
-    KT += K
+    KT += Kubo(gL,GR,VLR,VRL)
   return  KT/choose(len(CenterPositions(N,p)),nimp)		# Choose should give the size of our list of combinations
+
 
 
 def CASubsRandom(N,p,nimp,niter,E):
   """Calculates the configurational average for nimp substitutional impurities in an armchair nanoribbons (N,p).
   Randomly chooses niter configurations and returns a list of the results of the Kubo Formula applied in these iterations.
   Samples WITH replacement, which is not ideal"""
-  HC = HArmStrip(N)
-  VLR, VRL = VArmStrip(N)	
-  gC = gGen(E-1j*eta,HC)	# The advanced GF
-  gL = RubioSancho(gC,VRL,VLR)
-  gR = RubioSancho(gC,VLR,VRL)
+  gL,gR,VLR,VRL = Leads(N,E)
 
   Klist = []
   for i in range(niter):	# For every possible combination of positions
@@ -439,21 +380,19 @@ def CASubsRandom(N,p,nimp,niter,E):
 
     # Calculate the advanced GFs
     GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
-    GRRa, GRLa, GLRa, GLLa = gOffDiagonal(GR,gL,gL,gL,gL,VLR,VRL)
-    
-    # Calculates Gtilde, the imaginary part of the advanced GF
-    GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
-  
-    K = 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
+
+    K = Kubo(gL,GR,VLR,VRL)
     Klist.append(K)
   return Klist
   
   
 if __name__ == "__main__":  
-  N = 5
+  N = 8
   p = 1
   E = 1.2
-  print KuboPristine(N,E)
+  nimp = 3
+  niter = 1000
+  print np.average(np.array(CASubsRandom(N,p,nimp,niter,E)))
     
 
 
