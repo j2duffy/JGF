@@ -382,7 +382,7 @@ def ConfigAvCenterTotal(N,p,nimp,E):
   gL = RubioSancho(gC,VRL,VLR)
   gR = RubioSancho(gC,VLR,VRL)
   
-  # Should have this escape clause in any case, should also probably raise and exception
+  # Should have this escape clause in any case, should probably raise an exception
   if nimp > len(CenterPositions(N,p)): 
     print "Too many impurities!"
     return
@@ -441,20 +441,7 @@ def CASubsRandom(N,p,nimp,niter,E):
   return Klist
   
   
-if __name__ == "__main__":
-  N = 8
-  p = 2
-  nimp = 3
-  niter = 10000
-  E = 1.2
-
-  CA = CASubsRandom(N,p,nimp,niter,E)
-  print np.average(np.array(CA)), np.std(np.array(CA))
-  #pl.hist(CASubsRandom(N,p,nimp,niter,E),20)
-  #pl.savefig('test.jpg')
-  #pl.show()
-
-  
+if __name__ == "__main__":  
   #N = 8
   #p = 3
   
