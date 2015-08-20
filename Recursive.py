@@ -65,19 +65,13 @@ def HBigArmStrip(N,p):
   for j in range(0,2*p*N-N+1,N):
     for i in range(j,j+N-1):
       H[i,i+1] = H[i+1,i] = t
-  if N%2 == 0:
-    # Other elements even
-    for j in range(0,2*p*N-2*N+1,2*N):
-      for i in range(j,j+N-1,2):
-	H[i,i+N] = H[i+N,i] = t
-    for j in range(N,2*p*N-3*N+1,2*N):
-      for i in range(j+1,j+N,2):
-	H[i,i+N] = H[i+N,i] = t
-  else:
-    # Other elements odd
-    for i in range(0,2*N*p-N,2):
+  # Other elements
+  for j in range(0,2*p*N-2*N+1,2*N):
+    for i in range(j,j+N,2):
       H[i,i+N] = H[i+N,i] = t
-      
+  for j in range(N,2*p*N-3*N+1,2*N):
+    for i in range(j+1,j+N,2):
+      H[i,i+N] = H[i+N,i] = t
   return H
 
 
@@ -389,32 +383,16 @@ def CASubsRandom(N,p,nimp,niter,E):
   
   
   
-def Htest(N,p=1,SubsList=[],TopList=[],CenterList=[]):
-  """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width."""
-  H = np.zeros((2*N*p,2*N*p))
-  # nn elements
-  for j in range(0,2*p*N-N+1,N):
-    for i in range(j,j+N-1):
-      H[i,i+1] = H[i+1,i] = t
-  # Other elements
-  for j in range(0,2*p*N-2*N+1,2*N):
-    for i in range(j,j+N,2):
-      H[i,i+N] = H[i+N,i] = t
-  for j in range(N,2*p*N-3*N+1,2*N):
-    for i in range(j+1,j+N,2):
-      H[i,i+N] = H[i+N,i] = t
-      
-  for i in SubsList:
-    H[i,i] = eps_imp
-      
-  return H
+
   
   
 if __name__ == "__main__":  
-  N = 9
-  p = 3
-  SubsList=[5,7,8,1,10]
-  print np.all(Htest(N,p=p,SubsList=SubsList) == HBigArmStripSubs(N,p,SubsList))
+  N = 3
+  p = 2
+  nimp = 3
+  E = 1.2
+  niter = 10000
+  print np.average(CASubsRandom(N,p,nimp,niter,E))
   
   #N = 8
   #p = 3
