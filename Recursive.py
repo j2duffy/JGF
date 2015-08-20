@@ -33,6 +33,11 @@ def random_combination(iterable, r):
   return tuple(pool[i] for i in indices)
 
 
+def cumav(l):
+  """Gets the cumulative average of a list (or a 1d array)"""
+  return np.cumsum(l)/np.arange(1,len(l)+1)
+
+
 def CenterPositions(N,p):
   """Returns all valid positions for center adsorbed impurities in a BigArmStrip(N,p)
   Positions are NOT in logical order"""
@@ -382,17 +387,18 @@ def CASubsRandom(N,p,nimp,niter,E):
   return Klist
   
   
-  
 
   
-  
 if __name__ == "__main__":  
-  N = 3
+  N = 8
   p = 2
   nimp = 3
   E = 1.2
   niter = 10000
-  print np.average(CASubsRandom(N,p,nimp,niter,E))
+
+  pl.plot(range(niter),cumav(CASubsRandom(N,p,nimp,niter,E)))
+  pl.savefig('1.jpg')
+  pl.show()
   
   #N = 8
   #p = 3
