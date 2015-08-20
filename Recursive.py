@@ -50,22 +50,12 @@ def CenterPositions(N,p):
 
 
 
-
-def HArmStrip(N):
-  """Creates the Hamiltonian of an armchair strip (building block of a nanoribbon)."""
-  H = np.zeros([2*N,2*N])
-  # Adjacent elements
-  for i in range(N-1) + range(N,2*N-1):
-    H[i,i+1] = H[i+1,i] = t
-  # Other elements
-  for i in range(0,N,2):
-    H[i,N+i] = H[N+i,i] = t
-  return H
-
-
-def HBigArmStrip(N,p):
+def HBigArmStrip(N,p=1,SubsList=[],TopList=[],CenterList=[]):
   """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width."""
-  H = np.zeros((2*N*p,2*N*p))
+  ntop = len(TopList)	# Number of top adsorbed impurities
+  ncenter = len(CenterList)	# Number of center adsorbed impurities
+  H = np.zeros((2*N*p+ntop+ncenter,2*N*p+ntop+ncenter))		# Make sure our hamiltonian has space for sites+center+top
+
   # nn elements
   for j in range(0,2*p*N-N+1,N):
     for i in range(j,j+N-1):
@@ -77,6 +67,19 @@ def HBigArmStrip(N,p):
   for j in range(N,2*p*N-3*N+1,2*N):
     for i in range(j+1,j+N,2):
       H[i,i+N] = H[i+N,i] = t
+      
+  # Any substitutional impurities
+  for i in SubsList:
+    H[i,i] = eps_imp
+  # Any top adsorbed impurities
+  for i,k in enumerate(TopList):
+    H[2*N*p+i,k] = H[k,2*N*p+i] = tau
+    H[2*N*p+i,2*N*p+i] = eps_imp
+  # Any center adsorbed impurities
+  for i,k in enumerate(CenterList):
+    H[2*N*p+ntop+i,2*N*p+ntop+i] = eps_imp
+    for j in range(3) + range(N,N+3):
+      H[2*N*p+ntop+i,k+j] = H[k+j,2*N*p+ntop+i] = tau
   return H
 
 
@@ -206,7 +209,7 @@ def RubioSancho(g00,V01,V10,tol=rtol):
 def Leads(N,E):
   """Gets the semi-infinte leads for an armchair nanoribbon of width N.
   Also returns the connection matrices, because we always seem to need them."""
-  HC = HArmStrip(N)
+  HC = HBigArmStrip(N,p=1)
   VLR, VRL = VArmStrip(N)	
   gC = gGen(E-1j*eta,HC)	# The advanced GF
   gL = RubioSancho(gC,VRL,VLR)
@@ -378,17 +381,16 @@ def CASubsRandom(N,p,nimp,niter,E):
   return Klist
   
 
+
+
   
 if __name__ == "__main__":  
-  N = 8
-  p = 2
-  nimp = 3
-  E = 1.2
-  niter = 10000
+  N = 5
+  p = 4
+  E = -1.7
+  CenterList = [0,2]
 
-  pl.plot(range(niter),cumav(CASubsRandom(N,p,nimp,niter,E)))
-  pl.savefig('1.jpg')
-  pl.show()
+  print np.all(HBigArmStrip(N,p=p,CenterList=CenterList) == HBigArmStripCenter(N,p,CenterList))
   
   #N = 8
   #p = 3
