@@ -215,6 +215,7 @@ def Leads(N,E):
   return gL,gR,VLR,VRL
 
 
+
 def Kubo(gL,gR,VLR,VRL):
   """Given left and right GF leads (advanced) calculated the Kubo Formula"""
   GRRa, GRLa, GLRa, GLLa = gOffDiagonal(gR,gL,gL,gL,gL,VLR,VRL)
@@ -395,17 +396,12 @@ def Htest(N,p=1,SubsList=[],TopList=[],CenterList=[]):
   for j in range(0,2*p*N-N+1,N):
     for i in range(j,j+N-1):
       H[i,i+1] = H[i+1,i] = t
-  if N%2 == 0:
-    # Other elements even
-    for j in range(0,2*p*N-2*N+1,2*N):
-      for i in range(j,j+N-1,2):
-	H[i,i+N] = H[i+N,i] = t
-    for j in range(N,2*p*N-3*N+1,2*N):
-      for i in range(j+1,j+N,2):
-	H[i,i+N] = H[i+N,i] = t
-  else:
-    # Other elements odd
-    for i in range(0,2*N*p-N,2):
+  # Other elements
+  for j in range(0,2*p*N-2*N+1,2*N):
+    for i in range(j,j+N,2):
+      H[i,i+N] = H[i+N,i] = t
+  for j in range(N,2*p*N-3*N+1,2*N):
+    for i in range(j+1,j+N,2):
       H[i,i+N] = H[i+N,i] = t
       
   for i in SubsList:
@@ -415,10 +411,10 @@ def Htest(N,p=1,SubsList=[],TopList=[],CenterList=[]):
   
   
 if __name__ == "__main__":  
-  N = 5
-  p = 2
-  SubsList=[1,2,3]
-  print Htest(N,p=p,SubsList=SubsList) #== HBigArmStripSubs(N)
+  N = 9
+  p = 3
+  SubsList=[5,7,8,1,10]
+  print np.all(Htest(N,p=p,SubsList=SubsList) == HBigArmStripSubs(N,p,SubsList))
     
 
 
