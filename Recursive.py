@@ -80,38 +80,38 @@ def HBigArmStrip(N,p):
   return H
 
 
-def HBigArmStripSubs(N,p,Imp_List):
+def HBigArmStripSubs(N,p,ImpList):
   """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
-  Adds an impurity with energy eps_imp at every site in Imp_List."""
+  Adds an impurity with energy eps_imp at every site in ImpList."""
   H = HBigArmStrip(N,p)
-  for i in Imp_List:
+  for i in ImpList:
     H[i,i] = eps_imp
   return H
 
 
-def HBigArmStripTop(N,p,Imp_List):
+def HBigArmStripTop(N,p,ImpList):
   """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
   Populates the strip with a number of top-adsorbed impurities given in Imp_list. 
   These are added in the higher elements of the mx."""
-  nimp = len(Imp_List)
+  nimp = len(ImpList)
   H = np.zeros((2*N*p+nimp,2*N*p+nimp))
   H[:2*N*p,:2*N*p] = HBigArmStrip(N,p)
   
-  for i,k in enumerate(Imp_List):
+  for i,k in enumerate(ImpList):
     H[2*N*p+i,k] = H[k,2*N*p+i] = tau
     H[2*N*p+i,2*N*p+i] = eps_imp
   return H
 
 
-def HBigArmStripCenter(N,p,Imp_List):
+def HBigArmStripCenter(N,p,ImpList):
   """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
   Populates the strip with a number of center-adsorbed impurities given in Imp_list. 
   These are added in the higher elements of the mx."""
-  nimp = len(Imp_List)
+  nimp = len(ImpList)
   H = np.zeros((2*N*p+nimp,2*N*p+nimp))
   H[:2*N*p,:2*N*p] = HBigArmStrip(N,p)
   
-  for i,k in enumerate(Imp_List):
+  for i,k in enumerate(ImpList):
     for j in range(3) + range(N,N+3):
       H[2*N*p+i,k+j] = H[k+j,2*N*p+i] = tau
     H[2*N*p+i,2*N*p+i] = eps_imp
@@ -158,7 +158,7 @@ def RecAdd(g00,g11,V01,V10):
 
 
 def gEdge(gC,V01,V10,tol=rtol):
-  """Obtain a semi-infinite lead by simple recusive addition (in the 1 direction)"""
+  """Obtain a semi-infinite lead by simple recursive addition (in the 1 direction)"""
   g11 = gC.copy()
   gtemp = np.zeros(2*N)
   while np.linalg.norm(g11 - gtemp)/np.linalg.norm(g11) > tol:
@@ -216,9 +216,10 @@ def Leads(N,E):
 
 
 def Kubo(gL,gR,VLR,VRL):
-  """Given left and right GF leads (advanced) calculated the Kubo Formula"""
-  GRRa, GRLa, GLRa, GLLa = gOffDiagonal(gR,gL,gL,gL,gL,VLR,VRL)
+  """Given left and right GF leads (advanced) calculates the Kubo Formula"""
   
+  # Gets the off diagonal elements
+  GRRa, GRLa, GLRa, GLLa = gOffDiagonal(gR,gL,gL,gL,gL,VLR,VRL)
   # Calculates Gtilde, the imaginary part of the advanced GF
   GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
   
@@ -231,15 +232,11 @@ def KuboPristine(N,E):
   return Kubo(gL,gR,VLR,VRL)
 
 
-def KuboSubs(N,p,E,Imp_List):
-  """Calculates the conductance of a GNR with substitutional impurities using the Kubo Formula.
-  This is calculated by connecting a small strip to a big strip to a small strip, which is utterly pointless for the pristine case, and here mainly as an exercise.
-  Probably should at some point update this so that it just takes regular strips"""
-
+def KuboSubs(N,p,E,ImpList):
+  """Calculates the conductance of a GNR with substitutional impurities (given in ImpList) using the Kubo Formula."""
   gL,gR,VLR,VRL = Leads(N,E)
-
   # Scattering region and connection matrices 
-  HM = HBigArmStripSubs(N,p,Imp_List)
+  HM = HBigArmStripSubs(N,p,ImpList)
   gM = gGen(E-1j*eta,HM)
   VbLsR, VsRbL = VArmStripBigLSmallR(N,p)		# Notation VbLsR means a big strip on the left connects to a small strip on the right
   VsLbR, VbRsL = VArmStripSmallLBigR(N,p)
@@ -250,13 +247,13 @@ def KuboSubs(N,p,E,Imp_List):
   return Kubo(gL,GR,VLR,VRL)
 
 
-def KuboTop(N,p,E,Imp_List):
-  """Calculates the conductance of a GNR with top-adsorbed impurities using the Kubo Formula."""
-  nimp = len(Imp_List)
+def KuboTop(N,p,E,ImpList):
+  """Calculates the conductance of a GNR with top-adsorbed impurities (given in ImpList) using the Kubo Formula."""
+  nimp = len(ImpList)
   gL,gR,VLR,VRL = Leads(N,E)
 
   # Scattering region and connection matrices 
-  HM = HBigArmStripTop(N,p,Imp_List)
+  HM = HBigArmStripTop(N,p,ImpList)
   gM = gGen(E-1j*eta,HM)
   VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
   VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
@@ -269,14 +266,15 @@ def KuboTop(N,p,E,Imp_List):
   return Kubo(gL,GR,VLR,VRL)
 
 
-def KuboCenter(N,p,E,Imp_List):
-  """Calculates the conductance of a GNR with top-adsorbed impurities using the Kubo Formula."""
-  nimp = len(Imp_List)
+def KuboCenter(N,p,E,ImpList):
+  """Calculates the conductance of a GNR with center adsorbed impurities using the Kubo Formula.
+  The impurities are given in ImpList and labelled with the bottom left connecting site."""
+  nimp = len(ImpList)
   # Leads 
   gL,gR,VLR,VRL = Leads(N,E)
 
   # Scattering region and connection matrices 
-  HM = HBigArmStripCenter(N,p,Imp_List)
+  HM = HBigArmStripCenter(N,p,ImpList)
   gM = gGen(E-1j*eta,HM)
   VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
   VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
@@ -291,15 +289,13 @@ def KuboCenter(N,p,E,Imp_List):
 
 
 def ConfigAvSubsTotal(N,p,nimp,E):
-  """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p).
-  Averages all cases.
-  Way faster due to leaving the calculation of the leads out of the loop body"""
+  """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p). Averages all cases."""
   gL,gR,VLR,VRL = Leads(N,E)
   
   KT = 0
-  for Imp_List in combinations(range(2*N*p),nimp):	# For every possible combination of positions
+  for ImpList in combinations(range(2*N*p),nimp):	# For every possible combination of positions
     # Scattering region and connection matrices 
-    HM = HBigArmStripSubs(N,p,Imp_List)
+    HM = HBigArmStripSubs(N,p,ImpList)
     gM = gGen(E-1j*eta,HM)
     VbLsR, VsRbL = VArmStripBigLSmallR(N,p)		# Notation VbLsR means a big strip on the left connects to a small strip on the right
     VsLbR, VbRsL = VArmStripSmallLBigR(N,p)
@@ -312,16 +308,13 @@ def ConfigAvSubsTotal(N,p,nimp,E):
 
 
 def ConfigAvTopTotal(N,p,nimp,E):
-  """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p).
-  Averages all cases.
-  Way faster due to leaving the calculation of the leads out of the loop body"""
-
+  """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p). Averages all cases."""
   gL,gR,VLR,VRL = Leads(N,E)
   
   KT = 0
-  for Imp_List in combinations(range(2*N*p),nimp):	# For every possible combination of positions
+  for ImpList in combinations(range(2*N*p),nimp):	# For every possible combination of positions
     # Scattering region and connection matrices 
-    HM = HBigArmStripTop(N,p,Imp_List)
+    HM = HBigArmStripTop(N,p,ImpList)
     gM = gGen(E-1j*eta,HM)
     VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
     VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
@@ -336,9 +329,7 @@ def ConfigAvTopTotal(N,p,nimp,E):
 
 
 def ConfigAvCenterTotal(N,p,nimp,E):
-  """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p).
-  Averages all cases.
-  Way faster due to leaving the calculation of the leads out of the loop body"""
+  """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p). Averages all cases."""
   gL,gR,VLR,VRL = Leads(N,E)
   
   # Should have this escape clause in any case, should probably raise an exception
@@ -347,9 +338,9 @@ def ConfigAvCenterTotal(N,p,nimp,E):
     return
   
   KT = 0
-  for Imp_List in combinations(CenterPositions(N,p),nimp):	# For every possible combination of positions
+  for ImpList in combinations(CenterPositions(N,p),nimp):	# For every possible combination of positions
     # Scattering region and connection matrices 
-    HM = HBigArmStripCenter(N,p,Imp_List)
+    HM = HBigArmStripCenter(N,p,ImpList)
     gM = gGen(E-1j*eta,HM)
     VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
     VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
@@ -372,9 +363,9 @@ def CASubsRandom(N,p,nimp,niter,E):
 
   Klist = []
   for i in range(niter):	# For every possible combination of positions
-    Imp_List = random.sample(range(2*N*p),nimp)		# Get a random sample of 
+    ImpList = random.sample(range(2*N*p),nimp)		# Get a random sample of 
     # Scattering region and connection matrices 
-    HM = HBigArmStripSubs(N,p,Imp_List)
+    HM = HBigArmStripSubs(N,p,ImpList)
     gM = gGen(E-1j*eta,HM)
     VbLsR, VsRbL = VArmStripBigLSmallR(N,p)		# Notation VbLsR means a big strip on the left connects to a small strip on the right
     VsLbR, VbRsL = VArmStripSmallLBigR(N,p)
@@ -385,7 +376,6 @@ def CASubsRandom(N,p,nimp,niter,E):
     K = Kubo(gL,GR,VLR,VRL)
     Klist.append(K)
   return Klist
-  
   
 
   
