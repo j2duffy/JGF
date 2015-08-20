@@ -415,6 +415,27 @@ if __name__ == "__main__":
   p = 3
   SubsList=[5,7,8,1,10]
   print np.all(Htest(N,p=p,SubsList=SubsList) == HBigArmStripSubs(N,p,SubsList))
+  
+  #N = 8
+  #p = 3
+  
+  #E = 0.0
+  #max_n = len(CenterPositions(N,p))
+  
+  #nimpl = range(1,max_n+1)
+  
+  #CAC = [ConfigAvCenterTotal(N,p,nimp,E) for nimp in nimpl]
+  #CAS = [ConfigAvSubsTotal(N,p,nimp,E) for nimp in nimpl]
+  #CAT = [ConfigAvTopTotal(N,p,nimp,E) for nimp in nimpl]
+  
+  #conc = [nimp/(2.0*N*p) for nimp in nimpl]
+  
+  #pl.plot(conc,CAC,label='Center')
+  #pl.plot(conc,CAS,label='Subs')
+  #pl.plot(conc,CAT,'o',label='Top')
+  #pl.legend()
+  #pl.savefig('plot.jpg')
+  #pl.show()
     
 
 
