@@ -50,8 +50,10 @@ def CenterPositions(N,p):
 
 
 
-def HBigArmStrip(N,p=1,SubsList=[],TopList=[],CenterList=[]):
-  """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width."""
+def HArmStrip(N,p=1,SubsList=[],TopList=[],CenterList=[]):
+  """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
+  Populates it with whatever impurities you desire.
+  Matrix order is Prisine->Top->Center."""
   ntop = len(TopList)	# Number of top adsorbed impurities
   ncenter = len(CenterList)	# Number of center adsorbed impurities
   H = np.zeros((2*N*p+ntop+ncenter,2*N*p+ntop+ncenter))		# Make sure our hamiltonian has space for sites+center+top
@@ -80,44 +82,6 @@ def HBigArmStrip(N,p=1,SubsList=[],TopList=[],CenterList=[]):
     H[2*N*p+ntop+i,2*N*p+ntop+i] = eps_imp
     for j in range(3) + range(N,N+3):
       H[2*N*p+ntop+i,k+j] = H[k+j,2*N*p+ntop+i] = tau
-  return H
-
-
-def HBigArmStripSubs(N,p,ImpList):
-  """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
-  Adds an impurity with energy eps_imp at every site in ImpList."""
-  H = HBigArmStrip(N,p)
-  for i in ImpList:
-    H[i,i] = eps_imp
-  return H
-
-
-def HBigArmStripTop(N,p,ImpList):
-  """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
-  Populates the strip with a number of top-adsorbed impurities given in Imp_list. 
-  These are added in the higher elements of the mx."""
-  nimp = len(ImpList)
-  H = np.zeros((2*N*p+nimp,2*N*p+nimp))
-  H[:2*N*p,:2*N*p] = HBigArmStrip(N,p)
-  
-  for i,k in enumerate(ImpList):
-    H[2*N*p+i,k] = H[k,2*N*p+i] = tau
-    H[2*N*p+i,2*N*p+i] = eps_imp
-  return H
-
-
-def HBigArmStripCenter(N,p,ImpList):
-  """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
-  Populates the strip with a number of center-adsorbed impurities given in Imp_list. 
-  These are added in the higher elements of the mx."""
-  nimp = len(ImpList)
-  H = np.zeros((2*N*p+nimp,2*N*p+nimp))
-  H[:2*N*p,:2*N*p] = HBigArmStrip(N,p)
-  
-  for i,k in enumerate(ImpList):
-    for j in range(3) + range(N,N+3):
-      H[2*N*p+i,k+j] = H[k+j,2*N*p+i] = tau
-    H[2*N*p+i,2*N*p+i] = eps_imp
   return H
 
 
@@ -209,7 +173,7 @@ def RubioSancho(g00,V01,V10,tol=rtol):
 def Leads(N,E):
   """Gets the semi-infinte leads for an armchair nanoribbon of width N.
   Also returns the connection matrices, because we always seem to need them."""
-  HC = HBigArmStrip(N,p=1)
+  HC = HArmStrip(N,p=1)
   VLR, VRL = VArmStrip(N)	
   gC = gGen(E-1j*eta,HC)	# The advanced GF
   gL = RubioSancho(gC,VRL,VLR)
@@ -239,7 +203,7 @@ def KuboSubs(N,p,E,ImpList):
   """Calculates the conductance of a GNR with substitutional impurities (given in ImpList) using the Kubo Formula."""
   gL,gR,VLR,VRL = Leads(N,E)
   # Scattering region and connection matrices 
-  HM = HBigArmStripSubs(N,p,ImpList)
+  HM = HArmStrip(N,p,SubsList=ImpList)
   gM = gGen(E-1j*eta,HM)
   VbLsR, VsRbL = VArmStripBigLSmallR(N,p)		# Notation VbLsR means a big strip on the left connects to a small strip on the right
   VsLbR, VbRsL = VArmStripSmallLBigR(N,p)
@@ -256,7 +220,7 @@ def KuboTop(N,p,E,ImpList):
   gL,gR,VLR,VRL = Leads(N,E)
 
   # Scattering region and connection matrices 
-  HM = HBigArmStripTop(N,p,ImpList)
+  HM =  HArmStrip(N,p,TopList=ImpList)
   gM = gGen(E-1j*eta,HM)
   VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
   VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
@@ -277,7 +241,7 @@ def KuboCenter(N,p,E,ImpList):
   gL,gR,VLR,VRL = Leads(N,E)
 
   # Scattering region and connection matrices 
-  HM = HBigArmStripCenter(N,p,ImpList)
+  HM = HArmStrip(N,p,CenterList=ImpList)
   gM = gGen(E-1j*eta,HM)
   VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
   VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
@@ -298,7 +262,7 @@ def ConfigAvSubsTotal(N,p,nimp,E):
   KT = 0
   for ImpList in combinations(range(2*N*p),nimp):	# For every possible combination of positions
     # Scattering region and connection matrices 
-    HM = HBigArmStripSubs(N,p,ImpList)
+    HM = HArmStrip(N,p,SubsList=ImpList)
     gM = gGen(E-1j*eta,HM)
     VbLsR, VsRbL = VArmStripBigLSmallR(N,p)		# Notation VbLsR means a big strip on the left connects to a small strip on the right
     VsLbR, VbRsL = VArmStripSmallLBigR(N,p)
@@ -317,7 +281,7 @@ def ConfigAvTopTotal(N,p,nimp,E):
   KT = 0
   for ImpList in combinations(range(2*N*p),nimp):	# For every possible combination of positions
     # Scattering region and connection matrices 
-    HM = HBigArmStripTop(N,p,ImpList)
+    HM =  HArmStrip(N,p,TopList=ImpList)
     gM = gGen(E-1j*eta,HM)
     VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
     VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
@@ -343,7 +307,7 @@ def ConfigAvCenterTotal(N,p,nimp,E):
   KT = 0
   for ImpList in combinations(CenterPositions(N,p),nimp):	# For every possible combination of positions
     # Scattering region and connection matrices 
-    HM = HBigArmStripCenter(N,p,ImpList)
+    HM = HArmStrip(N,p,CenterList=ImpList)
     gM = gGen(E-1j*eta,HM)
     VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
     VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
@@ -368,7 +332,7 @@ def CASubsRandom(N,p,nimp,niter,E):
   for i in range(niter):	# For every possible combination of positions
     ImpList = random.sample(range(2*N*p),nimp)		# Get a random sample of 
     # Scattering region and connection matrices 
-    HM = HBigArmStripSubs(N,p,ImpList)
+    HM = HArmStrip(N,p,SubsList=ImpList)
     gM = gGen(E-1j*eta,HM)
     VbLsR, VsRbL = VArmStripBigLSmallR(N,p)		# Notation VbLsR means a big strip on the left connects to a small strip on the right
     VsLbR, VbRsL = VArmStripSmallLBigR(N,p)
@@ -388,9 +352,8 @@ if __name__ == "__main__":
   N = 5
   p = 4
   E = -1.7
-  CenterList = [0,2]
 
-  print np.all(HBigArmStrip(N,p=p,CenterList=CenterList) == HBigArmStripCenter(N,p,CenterList))
+  print KuboSubs(N,p,E,[1,2,3])
   
   #N = 8
   #p = 3
