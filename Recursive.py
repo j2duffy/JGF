@@ -346,14 +346,21 @@ def CASubsRandom(N,p,nimp,niter,E):
   
 
 
-
-  
 if __name__ == "__main__":  
-  N = 5
-  p = 4
-  E = -1.7
-
-  print KuboSubs(N,p,E,[1,2,3])
+  N = 8
+  p = 1
+  nimp = 2
+  eps_imp = 1
+  tau = -0.1
+  
+  Elist = np.linspace(-3.0,3.0,201)
+  CASlist = [ConfigAvSubsTotal(N,p,nimp,E) for E in Elist]
+  CATlist = [ConfigAvTopTotal(N,p,nimp,E) for E in Elist]
+  CAClist = [ConfigAvCenterTotal(N,p,nimp,E) for E in Elist]
+  pl.plot(Elist,CASlist)
+  pl.plot(Elist,CATlist)
+  pl.plot(Elist,CAClist)
+  pl.show()
   
   #N = 8
   #p = 3
