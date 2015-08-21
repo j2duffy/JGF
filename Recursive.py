@@ -381,12 +381,13 @@ def CASubsRandom(N,p,nimp,niter,E):
   
 if __name__ == "__main__":  
   N = 8
-  p = 2
+  p = 3
   nimp = 3
-  E = 1.2
-  niter = 10000
+  E = -0.7
+  niter = 1000
 
   pl.plot(range(niter),cumav(CASubsRandom(N,p,nimp,niter,E)))
+  pl.plot(range(niter),ConfigAvSubsTotal(N,p,nimp,E)*np.ones(niter))
   pl.savefig('1.jpg')
   pl.show()
   
