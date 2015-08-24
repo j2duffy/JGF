@@ -63,6 +63,14 @@ def HArmStrip(N):
   return H
 
 
+def HArmStripSubs(N,ImpList):
+  """Creates the Hamiltonian of an armchair strip with substitutional impurities."""
+  H = HArmStrip(N)
+  for i in ImpList:
+    H[i,i] = eps_imp
+  return H
+
+
 def HBigArmStrip(N,p):
   """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width."""
   H = np.zeros((2*N*p,2*N*p))
@@ -381,36 +389,26 @@ def CASubsRandom(N,p,nimp,niter,E):
   
 if __name__ == "__main__":  
   N = 8
-  p = 3
-  nimp = 3
-  E = -0.7
-  niter = 1000
+  ImpList = [1,4,7]
+  E = 1.2
+  p = 1
 
-  pl.plot(range(niter),cumav(CASubsRandom(N,p,nimp,niter,E)))
-  pl.plot(range(niter),ConfigAvSubsTotal(N,p,nimp,E)*np.ones(niter))
-  pl.savefig('1.jpg')
-  pl.show()
+  gL,gR,VLR,VRL = Leads(N,E)
+  # Scattering region and connection matrices 
+  HM = HBigArmStripSubs(N,p,ImpList)
+  gM = gGen(E-1j*eta,HM)
+  VbLsR, VsRbL = VArmStripBigLSmallR(N,p)		# Notation VbLsR means a big strip on the left connects to a small strip on the right
+  VsLbR, VbRsL = VArmStripSmallLBigR(N,p)
+
+  # Calculate the advanced GFs
+  GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
   
-  #N = 8
-  #p = 3
+  # Gets the off diagonal elements
+  GRRa, GRLa, GLRa, GLLa = gOffDiagonal(GR,gL,gL,gL,gL,VLR,VRL)
+  # Calculates Gtilde, the imaginary part of the advanced GF
+  GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
   
-  #E = 0.0
-  #max_n = len(CenterPositions(N,p))
-  
-  #nimpl = range(1,max_n+1)
-  
-  #CAC = [ConfigAvCenterTotal(N,p,nimp,E) for nimp in nimpl]
-  #CAS = [ConfigAvSubsTotal(N,p,nimp,E) for nimp in nimpl]
-  #CAT = [ConfigAvTopTotal(N,p,nimp,E) for nimp in nimpl]
-  
-  #conc = [nimp/(2.0*N*p) for nimp in nimpl]
-  
-  #pl.plot(conc,CAC,label='Center')
-  #pl.plot(conc,CAS,label='Subs')
-  #pl.plot(conc,CAT,'o',label='Top')
-  #pl.legend()
-  #pl.savefig('plot.jpg')
-  #pl.show()
+  print 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
     
 
 
