@@ -386,29 +386,27 @@ def CASubsRandom(N,p,nimp,niter,E):
   return Klist
   
 
-  
-if __name__ == "__main__":  
-  N = 8
-  ImpList = [1,4,7]
-  E = 1.2
-  p = 1
-
+def KuboSubsTest(N,E,BigImpList):
   gL,gR,VLR,VRL = Leads(N,E)
   # Scattering region and connection matrices 
-  HM = HBigArmStripSubs(N,p,ImpList)
-  gM = gGen(E-1j*eta,HM)
-  VbLsR, VsRbL = VArmStripBigLSmallR(N,p)		# Notation VbLsR means a big strip on the left connects to a small strip on the right
-  VsLbR, VbRsL = VArmStripSmallLBigR(N,p)
+  for ImpList in BigImpList:
+    H = HArmStripSubs(N,ImpList)
+    g = gGen(E-1j*eta,H)
+    GL = RecAdd(gL,g,VLR,VRL)
+  return Kubo(GL,gR,VLR,VRL)
 
-  # Calculate the advanced GFs
-  GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
   
-  # Gets the off diagonal elements
-  GRRa, GRLa, GLRa, GLLa = gOffDiagonal(GR,gL,gL,gL,gL,VLR,VRL)
-  # Calculates Gtilde, the imaginary part of the advanced GF
-  GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
-  
-  print 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
+
+if __name__ == "__main__":  
+  N = 5
+  ImpList = [2,7]
+  BigImpList = [ImpList]
+
+  Elist = np.linspace(-3.0,3.0,201)
+  Klist = [KuboSubsTest(N,E,BigImpList) for E in Elist]
+  pl.plot(Elist,Klist)
+  pl.show()
+
     
 
 
