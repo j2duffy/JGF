@@ -310,7 +310,6 @@ def ConfigAvSubsTotal(N,p,nimp,E):
 
     # Calculate the advanced GFs
     GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
-
     KT += Kubo(gL,GR,VLR,VRL)
   return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
 
@@ -409,14 +408,35 @@ def ImpConvert(p,ImpListMess):
   return ImpListOrdered
 
 
-if __name__ == "__main__":  
-  N = 5
-  p = 3
-  nimp = 2
+def CAtest(N,p,nimp,E):
+  KT = 0
   imp_pos = AllPositions(N,p)
-  print ImpConvert(p,imp_pos)
-  #for i in combinations(all_pos,nimp):
-    #print i
+  gL,gR,VLR,VRL = Leads(N,E)
+  for i in combinations(imp_pos,nimp):	# For every possible combination of positions
+    BigImpList = ImpConvert(p,i)
+    GL = gL
+    for ImpList in BigImpList:
+      H = HArmStripSubs(N,ImpList)
+      g = gGen(E-1j*eta,H)
+      GL = RecAdd(GL,g,VLR,VRL)
+    KT += Kubo(GL,gR,VLR,VRL)
+  return KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
+
+
+if __name__ == "__main__":  
+  N = 8
+  p = 2
+  nimp = 3
+  E = 2.1
+  #imp_pos = AllPositions(N,p)
+  #for i in combinations(imp_pos,nimp):
+    #print i, ImpConvert(p,i)
+    
+  
+  
+
+  print CAtest(N,p,nimp,E)
+  print ConfigAvSubsTotal(N,p,nimp,E)
   
   #N = 5
   #p = 2
