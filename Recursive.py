@@ -392,21 +392,44 @@ def KuboSubsTest(N,E,BigImpList):
   for ImpList in BigImpList:
     H = HArmStripSubs(N,ImpList)
     g = gGen(E-1j*eta,H)
-    GL = RecAdd(gL,g,VLR,VRL)
-  return Kubo(GL,gR,VLR,VRL)
+    gL = RecAdd(gL,g,VLR,VRL)
+  return Kubo(gL,gR,VLR,VRL)
 
-  
+
+def AllPositions(N,p):
+  """Gives all of the possible positions in a nanoribbon of width N length p."""
+  return [[i,j] for i in range(p) for j in range(2*N)]
+
+
+def ImpConvert(p,ImpListMess):
+  """Converts a list of impurities from (lead,pos) notation to a [[imps in lead 1],[imps in lead 2]...] notation."""
+  ImpListOrdered = [[] for i in range(p)]
+  for i,j in ImpListMess:
+    ImpListOrdered[i].append(j)
+  return ImpListOrdered
+
 
 if __name__ == "__main__":  
   N = 5
-  ImpList = [2,7]
-  BigImpList = [ImpList]
+  p = 3
+  nimp = 2
+  imp_pos = AllPositions(N,p)
+  print ImpConvert(p,imp_pos)
+  #for i in combinations(all_pos,nimp):
+    #print i
+  
+  #N = 5
+  #p = 2
+  #ImpList = [1,2,7,12,19]
+  #BigImpList = [[1,2,7],[2,9]]
+  #E = -1.2
 
-  Elist = np.linspace(-3.0,3.0,201)
-  Klist = [KuboSubsTest(N,E,BigImpList) for E in Elist]
-  pl.plot(Elist,Klist)
-  pl.show()
-
+  #Elist = np.linspace(-3.0,3.0,201)
+  #K1list = [KuboSubs(N,p,E,ImpList) for E in Elist]
+  #K2list = [KuboSubsTest(N,E,BigImpList) for E in Elist]
+  #pl.plot(Elist,K1list)
+  #pl.plot(Elist,K2list)
+  #pl.show()
     
 
 
