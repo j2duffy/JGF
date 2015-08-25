@@ -40,13 +40,28 @@ def cumav(l):
 
 def CenterPositions(N,p):
   """Returns all valid positions for center adsorbed impurities in a BigArmStrip(N,p)
-  Positions are NOT in logical order"""
+  Positions are NOT in logical order.
+  This is not valid in your current code."""
   l = []
   # Short strip first 
   ss = [i for j in range(0,2*N*p-2*N+1,2*N) for i in range(j,j+N-2,2) ]
   # Long strip
   ls = [i for j in range(N,2*N*p-3*N+1,2*N) for i in range(j+1,j+N-2,2) ]
   return ss + ls
+
+
+def AllPositions(N,p):
+  """Gives all of the possible positions in a nanoribbon of width N length p."""
+  return [[i,j] for i in range(p) for j in range(2*N)]
+
+
+def ImpConvert(p,ImpListMess):
+  """Converts a list of impurities from (lead,pos) notation to a [[imps in lead 1],[imps in lead 2]...] notation."""
+  ImpListOrdered = [[] for i in range(p)]
+  for i,j in ImpListMess:
+    ImpListOrdered[i].append(j)
+  return ImpListOrdered
+
 
 
 
@@ -240,19 +255,16 @@ def KuboPristine(N,E):
   return Kubo(gL,gR,VLR,VRL)
 
 
-def KuboSubs(N,p,E,ImpList):
-  """Calculates the conductance of a GNR with substitutional impurities (given in ImpList) using the Kubo Formula."""
+def KuboSubs(N,E,BigImpList):
+  """Calculates the conductance of a GNR with substitutional impurities using the Kubo Formula."""
+  # Get Leads
   gL,gR,VLR,VRL = Leads(N,E)
-  # Scattering region and connection matrices 
-  HM = HBigArmStripSubs(N,p,ImpList)
-  gM = gGen(E-1j*eta,HM)
-  VbLsR, VsRbL = VArmStripBigLSmallR(N,p)		# Notation VbLsR means a big strip on the left connects to a small strip on the right
-  VsLbR, VbRsL = VArmStripSmallLBigR(N,p)
-
-  # Calculate the advanced GFs
-  GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
-  
-  return Kubo(gL,GR,VLR,VRL)
+  # Build scattering region strip by strip
+  for ImpList in BigImpList:
+    H = HArmStripSubs(N,ImpList)
+    g = gGen(E-1j*eta,H)
+    gL = RecAdd(gL,g,VLR,VRL)
+  return Kubo(gL,gR,VLR,VRL)
 
 
 def KuboTop(N,p,E,ImpList):
@@ -298,20 +310,18 @@ def KuboCenter(N,p,E,ImpList):
 
 def ConfigAvSubsTotal(N,p,nimp,E):
   """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p). Averages all cases."""
+  KT = 0	# Total of all conductance measurements
+  imp_pos = AllPositions(N,p)	# Generates all possible positions in [cell,site] notation
   gL,gR,VLR,VRL = Leads(N,E)
-  
-  KT = 0
-  for ImpList in combinations(range(2*N*p),nimp):	# For every possible combination of positions
-    # Scattering region and connection matrices 
-    HM = HBigArmStripSubs(N,p,ImpList)
-    gM = gGen(E-1j*eta,HM)
-    VbLsR, VsRbL = VArmStripBigLSmallR(N,p)		# Notation VbLsR means a big strip on the left connects to a small strip on the right
-    VsLbR, VbRsL = VArmStripSmallLBigR(N,p)
-
-    # Calculate the advanced GFs
-    GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
-    KT += Kubo(gL,GR,VLR,VRL)
-  return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
+  for i in combinations(imp_pos,nimp):	# Gets every possible combination of positions
+    BigImpList = ImpConvert(p,i)	# Conver the list to [[sites][sites]...] notation
+    GL = gL				# Otherwise this gets overwritten every time
+    for ImpList in BigImpList:
+      H = HArmStripSubs(N,ImpList)
+      g = gGen(E-1j*eta,H)
+      GL = RecAdd(GL,g,VLR,VRL)
+    KT += Kubo(GL,gR,VLR,VRL)
+  return KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
 
 
 def ConfigAvTopTotal(N,p,nimp,E):
@@ -385,72 +395,22 @@ def CASubsRandom(N,p,nimp,niter,E):
   return Klist
   
 
-def KuboSubsTest(N,E,BigImpList):
-  gL,gR,VLR,VRL = Leads(N,E)
-  # Scattering region and connection matrices 
-  for ImpList in BigImpList:
-    H = HArmStripSubs(N,ImpList)
-    g = gGen(E-1j*eta,H)
-    gL = RecAdd(gL,g,VLR,VRL)
-  return Kubo(gL,gR,VLR,VRL)
 
 
-def AllPositions(N,p):
-  """Gives all of the possible positions in a nanoribbon of width N length p."""
-  return [[i,j] for i in range(p) for j in range(2*N)]
 
 
-def ImpConvert(p,ImpListMess):
-  """Converts a list of impurities from (lead,pos) notation to a [[imps in lead 1],[imps in lead 2]...] notation."""
-  ImpListOrdered = [[] for i in range(p)]
-  for i,j in ImpListMess:
-    ImpListOrdered[i].append(j)
-  return ImpListOrdered
 
-
-def CAtest(N,p,nimp,E):
-  KT = 0
-  imp_pos = AllPositions(N,p)
-  gL,gR,VLR,VRL = Leads(N,E)
-  for i in combinations(imp_pos,nimp):	# For every possible combination of positions
-    BigImpList = ImpConvert(p,i)
-    GL = gL
-    for ImpList in BigImpList:
-      H = HArmStripSubs(N,ImpList)
-      g = gGen(E-1j*eta,H)
-      GL = RecAdd(GL,g,VLR,VRL)
-    KT += Kubo(GL,gR,VLR,VRL)
-  return KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
 
 
 if __name__ == "__main__":  
-  N = 8
-  p = 2
-  nimp = 3
-  E = 2.1
-  #imp_pos = AllPositions(N,p)
-  #for i in combinations(imp_pos,nimp):
-    #print i, ImpConvert(p,i)
-    
+  N = 5
+  p = 1
+  BigImpList = [[2,7]]
   
-  
-
-  print CAtest(N,p,nimp,E)
-  print ConfigAvSubsTotal(N,p,nimp,E)
-  
-  #N = 5
-  #p = 2
-  #ImpList = [1,2,7,12,19]
-  #BigImpList = [[1,2,7],[2,9]]
-  #E = -1.2
-
-  #Elist = np.linspace(-3.0,3.0,201)
-  #K1list = [KuboSubs(N,p,E,ImpList) for E in Elist]
-  #K2list = [KuboSubsTest(N,E,BigImpList) for E in Elist]
-  #pl.plot(Elist,K1list)
-  #pl.plot(Elist,K2list)
-  #pl.show()
-    
+  Elist = np.linspace(-3.0,3.0,201)
+  CAlist = [KuboSubs(N,E,BigImpList) for E in Elist]
+  pl.plot(Elist,CAlist)
+  pl.show()
 
 
 
