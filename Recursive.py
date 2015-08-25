@@ -269,7 +269,6 @@ def Kubo(gL,gR,VLR,VRL):
   GRRa, GRLa, GLRa, GLLa = gOffDiagonal(gR,gL,gL,gL,gL,VLR,VRL)
   # Calculates Gtilde, the imaginary part of the advanced GF
   GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
-  
   return 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
 
 
@@ -423,21 +422,28 @@ def CASubsRandom(N,p,nimp,niter,E):
 
 if __name__ == "__main__":  
   N = 11
-  p = 1
-  ImpList = [2,4,6]
-  
-  print np.all(HArmStripCenter(N,ImpList) == HBigArmStripCenter(N,1,ImpList))
-  
-  #"""Calculates the conductance of a GNR with substitutional impurities using the Kubo Formula."""
-  ## Get Leads
-  #gL,gR,VLR,VRL = Leads(N,E)
-  ## Build scattering region strip by strip
-  #for ImpList in BigImpList:
-    #H = HArmStripSubs(N,ImpList)
-    #g = gGen(E-1j*eta,H)
-    #gL = RecAdd(gL,g,VLR,VRL)
-  #return Kubo(gL,gR,VLR,VRL)
+  BigImpList = [[1,2,3],[1,2],[],[1]]
+  E = 1.2
+    
+  """Calculates the conductance of a GNR with substitutional impurities using the Kubo Formula."""
+  # Get Leads
+  gL,gR,VLR,VRL = Leads(N,E)
+  # Build scattering region strip by strip
+  for ImpList in BigImpList:
+    H = HArmStripTop(N,ImpList)
+    g = gGen(E-1j*eta,H)
+    VTopLR = np.zeros((gL.shape[0],g.shape[0]))
+    VTopRL = np.zeros((g.shape[0],gL.shape[0]))
+    VTopLR[:2*N,:2*N] = VLR
+    VTopRL[:2*N,:2*N] = VRL
+    gL = RecAdd(gL,g,VTopLR,VTopRL)
+  VTopLR = np.zeros((gL.shape[0],gR.shape[0]))
+  VTopRL = np.zeros((gR.shape[0],gL.shape[0]))
+  VTopLR[:2*N,:2*N] = VLR
+  VTopRL[:2*N,:2*N] = VRL
+  print Kubo(gL,gR,VTopLR,VTopRL)
 
+  #print KuboPristine(N,E)
 
   #"""Calculates the conductance of a GNR with top-adsorbed impurities (given in ImpList) using the Kubo Formula."""
   #nimp = len(ImpList)
