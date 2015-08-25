@@ -86,6 +86,30 @@ def HArmStripSubs(N,ImpList):
   return H
 
 
+def HArmStripTop(N,ImpList):
+  """Creates the Hamiltonian of an armchair strip with top adsorbed impurities."""
+  nimp = len(ImpList)
+  H = np.zeros((2*N+nimp,2*N+nimp))
+  H[:2*N,:2*N] = HArmStrip(N)
+  for i,k in enumerate(ImpList):
+    H[2*N+i,k] = H[k,2*N+i] = tau
+    H[2*N+i,2*N+i] = eps_imp
+  return H
+
+
+def HArmStripCenter(N,ImpList):
+  """Creates the Hamiltonian for an armchair strip populated with center adsorbed impurities"""
+  nimp = len(ImpList)
+  H = np.zeros((2*N+nimp,2*N+nimp))
+  H[:2*N,:2*N] = HArmStrip(N)
+  
+  for i,k in enumerate(ImpList):
+    for j in range(3) + range(N,N+3):
+      H[2*N+i,k+j] = H[k+j,2*N+i] = tau
+    H[2*N+i,2*N+i] = eps_imp
+  return H
+
+
 def HBigArmStrip(N,p):
   """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width."""
   H = np.zeros((2*N*p,2*N*p))
@@ -397,20 +421,40 @@ def CASubsRandom(N,p,nimp,niter,E):
 
 
 
-
-
-
-
-
 if __name__ == "__main__":  
-  N = 5
+  N = 11
   p = 1
-  BigImpList = [[2,7]]
+  ImpList = [2,4,6]
   
-  Elist = np.linspace(-3.0,3.0,201)
-  CAlist = [KuboSubs(N,E,BigImpList) for E in Elist]
-  pl.plot(Elist,CAlist)
-  pl.show()
+  print np.all(HArmStripCenter(N,ImpList) == HBigArmStripCenter(N,1,ImpList))
+  
+  #"""Calculates the conductance of a GNR with substitutional impurities using the Kubo Formula."""
+  ## Get Leads
+  #gL,gR,VLR,VRL = Leads(N,E)
+  ## Build scattering region strip by strip
+  #for ImpList in BigImpList:
+    #H = HArmStripSubs(N,ImpList)
+    #g = gGen(E-1j*eta,H)
+    #gL = RecAdd(gL,g,VLR,VRL)
+  #return Kubo(gL,gR,VLR,VRL)
+
+
+  #"""Calculates the conductance of a GNR with top-adsorbed impurities (given in ImpList) using the Kubo Formula."""
+  #nimp = len(ImpList)
+  #gL,gR,VLR,VRL = Leads(N,E)
+
+  ## Scattering region and connection matrices 
+  #HM = HBigArmStripTop(N,p,ImpList)
+  #gM = gGen(E-1j*eta,HM)
+  #VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
+  #VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
+  #VbLsR[:2*N*p,:2*N], VsRbL[:2*N,:2*N*p] = VArmStripBigLSmallR(N,p)
+  #VsLbR[:2*N,:2*N*p], VbRsL[:2*N*p,:2*N] = VArmStripSmallLBigR(N,p)
+
+  ## Calculate the advanced GFs
+  #GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
+  
+  #return Kubo(gL,GR,VLR,VRL)
 
 
 
