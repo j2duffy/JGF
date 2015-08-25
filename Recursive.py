@@ -344,41 +344,33 @@ def CASubsRandom(N,p,nimp,niter,E):
     Klist.append(K)
   return Klist
   
+  
+def ConcentrationPlot(N,p,E):
+  max_n = len(CenterPositions(N,p))
+  
+  nimpl = range(1,max_n+1)
+  
+  CAC = [ConfigAvCenterTotal(N,p,nimp,E) for nimp in nimpl]
+  CAS = [ConfigAvSubsTotal(N,p,nimp,E) for nimp in nimpl]
+  CAT = [ConfigAvTopTotal(N,p,nimp,E) for nimp in nimpl]
+  
+  conc = [nimp/(2.0*N*p) for nimp in nimpl]
+  
+  pl.plot(conc,CAC,label='Center')
+  pl.plot(conc,CAS,label='Subs')
+  pl.plot(conc,CAT,'o',label='Top')
+  pl.legend()
+  pl.savefig('plot.jpg')
+  pl.show()
 
 
 if __name__ == "__main__":  
-  N = 8
-  p = 3
-  nimp = 3
-  E = -0.7
-  niter = 1000
+  N = 5
+  p = 2
+  E = 0.0
+  
+  ConcentrationPlot(N,p,E)
 
-  pl.plot(range(niter),cumav(CASubsRandom(N,p,nimp,niter,E)))
-  pl.plot(range(niter),ConfigAvSubsTotal(N,p,nimp,E)*np.ones(niter))
-  pl.savefig('1.jpg')
-
-  
-  #N = 8
-  #p = 3
-  
-  #E = 0.0
-  #max_n = len(CenterPositions(N,p))
-  
-  #nimpl = range(1,max_n+1)
-  
-  #CAC = [ConfigAvCenterTotal(N,p,nimp,E) for nimp in nimpl]
-  #CAS = [ConfigAvSubsTotal(N,p,nimp,E) for nimp in nimpl]
-  #CAT = [ConfigAvTopTotal(N,p,nimp,E) for nimp in nimpl]
-  
-  #conc = [nimp/(2.0*N*p) for nimp in nimpl]
-  
-  #pl.plot(conc,CAC,label='Center')
-  #pl.plot(conc,CAS,label='Subs')
-  #pl.plot(conc,CAT,'o',label='Top')
-  #pl.legend()
-  #pl.savefig('plot.jpg')
-  #pl.show()
-    
 
 
 
