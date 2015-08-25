@@ -365,7 +365,7 @@ def ConcentrationPlot(N,p,E):
 
 
 if __name__ == "__main__":  
-  N = 5
+  N = 8
   p = 2
   E = 0.0
   
