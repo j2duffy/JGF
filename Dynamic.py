@@ -138,7 +138,7 @@ def ReducedGF(E,L):
   return gBulk_kZ(m,n,s,E)
 
 
-def Center_gen_multi(m,n,E):	# This is way too fast. Change to only one core and make sure it's slow.
+def Center_gen_multi(m,n,E):
   D = [m,n,0]
   hex1 = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])
   hex2 = hex1 + D
@@ -162,24 +162,6 @@ def Center_gen_multi(m,n,E):	# This is way too fast. Change to only one core and
   
   return g_mx
 
-    
-def Rot(L):
-  m = L[0]
-  n = L[1]
-  s = L[2]
-  
-  return [m+n+s,-m,-s]
-
-    
-def irr_sector(L):	# Again, best name?
-  while (L[0] < 0 or L[1] < 0):
-    L = Rot(L)		# Rotation
-    
-  if L[0]<L[1]:		# Reflection
-    L[0],L[1]=L[1],L[0]
-    
-  return L
-  
   
 def Center_gen_dic(m,n,E):
   D = [m,n,0]
@@ -191,7 +173,7 @@ def Center_gen_dic(m,n,E):
   Vec_mx = np.zeros([12,12,3],dtype=int)
   Vec_mx = atom_pos-atom_pos_col
   
-  Vec_mx = np.array([ map(irr_sector,item) for item in Vec_mx ])
+  Vec_mx = np.array([ map(SymSector,item) for item in Vec_mx ])
   
   g_dic = {}
   g_mx = np.zeros([14,14],dtype=complex)
@@ -219,7 +201,7 @@ def Center_paul_dic(m,n,E):
   
   Vec_mx = np.zeros([12,12,3],dtype=int)
   Vec_mx = atom_pos-atom_pos_col
-  Vec_mx = np.array([ map(irr_sector,item) for item in Vec_mx ])
+  Vec_mx = np.array([ map(SymSector,item) for item in Vec_mx ])
   
 
   v_dic = {}
@@ -436,6 +418,7 @@ def XRPAGNR3(nE,r0,r1,r2,Vup,Vdown,w):
   X00 = np.array([[XHFGNR3(nE,r0,r1,r2,[i,j],Vup,Vdown,w) for j in range(n)] for i in range(n)]) 		# Rather slick piece of work here mr. duffy. Apply elsewhere
   temp = inv( np.eye(len(X00)) + X00.dot(U) )
   return temp.dot(X00)
+
 
 
 def XHFGNRn(nE,r,site,Vup,Vdown,w):

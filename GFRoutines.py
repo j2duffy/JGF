@@ -27,8 +27,7 @@ def SymSector(r):
   while (m < 0 or n < 0):
     m,n,s = [m+n+s,-m,-s]		# Rotation
   if m<n:		# Reflection
-    m,n=n,m
-    
+    m,n=n,m  
   return [m,n,s]
 
 
