@@ -367,12 +367,11 @@ def ConcentrationPlot(N,p,E):
 if __name__ == "__main__":  
   N = 8
   p = 1
+  ImpList = range(2*N)
   Elist = np.linspace(-3.0,3.0,201)
-  for ImpList in [[6]]:
-    Klist = [KuboCenter(N,p,E,ImpList) for E in Elist]
-    pl.plot(Elist,Klist)
-    pl.savefig('%g.jpg' % (ImpList[0],))
-    pl.show()
+  Klist = [KuboTop(N,p,E,ImpList) for E in Elist]
+  for E, K in zip(Elist,Klist):
+    print E,K
 
 
 
