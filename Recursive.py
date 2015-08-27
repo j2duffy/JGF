@@ -25,14 +25,6 @@ def choose(n, k):
         return 0
 
 
-def random_combination(iterable, r):
-  "Random selection from itertools.combinations(iterable, r)"
-  pool = tuple(iterable)
-  n = len(pool)
-  indices = sorted(random.sample(xrange(n), r))
-  return tuple(pool[i] for i in indices)
-
-
 def cumav(l):
   """Gets the cumulative average of a list (or a 1d array)"""
   return np.cumsum(l)/np.arange(1,len(l)+1)
@@ -345,6 +337,56 @@ def CASubsRandom(N,p,nimp,niter,E):
   return Klist
   
   
+def CATopRandom(N,p,nimp,niter,E):
+  """Calculates the configurational average for nimp top-adsorbed impurities in an armchair nanoribbons (N,p).
+  Randomly chooses niter configurations and returns a list of the results of the Kubo Formula applied in these iterations.
+  Samples WITH replacement, which is not ideal"""
+  gL,gR,VLR,VRL = Leads(N,E)
+  Klist = []
+  for i in range(niter):
+    ImpList = random.sample(range(2*N*p),nimp)		# Get a random sample of positions
+    # Scattering region and connection matrices 
+    HM =  HArmStrip(N,p,TopList=ImpList)
+    gM = gGen(E-1j*eta,HM)
+    VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
+    VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
+    VbLsR[:2*N*p,:2*N], VsRbL[:2*N,:2*N*p] = VArmStripBigLSmallR(N,p)
+    VsLbR[:2*N,:2*N*p], VbRsL[:2*N*p,:2*N] = VArmStripSmallLBigR(N,p)
+    
+    # Calculate the advanced GFs
+    GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
+
+    K = Kubo(gL,GR,VLR,VRL)
+    Klist.append(K)
+  return Klist
+  
+  
+def CACenterRandom(N,p,nimp,niter,E):
+  """Calculates the configurational average for nimp center-adsorbed impurities in an armchair nanoribbons (N,p).
+  Randomly chooses niter configurations and returns a list of the results of the Kubo Formula applied in these iterations.
+  Samples WITH replacement, which is not ideal"""
+  # Should have this escape clause in any case, should probably raise an exception
+  if nimp > len(CenterPositions(N,p)): 
+    print "Too many impurities!"
+    return
+  gL,gR,VLR,VRL = Leads(N,E)
+  Klist = []
+  for i in range(niter):
+    ImpList = random.sample(CenterPositions(N,p),nimp)		# Get a random sample of positions
+    # Scattering region and connection matrices 
+    HM = HArmStrip(N,p,CenterList=ImpList)
+    gM = gGen(E-1j*eta,HM)
+    VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
+    VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
+    VbLsR[:2*N*p,:2*N], VsRbL[:2*N,:2*N*p] = VArmStripBigLSmallR(N,p)
+    VsLbR[:2*N,:2*N*p], VbRsL[:2*N*p,:2*N] = VArmStripSmallLBigR(N,p)
+    # Calculate the advanced GFs
+    GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
+
+    K = Kubo(gL,GR,VLR,VRL)
+    Klist.append(K)
+  return Klist
+  
 def ConcentrationPlot(N,p,E):
   max_n = len(CenterPositions(N,p))
   
@@ -365,13 +407,22 @@ def ConcentrationPlot(N,p,E):
 
 
 if __name__ == "__main__":  
-  N = 8
-  p = 1
-  ImpList = range(2*N)
+  N = 5
+  p = 2
+  nimp = 3
+  niter = 5000
+  
   Elist = np.linspace(-3.0,3.0,201)
-  Klist = [KuboTop(N,p,E,ImpList) for E in Elist]
-  for E, K in zip(Elist,Klist):
-    print E,K
+  CATlist = [ConfigAvCenterTotal(N,p,nimp,E) for E in Elist]
+  CARlist = [np.average(CACenterRandom(N,p,nimp,niter,E)) for E in Elist]
+  pl.plot(Elist,CATlist)
+  pl.plot(Elist,CARlist)
+  pl.savefig('plot.jpg')
+  pl.show()
+
+
+
+
 
 
 
