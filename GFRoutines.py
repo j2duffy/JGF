@@ -2,6 +2,10 @@
 
 from GF import *
 
+def Dyson1(g,V):
+  """The Dyson formula for scalar quantities"""
+  return g/(1.0-g*V)
+
 
 def Dyson(g,V):
   """Uses Dyson's formula to get the GF mx after a given perturbation."""

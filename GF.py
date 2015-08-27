@@ -22,6 +22,7 @@ wf=EF	# This needs a lot of thought/work
 eps_imp = 1.0
 tau = -1.0
 U = 10.0
+hw0 = 1.0e-3	# A default value for the Zeeman field. 
 dtol = 1.0e-6		# Stands for "default tolerance". Could be better
 
 

@@ -1,6 +1,6 @@
 # A file for just running Dynamic calculations and nothing else.
 # Should be the most up to date thing for Dynamic calculations, and the 
-from GF import *
+from GFRoutines import *
 from scipy import optimize
 from numpy.linalg import norm
 from functools import partial
@@ -9,37 +9,12 @@ import multiprocessing
 from functionsample import sample_function
 
 
-# Self-consistency crap
-hw0 = 1.0e-3	# A default value for the Zeeman field. Dodgy.
-
-
-def Dyson1(g,V):
-  return g/(1.0-g*V)
-
-
-def Dyson(g,V):
-  """Returns the new Green's function (mx) after a given peturbation"""
-  temp1 = inv( np.eye(len(g)) - g.dot(V) )	# If V is inputted as a scalar, automatically multiplies by 2x2 identity
-  G_new =  temp1.dot(g) 
-  return G_new
-
-
 def gRib_Armr(nE,r0,r1,E):
   """A temporary function that should be used to convert between old and new notation"""
   m1,n1,s1=r0
   m2,n2,s2=r1
   s=s2-s1
   return gRib_Arm(nE,m1,n1,m2,n2,s,E)
-
-
-def gRib_mx2(nE,m1,n1,m2,n2,s,E):      
-  """Just returns the GF matrix for two atomic positions in a graphene GNR.
-  Realistically, should be incorporated into far more functions that it is"""
-  g = np.zeros((2,2),dtype=complex)
-  g[0,0] = gRib_Arm(nE,m1,n1,m1,n1,0,E)
-  g[1,1] = gRib_Arm(nE,m2,n2,m2,n2,0,E)
-  g[0,1],g[1,0] = 2*(gRib_Arm(nE,m1,n1,m2,n2,s,E),)		# This can also be done with a = b = f(x)
-  return g
 
 
 def gSImx2(m1,n1,m2,n2,s,E):
@@ -81,30 +56,6 @@ def gGNRTop1(nE,m,n,E):
   g11 = gRib_Arm(nE,m,n,m,n,0,E)
   G00 = g00/(1.0-tau**2 *g00*g11)
   return G00
-
-
-def gGNRTopMx2(nE,m1,n1,m2,n2,s,E):      
-  """Calculates the appropriate matrix for Top Adsorbed impurities in a GNR.
-  Impurities are labelled as 2 and 3. They connect to sites 0 and 1."""
-  
-  # Introduce the connecting GFs
-  g = np.zeros((4,4),dtype=complex)
-  g[0,0] = gRib_Arm(nE,m1,n1,m1,n1,0,E)
-  g[1,1] = gRib_Arm(nE,m2,n2,m2,n2,0,E)
-  g[0,1],g[1,0] = 2*(gRib_Arm(nE,m1,n1,m2,n2,s,E),)
-  
-  #Introduce the impurity GFs
-  g_impurity = 1.0/(E-eps_imp)
-  g[2,2],g[3,3] = 2*(g_impurity,)
-  
-  # The peturbation connects the impurities to the lattice
-  V = np.zeros([4,4],dtype=complex)
-  V[2,0],V[0,2],V[1,3],V[3,1] = 4*(tau,)
-  
-  G = Dyson(g,V)
-  
-  # Return the part of the matrix that governs the impurity behaviour. 
-  return G[2:4,2:4]
 
 
 def gGNRTopMxn(nE,r,E): 
@@ -428,15 +379,15 @@ def XHF_SI2(m1,n1,m2,n2,s,site,Vup,Vdown,w):
 def XHF_GNR2(nE,m1,n1,m2,n2,s,site,Vup,Vdown,w):
   """Calculates the spin susceptibility in the HF approximation for a GNR"""
   def GF(E):
-    g = gRib_mx2(nE,m1,n1,m2,n2,s,E)
+    g = gGNRSubsMx(nE,m1,n1,m2,n2,s,E)
     return g  
   return XHF(GF,site,Vup,Vdown,w)
 
 
-def XGNR_HFTop2(nE,m1,n1,m2,n2,s,site,Vup,Vdown,w):
+def XHF_GNRTop2(nE,m1,n1,m2,n2,s,site,Vup,Vdown,w):
   """Calculates the spin susceptibility in the HF approximation for Top Adsorbed impurities in a GNR"""
   def GF(E):
-    g = gGNRTopMx2(nE,m1,n1,m2,n2,s,E)
+    g = gGNRTopMx(nE,m1,n1,m2,n2,s,E)
     return g   
   return XHF(GF,site,Vup,Vdown,w)
 
@@ -450,20 +401,21 @@ def XRPABulk(m,n,s,Vup,Vdown,w):
 
 
 def XRPA_GNR2(nE,m1,n1,m2,n2,s,Vup,Vdown,w):
-  """Gets the RPA spin susceptibility for a GNR for 2 atoms.
-  Done in a fairly shlick way, to make extensions to more atoms easier."""
+  """Gets the RPA spin susceptibility for a GNR for 2 substitutional.
+  Done in a fairly shlick way, to make extensions to more impurities easier."""
   n = 2
   X00 = np.array([[XHF_GNR2(nE,m1,n1,m2,n2,s,[i,j],Vup,Vdown,w) for j in range(n)] for i in range(n)])
   temp = inv( np.eye(len(X00)) + X00.dot(U) )
   return temp.dot(X00)
 
 
-def XGNR_RPATop2(nE,m1,n1,m2,n2,s,Vup,Vdown,w):
+def XRPA_GNRTop2(nE,m1,n1,m2,n2,s,Vup,Vdown,w):
   """Gets the RPA spin susceptibility for a GNR"""
   n = 2
-  X00 = np.array([[XGNR_HFTop2(nE,m1,n1,m2,n2,s,[i,j],Vup,Vdown,w) for j in range(n)] for i in range(n)])
+  X00 = np.array([[XHF_GNRTop2(nE,m1,n1,m2,n2,s,[i,j],Vup,Vdown,w) for j in range(n)] for i in range(n)])
   temp = inv( np.eye(len(X00)) + X00.dot(U) )
   return temp.dot(X00)
+
 
 
 def XHFGNR3(nE,r0,r1,r2,site,Vup,Vdown,w):
@@ -657,14 +609,14 @@ def SC2(GF,n0):
 def SC_GNRSubs2(nE,m1,n1,m2,n2,s,n0=1.0):
   """Calculates the self-consistency for 2 substitutional atoms in a GNR."""
   def GF(E):
-    return gRib_mx2(nE,m1,n1,m2,n2,s,E)
+    return gGNRSubsMx(nE,m1,n1,m2,n2,s,E)
   return SC2(GF,n0)
 
 
 def SC_GNRTop2(nE,m1,n1,m2,n2,s,n0=1.0):
   """The Self Consistency performed for a GNR with 2 Top adsorbed impurities."""
   def GF(E):
-    return gGNRTopMx2(nE,m1,n1,m2,n2,s,E)
+    return gGNRTopMx(nE,m1,n1,m2,n2,s,E)
   return SC2(GF,n0)
 
 
@@ -849,7 +801,7 @@ def SCBulkCenter(m,n,n0=1.0):
 def GNR_DOS(nE,m1,n1,m2,n2,s,V,E):
   """Temporary function for checking the GNR DOS in the presence of one impurity.
   Probably a bit unnecessary in general and due for retirement after its brief period of service."""
-  g_mx = gRib_mx2(nE,m1,n1,m2,n2,s,E)
+  g_mx = gGNRSubsMx(nE,m1,n1,m2,n2,s,E)
   g_V = Dyson(g_mx,V)[1,1]
   return -g_V.imag/pi
 
@@ -910,10 +862,10 @@ if __name__ == "__main__":
   #pl.plot(wrlist,Xrlist)
   #pl.plot(wilist,Xilist)
   #pl.show()
-  nE,m,n = 6,1,0
-  Vup,Vdown = SC_GNRTop1(nE,m,n)
-  fX = np.vectorize(lambda w: XRPA_GNRTop1(nE,m,n,Vup,Vdown,w).imag)
-  wlist, Xtemp = sample_function(fX, [0.0,1.0e-2], tol=1e-3)
+  nE,m1,n1,m2,n2,s = 6,1,0,21,20,0
+  Vup,Vdown = SC_GNRSubs2(nE,m1,n1,m2,n2,s)
+  fX = np.vectorize(lambda w: XRPA_GNR2(nE,m1,n1,m2,n2,s,Vup,Vdown,w)[0,0].imag)
+  wlist, Xtemp = sample_function(fX, [0.0,1.0e-1], tol=1e-3)
   Xlist = Xtemp[0]
   pl.plot(wlist,Xlist)
   pl.show()
