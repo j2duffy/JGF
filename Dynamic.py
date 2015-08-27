@@ -121,117 +121,25 @@ def gBulk_mx2(m,n,s,E):
   return g
 
 
-def Center_gen_multi(m,n,E):
+def gBulkCenterMx(m,n,E):
+  """A routine that calculates the 2x2 matrix for Center adsorbed impurities"""
   D = [m,n,0]
   hex1 = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])
   hex2 = hex1 + D
-  atom_pos = np.concatenate((hex1,hex2),axis=0)	# hex1+D
-  atom_pos_col = atom_pos[:,np.newaxis]
-  
-  Vec_mx = np.zeros([12,12,3],dtype=int)
-  Vec_mx = atom_pos-atom_pos_col
+  r = np.concatenate((hex1,hex2))
   
   g_mx = np.zeros([14,14],dtype=complex)
-  g = partial(gBulkList,E)
-  
-  pool = multiprocessing.Pool()
-  g_mx[:12,:12] = np.array([ pool.map(g,item) for item in Vec_mx ])
-  pool.close()
-  pool.join()
-  
-  g_impurity = 1.0/(E-eps_imp)	# 1 line
-  g_mx[12,12] = g_impurity
-  g_mx[13,13] = g_impurity
-  
-  return g_mx
-
-  
-def Center_gen_dic(m,n,E):
-  D = [m,n,0]
-  hex1 = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])
-  hex2 = hex1 + D
-  atom_pos = np.concatenate((hex1,hex2),axis=0)
-  atom_pos_col = atom_pos[:,np.newaxis]
-  
-  Vec_mx = np.zeros([12,12,3],dtype=int)
-  Vec_mx = atom_pos-atom_pos_col
-  
-  Vec_mx = np.array([ map(SymSector,item) for item in Vec_mx ])
-  
-  g_dic = {}
-  g_mx = np.zeros([14,14],dtype=complex)
-  for i, elem in enumerate( Vec_mx ):
-    for j, L in enumerate( elem ):
-      key = (L[0],L[1],L[2])
-      try:
-	g_mx[i,j] = g_dic[key]
-      except KeyError:
-	g_mx[i,j] = g_dic[key] = gBulkList(E,L)
-  
+  g_mx[:12,:12] = BulkMxGen(r,E)
   g_impurity = 1.0/(E-eps_imp)
-  g_mx[12,12] = g_impurity
-  g_mx[13,13] = g_impurity
-  
-  return g_mx
+  g_mx[12,12] = g_mx[13,13] = g_impurity
 
-
-def Center_paul_dic(m,n,E):
-  D = [m,n,0]
-  hex1 = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])
-  hex2 = hex1 + D
-  atom_pos = np.concatenate((hex1,hex2),axis=0)
-  atom_pos_col = atom_pos[:,np.newaxis]
-  
-  Vec_mx = np.zeros([12,12,3],dtype=int)
-  Vec_mx = atom_pos-atom_pos_col
-  Vec_mx = np.array([ map(SymSector,item) for item in Vec_mx ])
-  
-
-  v_dic = {}
-  mx_dic = {}
-  for xi,x in enumerate( Vec_mx ):
-    for yj,y in enumerate (x):
-      mx_dic[ ( xi,yj ) ] = (y[0],y[1],y[2])
-      v_dic[ (y[0],y[1],y[2]) ] = 0
-        
-  g = partial(gBulkList,E)
-  result = np.zeros([len(v_dic)],dtype=complex)
-  
-  
-  pool = multiprocessing.Pool()
-  result = pool.map(g,v_dic.keys())
-  pool.close()
-  pool.join()
-    
-  
-  for x,y in zip(result, v_dic.keys()):
-    v_dic[y] = x
-
-  g_mx = np.zeros([14,14],dtype=complex)
-  for x in mx_dic.keys():
-    g_mx[ x[0], x[1] ] = v_dic[mx_dic[x]]
-  
-
-  g_impurity = 1.0/(E-eps_imp)
-  g_mx[12,12] = g_impurity
-  g_mx[13,13] = g_impurity
-
-  return g_mx
-
-
-def CenterMx(m,n,E):
-  """A routine for calculating the 2x2 impurity matrix for Center adsorbed impurities
-  Still very much in its beta phase"""
   V = np.zeros([14,14],dtype=complex)
   V[:6,12] = tau
   V[12,:6] = tau
-
   V[6:12,13] = tau
   V[13,6:12] = tau
   
-  g = Center_gen_dic(m,n,E)
-
-  g_new = Dyson(g,V)
+  g_new = Dyson(g_mx,V)
 
   g_impur =  np.zeros([2,2],dtype=complex)
   g_impur[0,0] = g_new[12,12]
@@ -738,7 +646,7 @@ def SCBulkCenter(m,n,n0=1.0):
   delta = 0.0
   
   def GFImp(y,V):
-    g = CenterMx(m,n,EF+1j*y)
+    g = gBulkCenterMx(m,n,EF+1j*y)
     g_new = Dyson(g,V)[0,0]
     return g_new.real
   
