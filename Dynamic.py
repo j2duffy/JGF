@@ -121,23 +121,6 @@ def gBulk_mx2(m,n,s,E):
   return g
 
 
-def ReducedGF(E,L):
-  """Calculates the GF from the Energy and a list.
-  Really just a convenience function for all of those Center_gen codes"""
-  m = L[0]
-  n = L[1]
-  if L[2] == 0:
-    s = 0
-  elif L[2] == 1:
-    s = 1
-  elif L[2] == -1:
-    s = -1
-  else:
-    print 'ReducedGF Error'
-
-  return gBulk_kZ(m,n,s,E)
-
-
 def Center_gen_multi(m,n,E):
   D = [m,n,0]
   hex1 = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])
@@ -149,7 +132,7 @@ def Center_gen_multi(m,n,E):
   Vec_mx = atom_pos-atom_pos_col
   
   g_mx = np.zeros([14,14],dtype=complex)
-  g = partial(ReducedGF,E)
+  g = partial(gBulkList,E)
   
   pool = multiprocessing.Pool()
   g_mx[:12,:12] = np.array([ pool.map(g,item) for item in Vec_mx ])
@@ -183,7 +166,7 @@ def Center_gen_dic(m,n,E):
       try:
 	g_mx[i,j] = g_dic[key]
       except KeyError:
-	g_mx[i,j] = g_dic[key] = ReducedGF(E,L)
+	g_mx[i,j] = g_dic[key] = gBulkList(E,L)
   
   g_impurity = 1.0/(E-eps_imp)
   g_mx[12,12] = g_impurity
@@ -211,7 +194,7 @@ def Center_paul_dic(m,n,E):
       mx_dic[ ( xi,yj ) ] = (y[0],y[1],y[2])
       v_dic[ (y[0],y[1],y[2]) ] = 0
         
-  g = partial(ReducedGF,E)
+  g = partial(gBulkList,E)
   result = np.zeros([len(v_dic)],dtype=complex)
   
   
