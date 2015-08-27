@@ -899,22 +899,21 @@ def SCGNRField(nE,m,n,hw0=hw0,n0=1.0):
 
 
 if __name__ == "__main__":
-  nE, r = 6,[[1,0,0],[11,10,0],[21,20,0]]
-  Vup, Vdown = SC_GNRTopn(nE,r)
-  fXr = np.vectorize(lambda w: XRPAGNRTopn(nE,r,Vup,Vdown,w)[0,0].real)
-  fXi = np.vectorize(lambda w: XRPAGNRTopn(nE,r,Vup,Vdown,w)[0,0].imag)
-  wrlist, Xrtemp = sample_function(fXr, [0.0,0.00122,0.5e-2], tol=1e-3)
-  wilist, Xitemp = sample_function(fXi, [0.0,0.00122,0.5e-2], tol=1e-3)
-  Xrlist = Xrtemp[0]
-  Xilist = Xitemp[0]
-  pl.plot(wrlist,Xrlist)
-  pl.plot(wilist,Xilist)
-  pl.show()
-
-  #nE,r = 6, [[1,0,0],[2,0,0],[4,0,0]]
-  #Vup,Vdown = SC_GNRSubsn(nE,r)
-  #fXi = np.vectorize(lambda w: XRPAGNRn(nE,r,Vup,Vdown,w)[0,0].imag)
-  #wilist, Xitemp = sample_function(fXi, [0.0,1.0e-1], tol=1e-3)
+  #nE, r = 6,[[1,0,0],[11,10,0],[21,20,0]]
+  #Vup, Vdown = SC_GNRTopn(nE,r)
+  #fXr = np.vectorize(lambda w: XRPAGNRTopn(nE,r,Vup,Vdown,w)[0,0].real)
+  #fXi = np.vectorize(lambda w: XRPAGNRTopn(nE,r,Vup,Vdown,w)[0,0].imag)
+  #wrlist, Xrtemp = sample_function(fXr, [0.0,0.00122,0.5e-2], tol=1e-3)
+  #wilist, Xitemp = sample_function(fXi, [0.0,0.00122,0.5e-2], tol=1e-3)
+  #Xrlist = Xrtemp[0]
   #Xilist = Xitemp[0]
+  #pl.plot(wrlist,Xrlist)
   #pl.plot(wilist,Xilist)
   #pl.show()
+  nE,m,n = 6,1,0
+  Vup,Vdown = SC_GNRTop1(nE,m,n)
+  fX = np.vectorize(lambda w: XRPA_GNRTop1(nE,m,n,Vup,Vdown,w).imag)
+  wlist, Xtemp = sample_function(fX, [0.0,1.0e-2], tol=1e-3)
+  Xlist = Xtemp[0]
+  pl.plot(wlist,Xlist)
+  pl.show()
