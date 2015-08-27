@@ -31,8 +31,8 @@ def cumav(l):
 
 
 def CenterPositions(N,p):
-  """Returns all valid positions for center adsorbed impurities in a BigArmStrip(N,p)
-  Positions are NOT in logical order"""
+  """Returns all valid positions for center adsorbed impurities in a BigArmStrip(N,p).
+  Positions are NOT in obvious order"""
   l = []
   # Short strip first 
   ss = [i for j in range(0,2*N*p-2*N+1,2*N) for i in range(j,j+N-2,2) ]
@@ -176,7 +176,6 @@ def Leads(N,E):
 
 def Kubo(gL,gR,VLR,VRL):
   """Given left and right GF leads (advanced) calculates the Kubo Formula"""
-  
   # Gets the off diagonal elements
   GRRa, GRLa, GLRa, GLLa = gOffDiagonal(gR,gL,gL,gL,gL,VLR,VRL)
   # Calculates Gtilde, the imaginary part of the advanced GF
@@ -314,7 +313,7 @@ def ConfigAvCenterTotal(N,p,nimp,E):
 
 
 
-def CASubsRandom(N,p,nimp,niter,E):
+def ConfigAvSubsRandom(N,p,nimp,niter,E):
   """Calculates the configurational average for nimp substitutional impurities in an armchair nanoribbons (N,p).
   Randomly chooses niter configurations and returns a list of the results of the Kubo Formula applied in these iterations.
   Samples WITH replacement, which is not ideal"""
@@ -337,7 +336,7 @@ def CASubsRandom(N,p,nimp,niter,E):
   return Klist
   
   
-def CATopRandom(N,p,nimp,niter,E):
+def ConfigAvTopRandom(N,p,nimp,niter,E):
   """Calculates the configurational average for nimp top-adsorbed impurities in an armchair nanoribbons (N,p).
   Randomly chooses niter configurations and returns a list of the results of the Kubo Formula applied in these iterations.
   Samples WITH replacement, which is not ideal"""
@@ -361,7 +360,7 @@ def CATopRandom(N,p,nimp,niter,E):
   return Klist
   
   
-def CACenterRandom(N,p,nimp,niter,E):
+def ConfigAvCenterRandom(N,p,nimp,niter,E):
   """Calculates the configurational average for nimp center-adsorbed impurities in an armchair nanoribbons (N,p).
   Randomly chooses niter configurations and returns a list of the results of the Kubo Formula applied in these iterations.
   Samples WITH replacement, which is not ideal"""
@@ -387,6 +386,7 @@ def CACenterRandom(N,p,nimp,niter,E):
     Klist.append(K)
   return Klist
   
+  
 def ConcentrationPlot(N,p,E):
   max_n = len(CenterPositions(N,p))
   
@@ -407,16 +407,24 @@ def ConcentrationPlot(N,p,E):
 
 
 if __name__ == "__main__":  
-  N = 5
-  p = 2
-  nimp = 3
-  niter = 5000
+  N = 8
+  p = 4
+  niter = 50000
+  E = 0.0
   
-  Elist = np.linspace(-3.0,3.0,201)
-  CATlist = [ConfigAvCenterTotal(N,p,nimp,E) for E in Elist]
-  CARlist = [np.average(CACenterRandom(N,p,nimp,niter,E)) for E in Elist]
-  pl.plot(Elist,CATlist)
-  pl.plot(Elist,CARlist)
+  max_n = len(CenterPositions(N,p))
+  nimpl = range(1,max_n+1)
+  
+  CAC = [np.average(ConfigAvCenterRandom(N,p,nimp,niter,E)) for nimp in nimpl]
+  CAS = [np.average(ConfigAvSubsRandom(N,p,nimp,niter,E)) for nimp in nimpl]
+  CAT = [np.average(ConfigAvTopRandom(N,p,nimp,niter,E)) for nimp in nimpl]
+  
+  conc = [nimp/(2.0*N*p) for nimp in nimpl]
+  
+  pl.plot(conc,CAC,label='Center')
+  pl.plot(conc,CAS,label='Subs')
+  pl.plot(conc,CAT,'o',label='Top')
+  pl.legend()
   pl.savefig('plot.jpg')
   pl.show()
 
