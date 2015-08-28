@@ -727,6 +727,7 @@ def SCGNRField(nE,m,n,hw0=hw0,n0=1.0):
   return SCField(GFup,GFdown,n0)
 
 
+
 if __name__ == "__main__":
   nE, r = 6,[[2,0,0],[6,3,0],[12,9,0]]
   Vup, Vdown = SCnGNRTop(nE,r)
