@@ -17,38 +17,8 @@ def gRib_Armr(nE,r0,r1,E):
   return gRib_Arm(nE,m1,n1,m2,n2,s,E)
 
 
-def gSImx2(m1,n1,m2,n2,s,E):
-  """The appropriate mx for the SI GF. Includes symmetries in a rather ad hoc way"""
-  g = np.zeros((2,2),dtype=complex)
-  g[0,0] = gSI_kZ(m1,n1,m1,n1,0,E)
-  g[1,1]= gSI_kZ(m2,n2,m2,n2,0,E)
-  g[0,1] = gSI_kZ(m1,n1,m2,n2,s,E)
-  g[1,0] = g[0,1]
-  return g
-
-
-def gRib_mx3(nE,r0,r1,r2,E):      
-  """Just returns the GF matrix for three atomic positions in a graphene GNR.
-    Tested probably as much as you'd want to."""
-  g = np.zeros((3,3),dtype=complex)
-  g[0,0] = gRib_Armr(nE,r0,r0,E)
-  g[1,1] = gRib_Armr(nE,r1,r1,E)
-  g[2,2] = gRib_Armr(nE,r2,r2,E)
-  g[0,1] = g[1,0] = gRib_Armr(nE,r0,r1,E)
-  g[0,2] = g[2,0] = gRib_Armr(nE,r0,r2,E)
-  g[1,2] = g[2,1] = gRib_Armr(nE,r1,r2,E)
-  return g
-
-
-def gRib_mxn(nE,r,E):      
-  """The GF matrix for n substitutional impurities. Does not account for symmetries at all"""
-  # r is a list of all the relevant position vectors (so a list of lists)
-  n = len(r)
-  g = np.array([[gRib_Armr(nE,r[i],r[j],E) for j in range(n)] for i in range(n)])
-  return g
-
-
-def gGNRTop1(nE,m,n,E):
+# 1 Impurity Peturbed GFs
+def g1GNRTop(nE,m,n,E):
   """Returns the GF for the Top Adsorbed impurity in a GNR
   Suffers from a difference of convention with most of your code, where the connecting atoms are labelled first and the impurities last.
   However, this may be a more logical way of doing it (you are more interested in the impurity positions."""
@@ -58,62 +28,8 @@ def gGNRTop1(nE,m,n,E):
   return G00
 
 
-def gGNRTopMxn(nE,r,E): 
-  """Calculates the appropriate matrix for an arbitrary number of Top Adsorbed impurities in a GNR.
-  Returns the impurity Matrix"""
-  
-  n = len(r)
-  # Creates the Mx of sites we connect to
-  gPosMx = gRib_mxn(nE,r,E)
-  
-  # Createst the Mx of impurities
-  g_impurity = 1.0/(E-eps_imp)
-  gImpMx = g_impurity*np.eye(n)
-  
-  # Combination Mx
-  gbig = np.zeros([2*n,2*n],dtype=complex)
-  gbig[:n,:n] = gPosMx
-  gbig[n:,n:] = gImpMx
-  
-  # Connection Potential
-  V = np.zeros([2*n,2*n])
-  for i in range(n):
-    V[n+i,i] = V[i,n+i] = tau
-  
-  G = Dyson(gbig,V)
-  
-  # Return the part of the matrix that governs the impurity behaviour. 
-  return G[n:,n:]
-
-
-def gGNRTopMxFast(nE,m1,n1,m2,n2,s,E):      
-  """A faster version of gGNRTopMx. 
-  Uses Dyson's formula in a more specific way to speed everything up.
-  Gets a speed up of a factor of about 2."""
-  
-  # Introduce the connecting GFs
-  gaa = gRib_Arm(nE,m1,n1,m1,n1,0,E)
-  gbb = gRib_Arm(nE,m2,n2,m2,n2,0,E)
-  gab,gba = 2*(gRib_Arm(nE,m1,n1,m2,n2,s,E),)
-  
-  #Introduce the impurity GFs
-  g_impurity = 1.0/(E-eps_imp)
-  gAA,gBB = 2*(g_impurity,)
-  
-  GAA = (gAA - gAA*gbb*gBB*t**2)/(1 - gbb*gBB*t**2 - gAA*gab*gba*gBB*t**4 + 
-  gaa*gAA*t**2*(-1 + gbb*gBB*t**2))
-  GBB = (gBB - gaa*gAA*gBB*t**2)/(1 - gbb*gBB*t**2 - gAA*gab*gba*gBB*t**4 + 
-  gaa*gAA*t**2*(-1 + gbb*gBB*t**2))
-  GAB = -((gAA*gab*gBB*t**2)/(-1 + gbb*gBB*t**2 + gAA*gab*gba*gBB*t**4 + gaa*gAA*(t**2 - gbb*gBB*t**4)))
-  
-  G = np.zeros((2,2),dtype=complex)
-  G[0,0] = GAA
-  G[1,1] = GBB
-  G[0,1],G[1,0] = 2*(GAB,)
-  return G
-
-
-def gBulk_mx2(m,n,s,E):
+# 2 site GF Matrices
+def gMx2Bulk(m,n,s,E):
   """ Returns the GF matrix for two atomic sites in bulk graphene"""
   g = np.zeros((2,2),dtype=complex)
   g[0,0],g[1,1] = 2*(gBulk_kZ(0,0,0,E),)
@@ -121,7 +37,7 @@ def gBulk_mx2(m,n,s,E):
   return g
 
 
-def gBulkCenterMx(m,n,E):
+def gMx2BulkCenter(m,n,E):
   """A routine that calculates the 2x2 matrix for Center adsorbed impurities"""
   D = [m,n,0]
   hex1 = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])
@@ -148,6 +64,94 @@ def gBulkCenterMx(m,n,E):
   g_impur[1,1] = g_new[13,13]
 
   return g_impur
+
+
+def gMx2SI(m1,n1,m2,n2,s,E):
+  """Returns the GF matrix for two atomic positions in semi-infinite graphene."""
+  g = np.zeros((2,2),dtype=complex)
+  g[0,0] = gSI_kZ(m1,n1,m1,n1,0,E)
+  g[1,1]= gSI_kZ(m2,n2,m2,n2,0,E)
+  g[0,1] = gSI_kZ(m1,n1,m2,n2,s,E)
+  g[1,0] = g[0,1]
+  return g
+
+
+def gMx2GNRTopFast(nE,m1,n1,m2,n2,s,E):      
+  """A faster version of gGNRTopMx. 
+  Uses Dyson's formula in a more specific way to speed everything up.
+  Gets a speed up of a factor of about 2."""
+  
+  # Introduce the connecting GFs
+  gaa = gRib_Arm(nE,m1,n1,m1,n1,0,E)
+  gbb = gRib_Arm(nE,m2,n2,m2,n2,0,E)
+  gab,gba = 2*(gRib_Arm(nE,m1,n1,m2,n2,s,E),)
+  
+  #Introduce the impurity GFs
+  g_impurity = 1.0/(E-eps_imp)
+  gAA,gBB = 2*(g_impurity,)
+  
+  GAA = (gAA - gAA*gbb*gBB*t**2)/(1 - gbb*gBB*t**2 - gAA*gab*gba*gBB*t**4 + 
+  gaa*gAA*t**2*(-1 + gbb*gBB*t**2))
+  GBB = (gBB - gaa*gAA*gBB*t**2)/(1 - gbb*gBB*t**2 - gAA*gab*gba*gBB*t**4 + 
+  gaa*gAA*t**2*(-1 + gbb*gBB*t**2))
+  GAB = -((gAA*gab*gBB*t**2)/(-1 + gbb*gBB*t**2 + gAA*gab*gba*gBB*t**4 + gaa*gAA*(t**2 - gbb*gBB*t**4)))
+  
+  G = np.zeros((2,2),dtype=complex)
+  G[0,0] = GAA
+  G[1,1] = GBB
+  G[0,1],G[1,0] = 2*(GAB,)
+  return G
+
+
+# 3 site GF Matrices
+def gMx3GNR(nE,r0,r1,r2,E):      
+  """Just returns the GF matrix for three atomic positions in a graphene GNR."""
+  g = np.zeros((3,3),dtype=complex)
+  g[0,0] = gRib_Armr(nE,r0,r0,E)
+  g[1,1] = gRib_Armr(nE,r1,r1,E)
+  g[2,2] = gRib_Armr(nE,r2,r2,E)
+  g[0,1] = g[1,0] = gRib_Armr(nE,r0,r1,E)
+  g[0,2] = g[2,0] = gRib_Armr(nE,r0,r2,E)
+  g[1,2] = g[2,1] = gRib_Armr(nE,r1,r2,E)
+  return g
+
+
+# n site GF Matrices
+def gMxnGNR(nE,r,E):      
+  """The GF matrix for n substitutional impurities. Does not account for symmetries at all"""
+  # r is a list of all the relevant position vectors (so a list of lists)
+  n = len(r)
+  g = np.array([[gRib_Armr(nE,r[i],r[j],E) for j in range(n)] for i in range(n)])
+  return g
+
+
+def gMxnGNRTop(nE,r,E): 
+  """Calculates the appropriate matrix for an arbitrary number of Top Adsorbed impurities in a GNR.
+  Returns the impurity Matrix"""
+  
+  n = len(r)
+  # Creates the Mx of sites we connect to
+  gPosMx = gMxnGNR(nE,r,E)
+  
+  # Createst the Mx of impurities
+  g_impurity = 1.0/(E-eps_imp)
+  gImpMx = g_impurity*np.eye(n)
+  
+  # Combination Mx
+  gbig = np.zeros([2*n,2*n],dtype=complex)
+  gbig[:n,:n] = gPosMx
+  gbig[n:,n:] = gImpMx
+  
+  # Connection Potential
+  V = np.zeros([2*n,2*n])
+  for i in range(n):
+    V[n+i,i] = V[i,n+i] = tau
+  
+  G = Dyson(gbig,V)
+  
+  # Return the part of the matrix that governs the impurity behaviour. 
+  return G[n:,n:]
+
 
 
 
@@ -192,7 +196,7 @@ def XHF_GNR1(nE,m,n,Vup,Vdown,w):
 def XHF_GNRTop1(nE,m,n,Vup,Vdown,w):
   """Calculates the Hartree-Fock spin susceptibility for a Top adsorbed impurity in a GNR."""
   def GF(E,V):
-    g = gGNRTop1(nE,m,n,E)
+    g = g1GNRTop(nE,m,n,E)
     return Dyson1(g,V)
   return XHF1(GF,Vup,Vdown,w)
 
@@ -236,7 +240,7 @@ def XHF(GF,site,Vup,Vdown,w):	# Might be better to include the Dyson function wi
 def XHFBulk2(m,n,s,site,Vup,Vdown,w):
   """Calculates the HF spin susceptibility for two substitutional impurities in bulk graphene"""
   def GF(E):
-    return gBulk_mx2(m,n,s,E)	# Could maybe include the site term here and save a fucking bunch of time  
+    return gMx2Bulk(m,n,s,E)	# Could maybe include the site term here and save a fucking bunch of time  
   return XHF(GF,site,Vup,Vdown,w)
 
 
@@ -244,7 +248,7 @@ def XHF_SI2(m1,n1,m2,n2,s,site,Vup,Vdown,w):
   """Calculates the spin susceptibility in the HF approximation for Semi-Infinite Graphene, 
     Requires testing"""
   def GF(E):
-    return gSImx2(m1,n1,m2,n2,s,E)
+    return gMx2SI(m1,n1,m2,n2,s,E)
     
   return XHF(GF,site,Vup,Vdown,w)
 
@@ -296,7 +300,7 @@ def XHFGNR3(nE,r0,r1,r2,site,Vup,Vdown,w):
   Tested a little. Also has a much better name."""
   i,j = site
   def GF(E):
-    return gRib_mx3(nE,r0,r1,r2,E)
+    return gMx3GNR(nE,r0,r1,r2,E)
     
   return XHF(GF,site,Vup,Vdown,w)
 
@@ -315,7 +319,7 @@ def XRPAGNR3(nE,r0,r1,r2,Vup,Vdown,w):
 def XHFGNRn(nE,r,site,Vup,Vdown,w):
   """The HF spin sus for n substitutional atoms in a GNR."""
   def GF(E):
-    return gRib_mxn(nE,r,E)
+    return gMxnGNR(nE,r,E)
   return XHF(GF,site,Vup,Vdown,w)
 
 
@@ -331,7 +335,7 @@ def XRPAGNRn(nE,r,Vup,Vdown,w):
 def XHFGNRTopn(nE,r,site,Vup,Vdown,w):
   """The HF spin sus for n substitutional atoms in a GNR."""
   def GF(E):
-    return gGNRTopMxn(nE,r,E)
+    return gMxnGNRTop(nE,r,E)
   return XHF(GF,site,Vup,Vdown,w)
 
 
@@ -393,7 +397,7 @@ def SC_GNRSubs1(nE,m,n,n0=1.0):
 def SC_GNRTop1(nE,m,n,n0=1.0):  
   """Calculates the SC potentials for a GNR with one impurity. Has been tested against Filipe's"""
   def GF(y,V):
-    g = gGNRTop1(nE,m,n,EF+1j*y)
+    g = g1GNRTop(nE,m,n,EF+1j*y)
     return Dyson1(g,V).real
   return SC1(GF,n0)
 
@@ -406,7 +410,7 @@ def SCBulkSubs2(m,n,s,n0=1.0):
   delta = 0.0
   
   def GF(y,V):	# g_im is a better name
-    g = Dyson(gBulk_mx2(m,n,s,EF+1j*y),V)[0,0]
+    g = Dyson(gMx2Bulk(m,n,s,EF+1j*y),V)[0,0]
     return g.real
   
   def n_occ(V):
@@ -509,7 +513,7 @@ def SC_GNRSubs3(nE,r0,r1,r2,n0=1.0):
     
   def g_im(y,V,site):
     """Calcualtes the GF on the imaginary axis"""
-    g = gRib_mx3(nE,r0,r1,r2,EF+1j*y)
+    g = gMx3GNR(nE,r0,r1,r2,EF+1j*y)
     g_new = Dyson(g,V)[site,site]
     return g_new.real
   
@@ -557,7 +561,7 @@ def SC_GNRSubsn(nE,r,n0=1.0):
     
   def g_im(y,V,site):
     """Calcualtes the GF on the imaginary axis"""
-    g = gRib_mxn(nE,r,EF+1j*y)
+    g = gMxnGNR(nE,r,EF+1j*y)
     g_new = Dyson(g,V)[site,site]
     return g_new.real
   
@@ -605,7 +609,7 @@ def SC_GNRTopn(nE,r,n0=1.0):
     
   def g_im(y,V,site):
     """Calcualtes the GF on the imaginary axis"""
-    g = gGNRTopMxn(nE,r,EF+1j*y)
+    g = gMxnGNRTop(nE,r,EF+1j*y)
     g_new = Dyson(g,V)[site,site]
     return g_new.real
   
@@ -646,7 +650,7 @@ def SCBulkCenter(m,n,n0=1.0):
   delta = 0.0
   
   def GFImp(y,V):
-    g = gBulkCenterMx(m,n,EF+1j*y)
+    g = gMx2BulkCenter(m,n,EF+1j*y)
     g_new = Dyson(g,V)[0,0]
     return g_new.real
   
