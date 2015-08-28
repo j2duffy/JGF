@@ -126,8 +126,7 @@ def gMxnGNR(nE,r,E):
 
 
 def gMxnGNRTop(nE,r,E): 
-  """Calculates the appropriate matrix for an arbitrary number of Top Adsorbed impurities in a GNR.
-  Returns the impurity Matrix"""
+  """Calculates the appropriate matrix for n Top Adsorbed impurities in a GNR."""
   
   n = len(r)
   # Creates the Mx of sites we connect to
@@ -155,8 +154,8 @@ def gMxnGNRTop(nE,r,E):
 
 
 
-def XHF1(GF,Vup,Vdown,w):
-  """Calculates the Hartree-Fock spin susceptibility"""
+def X1HF(GF,Vup,Vdown,w):
+  """Calculates the Hartree-Fock spin susceptibility for a general GF"""
   def spin_sus_int12(y):
     return hbar/(2.0*pi) *( GF(wf + 1j*y,Vup)*GF(wf + w + 1j*y,Vdown) + GF(wf - 1j*y,Vdown)*GF(wf-w- 1j*y,Vup) )
 
@@ -169,59 +168,59 @@ def XHF1(GF,Vup,Vdown,w):
   return I12 + I3
 
 
-def XHFBulk1(Vup,Vdown,w):
-  """Calculates the Hartree-Fock spin susceptibility in Bulk Graphene"""
+def X1HFBulkSubs(Vup,Vdown,w):
+  """Calculates the Hartree-Fock spin susceptibility for a substitutional impurity Bulk Graphene"""
   def GF(E,V):
     g = gBulk_kZ(0,0,0,E)
     return Dyson1(g,V)
-  return XHF1(GF,Vup,Vdown,w)
+  return X1HF(GF,Vup,Vdown,w)
 
 
-def XHF_SI1(m,n,Vup,Vdown,w):
-  """Calculates the on-site Hartree-Fock spin susceptibility in Semi-Infinite Graphene."""
+def X1HFSISubs(m,n,Vup,Vdown,w):
+  """Calculates the on-site Hartree-Fock spin susceptibility for a substitutional impurity in Semi-Infinite Graphene."""
   def GF(E,V):
     g = gSI_kZ(m,n,m,n,0,E)
     return Dyson1(g,V)
-  return XHF1(GF,Vup,Vdown,w)
+  return X1HF(GF,Vup,Vdown,w)
 
 
-def XHF_GNR1(nE,m,n,Vup,Vdown,w):
-  """Calculates the Hartree-Fock spin susceptibility in a GNR."""
+def X1HFGNRSubs(nE,m,n,Vup,Vdown,w):
+  """Calculates the Hartree-Fock spin susceptibility for a substitutional impurity in a GNR."""
   def GF(E,V):
     g = gRib_Arm(nE,m,n,m,n,0,E)
     return Dyson1(g,V)
-  return XHF1(GF,Vup,Vdown,w)
+  return X1HF(GF,Vup,Vdown,w)
 
 
-def XHF_GNRTop1(nE,m,n,Vup,Vdown,w):
-  """Calculates the Hartree-Fock spin susceptibility for a Top adsorbed impurity in a GNR."""
+def X1HFGNRTop(nE,m,n,Vup,Vdown,w):
+  """Calculates the Hartree-Fock spin susceptibility for a top adsorbed impurity in a GNR."""
   def GF(E,V):
     g = g1GNRTop(nE,m,n,E)
     return Dyson1(g,V)
-  return XHF1(GF,Vup,Vdown,w)
+  return X1HF(GF,Vup,Vdown,w)
 
 
-def XRPABulk1(Vup,Vdown,w):
-  """Calculates the on-site spin susceptibility in the RPA approximation"""
-  X0 = XHFBulk1(Vup,Vdown,w)
+def X1RPABulkSubs(Vup,Vdown,w):
+  """Calculates the on-site RPA spin susceptibility for a substitutional impurity in bulk graphene"""
+  X0 = X1HFBulkSubs(Vup,Vdown,w)
   return X0/(1.0+U*X0)
 
 
-def XRPA_GNRSubs1(nE,m,n,Vup,Vdown,w):
-  """Calculates the on-site spin susceptibility in the RPA approximation"""
-  X0 = XHF_GNR1(nE,m,n,Vup,Vdown,w)
+def X1RPAGNRSubs(nE,m,n,Vup,Vdown,w):
+  """Calculates the on-site RPA spin susceptibility for a substitutional impurity in a GNR"""
+  X0 = X1HFGNRSubs(nE,m,n,Vup,Vdown,w)
   return X0/(1.0+U*X0)
 
 
-def XRPA_GNRTop1(nE,m,n,Vup,Vdown,w):
-  """Calculates the on-site spin susceptibility in the RPA approximation"""
-  X0 = XHF_GNRTop1(nE,m,n,Vup,Vdown,w)
+def X1RPAGNRTop(nE,m,n,Vup,Vdown,w):
+  """Calculates the on-site RPA spin susceptibility for a top adsorbed impurity in a GNR"""
+  X0 = X1HFGNRTop(nE,m,n,Vup,Vdown,w)
   return X0/(1.0+U*X0)
 
 
 
 def XHF(GF,site,Vup,Vdown,w):	# Might be better to include the Dyson function within the calling functions
-  """Calculates the Hartree-Fock spin susceptibility"""
+  """Calculates the Hartree-Fock spin susceptibility between two sites"""
   i,j = site
   def spin_sus_int12(y):
     X = hbar/(2.0*pi) *( Dyson(GF(wf + 1j*y),Vup)[j,i]*Dyson(GF(wf + w + 1j*y),Vdown)[i,j] + \
@@ -237,15 +236,15 @@ def XHF(GF,site,Vup,Vdown,w):	# Might be better to include the Dyson function wi
   return I12 + I3
 
 
-def XHFBulk2(m,n,s,site,Vup,Vdown,w):
+def X2HFBulkSubs(m,n,s,site,Vup,Vdown,w):
   """Calculates the HF spin susceptibility for two substitutional impurities in bulk graphene"""
   def GF(E):
     return gMx2Bulk(m,n,s,E)	# Could maybe include the site term here and save a fucking bunch of time  
   return XHF(GF,site,Vup,Vdown,w)
 
 
-def XHF_SI2(m1,n1,m2,n2,s,site,Vup,Vdown,w):
-  """Calculates the spin susceptibility in the HF approximation for Semi-Infinite Graphene, 
+def X2HFSISubs(m1,n1,m2,n2,s,site,Vup,Vdown,w):
+  """Calculates the HF spin susceptibility for two substitutional impurities in semi-infinite graphene, 
     Requires testing"""
   def GF(E):
     return gMx2SI(m1,n1,m2,n2,s,E)
@@ -253,51 +252,49 @@ def XHF_SI2(m1,n1,m2,n2,s,site,Vup,Vdown,w):
   return XHF(GF,site,Vup,Vdown,w)
 
 
-def XHF_GNR2(nE,m1,n1,m2,n2,s,site,Vup,Vdown,w):
-  """Calculates the spin susceptibility in the HF approximation for a GNR"""
+def X2HFGNRSubs(nE,m1,n1,m2,n2,s,site,Vup,Vdown,w):
+  """Calculates the HF spin susceptibility for two substitutional impurities in a GNR"""
   def GF(E):
     g = gGNRSubsMx(nE,m1,n1,m2,n2,s,E)
     return g  
   return XHF(GF,site,Vup,Vdown,w)
 
 
-def XHF_GNRTop2(nE,m1,n1,m2,n2,s,site,Vup,Vdown,w):
-  """Calculates the spin susceptibility in the HF approximation for Top Adsorbed impurities in a GNR"""
+def X2HFGNRTop(nE,m1,n1,m2,n2,s,site,Vup,Vdown,w):
+  """Calculates the HF spin susceptibility for two top-adsorbed impurities in a GNR"""
   def GF(E):
     g = gGNRTopMx(nE,m1,n1,m2,n2,s,E)
     return g   
   return XHF(GF,site,Vup,Vdown,w)
 
 
-def XRPABulk(m,n,s,Vup,Vdown,w):
-  """The RPA susceptibility for Bulk graphene. Has not been tested really at all."""
+def X2RPABulkSubs(m,n,s,Vup,Vdown,w):
+  """Calculates the RPA spin susceptibility for two substitutional impurities in bulk graphene"""
   n = 2
-  X00 = np.array([[XHFBulk2(m,n,s,[i,j],Vup,Vdown,w) for j in range(n)] for i in range(n)])
+  X00 = np.array([[X2HFBulkSubs(m,n,s,[i,j],Vup,Vdown,w) for j in range(n)] for i in range(n)])
   temp = inv( np.eye(len(X00)) + X00.dot(U) )
   return temp.dot(X00)
 
 
-def XRPA_GNR2(nE,m1,n1,m2,n2,s,Vup,Vdown,w):
-  """Gets the RPA spin susceptibility for a GNR for 2 substitutional.
-  Done in a fairly shlick way, to make extensions to more impurities easier."""
+def X2RPAGNRSubs(nE,m1,n1,m2,n2,s,Vup,Vdown,w):
+  """Calculates the RPA spin susceptibility for two substitutional impurities in a GNR"""
   n = 2
-  X00 = np.array([[XHF_GNR2(nE,m1,n1,m2,n2,s,[i,j],Vup,Vdown,w) for j in range(n)] for i in range(n)])
+  X00 = np.array([[X2HFGNRSubs(nE,m1,n1,m2,n2,s,[i,j],Vup,Vdown,w) for j in range(n)] for i in range(n)])
   temp = inv( np.eye(len(X00)) + X00.dot(U) )
   return temp.dot(X00)
 
 
-def XRPA_GNRTop2(nE,m1,n1,m2,n2,s,Vup,Vdown,w):
-  """Gets the RPA spin susceptibility for a GNR"""
+def X2RPAGNRTop(nE,m1,n1,m2,n2,s,Vup,Vdown,w):
+  """Calculates the RPA spin susceptibility for two top-adsorbed impurities in a GNR"""
   n = 2
-  X00 = np.array([[XHF_GNRTop2(nE,m1,n1,m2,n2,s,[i,j],Vup,Vdown,w) for j in range(n)] for i in range(n)])
+  X00 = np.array([[X2HFGNRTop(nE,m1,n1,m2,n2,s,[i,j],Vup,Vdown,w) for j in range(n)] for i in range(n)])
   temp = inv( np.eye(len(X00)) + X00.dot(U) )
   return temp.dot(X00)
 
 
 
-def XHFGNR3(nE,r0,r1,r2,site,Vup,Vdown,w):
-  """The HF spin sus for 3 atoms in a GNR. 
-  Tested a little. Also has a much better name."""
+def X3HFGNRSubs(nE,r0,r1,r2,site,Vup,Vdown,w):
+  """Calculates the HF spin susceptibility for 3 substitutional impurities in a GNR"""
   i,j = site
   def GF(E):
     return gMx3GNR(nE,r0,r1,r2,E)
@@ -305,18 +302,18 @@ def XHFGNR3(nE,r0,r1,r2,site,Vup,Vdown,w):
   return XHF(GF,site,Vup,Vdown,w)
 
 
-def XRPAGNR3(nE,r0,r1,r2,Vup,Vdown,w):
+def X3RPAGNRSubs(nE,r0,r1,r2,Vup,Vdown,w):
   """Gets the RPA spin susceptibility for a GNR for 3 atoms.
     Should be easy to extend to further dimensions. 
     There's also a bunch of obvious symmetries here that we're not exploiting (since the output mx is symmetric (NOT HERMITIAN))"""
   n = 3
-  X00 = np.array([[XHFGNR3(nE,r0,r1,r2,[i,j],Vup,Vdown,w) for j in range(n)] for i in range(n)]) 		# Rather slick piece of work here mr. duffy. Apply elsewhere
+  X00 = np.array([[X3HFGNRSubs(nE,r0,r1,r2,[i,j],Vup,Vdown,w) for j in range(n)] for i in range(n)]) 		# Rather slick piece of work here mr. duffy. Apply elsewhere
   temp = inv( np.eye(len(X00)) + X00.dot(U) )
   return temp.dot(X00)
 
 
 
-def XHFGNRn(nE,r,site,Vup,Vdown,w):
+def XnHFGNRSubs(nE,r,site,Vup,Vdown,w):
   """The HF spin sus for n substitutional atoms in a GNR."""
   def GF(E):
     return gMxnGNR(nE,r,E)
@@ -327,23 +324,23 @@ def XRPAGNRn(nE,r,Vup,Vdown,w):
   """Gets the RPA spin susceptibility for a GNR for n substitutional impurities.
     There are a lot of symmetries not being exploited here (the matrix is symmetric)"""
   n = len(r)
-  X00 = np.array([[XHFGNRn(nE,r,[i,j],Vup,Vdown,w) for j in range(n)] for i in range(n)]) 		# Rather slick piece of work here Mr. duffy. Apply elsewhere
+  X00 = np.array([[XnHFGNRSubs(nE,r,[i,j],Vup,Vdown,w) for j in range(n)] for i in range(n)]) 		# Rather slick piece of work here Mr. duffy. Apply elsewhere
   temp = inv( np.eye(len(X00)) + X00.dot(U) )
   return temp.dot(X00)
 
 
-def XHFGNRTopn(nE,r,site,Vup,Vdown,w):
+def XnHFGNRTop(nE,r,site,Vup,Vdown,w):
   """The HF spin sus for n substitutional atoms in a GNR."""
   def GF(E):
     return gMxnGNRTop(nE,r,E)
   return XHF(GF,site,Vup,Vdown,w)
 
 
-def XRPAGNRTopn(nE,r,Vup,Vdown,w):
+def XnRPAGNRTop(nE,r,Vup,Vdown,w):
   """Gets the RPA spin susceptibility for a GNR for n substitutional impurities.
     There are a lot of symmetries not being exploited here (the matrix is symmetric)"""
   n = len(r)
-  X00 = np.array([[XHFGNRTopn(nE,r,[i,j],Vup,Vdown,w) for j in range(n)] for i in range(n)]) 		# Rather slick piece of work here Mr. duffy. Apply elsewhere
+  X00 = np.array([[XnHFGNRTop(nE,r,[i,j],Vup,Vdown,w) for j in range(n)] for i in range(n)]) 		# Rather slick piece of work here Mr. duffy. Apply elsewhere
   temp = inv( np.eye(len(X00)) + X00.dot(U) )
   return temp.dot(X00)
 
@@ -379,14 +376,14 @@ def SC1(GF,n0=1.0):
   return Vup, Vdown
 
 
-def SCBulkSubs1(n0=1.0):
+def SC1BulkSubs(n0=1.0):
   def GF(y,V):
     g = gBulk_kZ(0,0,0,EF+1j*y)
     return Dyson1(g,V).real
   return SC1(GF,n0)
 
 
-def SC_GNRSubs1(nE,m,n,n0=1.0):  
+def SC1GNRSubs(nE,m,n,n0=1.0):  
   """Calculates the SC potentials for a GNR with one impurity. Has been tested against Filipe's"""
   def GF(y,V):
     g = gRib_Arm(nE,m,n,m,n,0,EF+1j*y)
@@ -394,7 +391,7 @@ def SC_GNRSubs1(nE,m,n,n0=1.0):
   return SC1(GF,n0)
 
 
-def SC_GNRTop1(nE,m,n,n0=1.0):  
+def SC1GNRTop(nE,m,n,n0=1.0):  
   """Calculates the SC potentials for a GNR with one impurity. Has been tested against Filipe's"""
   def GF(y,V):
     g = g1GNRTop(nE,m,n,EF+1j*y)
@@ -402,44 +399,11 @@ def SC_GNRTop1(nE,m,n,n0=1.0):
   return SC1(GF,n0)
 
 
-def SCBulkSubs2(m,n,s,n0=1.0):
-  """Calculate Vup/Vdown for a 2 impurities in graphene. Takes advantage of the symmetry a bit."""
-  # This return values for the up/down spin that are only separated by a sign. There is a symmetry here that you are not exploiting.
-  mag_m = 0.8
-  tolerance = dtol
-  delta = 0.0
-  
-  def GF(y,V):	# g_im is a better name
-    g = Dyson(gMx2Bulk(m,n,s,EF+1j*y),V)[0,0]
-    return g.real
-  
-  def n_occ(V):
-    integral = quad(GF, eta, np.inf, args=V, epsabs=0.0, epsrel=dtol, limit=200 )
-    return 1.0/2.0 + integral[0]/pi
-    
-  def FZero(delta):
-    ex_split = U*mag_m
-    Vdown = np.eye(2)*(delta + (ex_split + hw0)/2.0)
-    Vup = np.eye(2)*(delta - (ex_split + hw0)/2.0)
-    return n0 - n_occ(Vup) - n_occ(Vdown)
-
-  while True:
-    mag_temp = mag_m
-    delta = newton(FZero, delta, tol=dtol, maxiter=50)
-    ex_split = U*mag_m
-    Vdown = delta + (ex_split + hw0)/2.0
-    Vup = delta - (ex_split + hw0)/2.0
-    mag_m = n_occ(Vup) - n_occ(Vdown)
-    if abs(mag_m - mag_temp) <= tolerance:
-      break
-
-  return Vup, Vdown
-
 
 
 def SC2(GF,n0):
   """Calculates the self-consistency for 2 substitutional atoms in a GNR.
-    Currently the tidiest of all of my codes."""
+  Is this specific to GNRs?"""
   tol = dtol
   m = 0.8*np.ones(2)
   delta = np.zeros(2)
@@ -484,21 +448,55 @@ def SC2(GF,n0):
   return Vup, Vdown
 
 
-def SC_GNRSubs2(nE,m1,n1,m2,n2,s,n0=1.0):
+def SC2BulkSubs(m,n,s,n0=1.0):
+  """Calculate Vup/Vdown for a 2 impurities in graphene. Takes advantage of the symmetry a bit."""
+  # This return values for the up/down spin that are only separated by a sign. There is a symmetry here that you are not exploiting.
+  mag_m = 0.8
+  tolerance = dtol
+  delta = 0.0
+  
+  def GF(y,V):	# g_im is a better name
+    g = Dyson(gMx2Bulk(m,n,s,EF+1j*y),V)[0,0]
+    return g.real
+  
+  def n_occ(V):
+    integral = quad(GF, eta, np.inf, args=V, epsabs=0.0, epsrel=dtol, limit=200 )
+    return 1.0/2.0 + integral[0]/pi
+    
+  def FZero(delta):
+    ex_split = U*mag_m
+    Vdown = np.eye(2)*(delta + (ex_split + hw0)/2.0)
+    Vup = np.eye(2)*(delta - (ex_split + hw0)/2.0)
+    return n0 - n_occ(Vup) - n_occ(Vdown)
+
+  while True:
+    mag_temp = mag_m
+    delta = newton(FZero, delta, tol=dtol, maxiter=50)
+    ex_split = U*mag_m
+    Vdown = delta + (ex_split + hw0)/2.0
+    Vup = delta - (ex_split + hw0)/2.0
+    mag_m = n_occ(Vup) - n_occ(Vdown)
+    if abs(mag_m - mag_temp) <= tolerance:
+      break
+
+  return Vup, Vdown
+
+
+def SC2GNRSubs(nE,m1,n1,m2,n2,s,n0=1.0):
   """Calculates the self-consistency for 2 substitutional atoms in a GNR."""
   def GF(E):
     return gGNRSubsMx(nE,m1,n1,m2,n2,s,E)
   return SC2(GF,n0)
 
 
-def SC_GNRTop2(nE,m1,n1,m2,n2,s,n0=1.0):
+def SC2GNRTop(nE,m1,n1,m2,n2,s,n0=1.0):
   """The Self Consistency performed for a GNR with 2 Top adsorbed impurities."""
   def GF(E):
     return gGNRTopMx(nE,m1,n1,m2,n2,s,E)
   return SC2(GF,n0)
 
 
-def SC_GNRSubs3(nE,r0,r1,r2,n0=1.0):
+def SC3GNRSubs(nE,r0,r1,r2,n0=1.0):
   """Calculates the self consistency for 3 atoms."""
   tol = dtol
   m = 0.8*np.ones(3)
@@ -545,7 +543,7 @@ def SC_GNRSubs3(nE,r0,r1,r2,n0=1.0):
   return Vup, Vdown
 
 
-def SC_GNRSubsn(nE,r,n0=1.0):
+def SCnGNRSubs(nE,r,n0=1.0):
   """Calculates the self consistency for n substitutional impurities. Matches in the appropriate places."""
   n = len(r)
   tol = dtol
@@ -593,7 +591,7 @@ def SC_GNRSubsn(nE,r,n0=1.0):
   return Vup, Vdown
 
 
-def SC_GNRTopn(nE,r,n0=1.0):
+def SCnGNRTop(nE,r,n0=1.0):
   """Calculates the self consistency for n top-adorsbed impurities. Matches in the appropriate places."""
   n = len(r)
   tol = dtol
@@ -641,7 +639,7 @@ def SC_GNRTopn(nE,r,n0=1.0):
   return Vup, Vdown
 
 
-def SCBulkCenter(m,n,n0=1.0):
+def SC2BulkCenter(m,n,n0=1.0):
   """Calculate Vup/Vdown for center adsorbed impurities in graphene.
   Assumes that both impurities have equal magnetic moments by symmetry.
   Not converging to high accuracy, possibly because integrating the fucking center adsorbed matrix is a nightmare."""
@@ -730,10 +728,10 @@ def SCGNRField(nE,m,n,hw0=hw0,n0=1.0):
 
 
 if __name__ == "__main__":
-  nE, r = 6,[[2,0,0],[4,2,0],[12,10,0]]
-  Vup, Vdown = SC_GNRTopn(nE,r)
-  fXr = np.vectorize(lambda w: XRPAGNRTopn(nE,r,Vup,Vdown,w)[0,0].real)
-  fXi = np.vectorize(lambda w: XRPAGNRTopn(nE,r,Vup,Vdown,w)[0,0].imag)
+  nE, r = 6,[[2,0,0],[6,3,0],[12,9,0]]
+  Vup, Vdown = SCnGNRTop(nE,r)
+  fXr = np.vectorize(lambda w: XnRPAGNRTop(nE,r,Vup,Vdown,w)[0,0].real)
+  fXi = np.vectorize(lambda w: XnRPAGNRTop(nE,r,Vup,Vdown,w)[0,0].imag)
   wrlist, Xrtemp = sample_function(fXr, [0.0,1.0e-2], tol=1e-3)
   wilist, Xitemp = sample_function(fXi, [0.0,1.0e-2], tol=1e-3)
   Xrlist = Xrtemp[0]

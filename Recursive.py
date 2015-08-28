@@ -407,9 +407,9 @@ def ConcentrationPlot(N,p,E):
 
 
 if __name__ == "__main__":  
-  N = 8
-  p = 4
-  niter = 50000
+  N = 11
+  p = 10
+  niter = 5000
   E = 0.0
   
   max_n = len(CenterPositions(N,p))
