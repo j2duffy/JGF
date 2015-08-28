@@ -203,7 +203,7 @@ def XRPABulk1(Vup,Vdown,w):
   return X0/(1.0+U*X0)
 
 
-def XRPA_GNR1(nE,m,n,Vup,Vdown,w):
+def XRPA_GNRSubs1(nE,m,n,Vup,Vdown,w):
   """Calculates the on-site spin susceptibility in the RPA approximation"""
   X0 = XHF_GNR1(nE,m,n,Vup,Vdown,w)
   return X0/(1.0+U*X0)
@@ -672,6 +672,7 @@ def SCBulkCenter(m,n,n0=1.0):
   return Vup, Vdown
 
 
+
 def GNR_DOS(nE,m1,n1,m2,n2,s,V,E):
   """Temporary function for checking the GNR DOS in the presence of one impurity.
   Probably a bit unnecessary in general and due for retirement after its brief period of service."""
@@ -725,21 +726,15 @@ def SCGNRField(nE,m,n,hw0=hw0,n0=1.0):
 
 
 if __name__ == "__main__":
-  #nE, r = 6,[[1,0,0],[11,10,0],[21,20,0]]
-  #Vup, Vdown = SC_GNRTopn(nE,r)
-  #fXr = np.vectorize(lambda w: XRPAGNRTopn(nE,r,Vup,Vdown,w)[0,0].real)
-  #fXi = np.vectorize(lambda w: XRPAGNRTopn(nE,r,Vup,Vdown,w)[0,0].imag)
-  #wrlist, Xrtemp = sample_function(fXr, [0.0,0.00122,0.5e-2], tol=1e-3)
-  #wilist, Xitemp = sample_function(fXi, [0.0,0.00122,0.5e-2], tol=1e-3)
-  #Xrlist = Xrtemp[0]
-  #Xilist = Xitemp[0]
-  #pl.plot(wrlist,Xrlist)
-  #pl.plot(wilist,Xilist)
-  #pl.show()
-  nE,m1,n1,m2,n2,s = 6,1,0,21,20,0
-  Vup,Vdown = SC_GNRSubs2(nE,m1,n1,m2,n2,s)
-  fX = np.vectorize(lambda w: XRPA_GNR2(nE,m1,n1,m2,n2,s,Vup,Vdown,w)[0,0].imag)
-  wlist, Xtemp = sample_function(fX, [0.0,1.0e-1], tol=1e-3)
-  Xlist = Xtemp[0]
-  pl.plot(wlist,Xlist)
+  nE, r = 6,[[2,0,0],[4,2,0],[12,10,0]]
+  Vup, Vdown = SC_GNRTopn(nE,r)
+  fXr = np.vectorize(lambda w: XRPAGNRTopn(nE,r,Vup,Vdown,w)[0,0].real)
+  fXi = np.vectorize(lambda w: XRPAGNRTopn(nE,r,Vup,Vdown,w)[0,0].imag)
+  wrlist, Xrtemp = sample_function(fXr, [0.0,1.0e-2], tol=1e-3)
+  wilist, Xitemp = sample_function(fXi, [0.0,1.0e-2], tol=1e-3)
+  Xrlist = Xrtemp[0]
+  Xilist = Xitemp[0]
+  pl.plot(wrlist,Xrlist)
+  pl.plot(wilist,Xilist)
+  pl.savefig("Dynamic.jpg")
   pl.show()
