@@ -303,7 +303,7 @@ def KuboTop(N,E,BigImpList):
     VTopLR[:2*N,:2*N] = VLR
     VTopRL[:2*N,:2*N] = VRL
     gL = RecAdd(gL,g,VTopLR,VTopRL)
-  gL = gL[:2*N,:2*N]
+  gL = gL[:2*N,:2*N]		# Only need first 2N elements, V kills the rest
   return Kubo(gL,gR,VLR,VRL)
 
 
@@ -347,23 +347,23 @@ def ConfigAvSubsTotal(N,p,nimp,E):
 
 def ConfigAvTopTotal(N,p,nimp,E):
   """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p). Averages all cases."""
+  KT = 0	# Total of all conductance measurements
+  imp_pos = AllPositions(N,p)	# Generates all possible positions in [cell,site] notation
   gL,gR,VLR,VRL = Leads(N,E)
-  
-  KT = 0
-  for ImpList in combinations(range(2*N*p),nimp):	# For every possible combination of positions
-    # Scattering region and connection matrices 
-    HM = HBigArmStripTop(N,p,ImpList)
-    gM = gGen(E-1j*eta,HM)
-    VbLsR, VsRbL = np.zeros((2*N*p+nimp,2*N)), np.zeros((2*N,2*N*p+nimp))
-    VsLbR, VbRsL = np.zeros((2*N,2*N*p+nimp)), np.zeros((2*N*p+nimp,2*N))
-    VbLsR[:2*N*p,:2*N], VsRbL[:2*N,:2*N*p] = VArmStripBigLSmallR(N,p)
-    VsLbR[:2*N,:2*N*p], VbRsL[:2*N*p,:2*N] = VArmStripSmallLBigR(N,p)
-
-    # Calculate the advanced GFs
-    GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
-
-    KT += Kubo(gL,GR,VLR,VRL)
-  return  KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
+  for i in combinations(imp_pos,nimp):	# Gets every possible combination of positions
+    BigImpList = ImpConvert(p,i)	# Conver the list to [[sites][sites]...] notation
+    GL = gL				# Otherwise this gets overwritten every time
+    for ImpList in BigImpList:
+      H = HArmStripTop(N,ImpList)
+      g = gGen(E-1j*eta,H)
+      VTopLR = np.zeros((GL.shape[0],g.shape[0]))
+      VTopRL = np.zeros((g.shape[0],GL.shape[0]))
+      VTopLR[:2*N,:2*N] = VLR
+      VTopRL[:2*N,:2*N] = VRL
+      GL = RecAdd(GL,g,VTopLR,VTopRL)
+    GL = GL[:2*N,:2*N]
+    KT += Kubo(GL,gR,VLR,VRL)
+  return KT/choose(2*N*p,nimp)		# Choose should give the size of our list of combinations
 
 
 def ConfigAvCenterTotal(N,p,nimp,E):
@@ -418,15 +418,16 @@ def CASubsRandom(N,p,nimp,niter,E):
 
 
 if __name__ == "__main__":  
-  N = 8
-  Imp_List = [0,2,4,9,20]
-  BigImpList = [[0,2,4,9],[4]]
+  N = 5
+  p = 3
+  nimp = 3
+  eps_imp = 10
+  tau = -10
 
   Elist = np.linspace(-3.0,3.0,201)
-  Klist = [KuboTop(N,E,BigImpList) for E in Elist]
+  Klist = [ConfigAvTopTotal(N,p,nimp,E) for E in Elist]
   pl.plot(Elist,Klist)
   pl.show()
-
 
 
 
