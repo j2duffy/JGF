@@ -406,14 +406,16 @@ def ConcentrationPlot(N,p,E):
   pl.show()
 
 
+
 if __name__ == "__main__":  
   N = 11
-  p = 10
+  p = 20
   niter = 5000
   E = 0.0
+  step = 3
   
   max_n = len(CenterPositions(N,p))
-  nimpl = range(1,max_n+1)
+  nimpl = range(1,max_n+1,step)
   
   CAC = [np.average(ConfigAvCenterRandom(N,p,nimp,niter,E)) for nimp in nimpl]
   CAS = [np.average(ConfigAvSubsRandom(N,p,nimp,niter,E)) for nimp in nimpl]
