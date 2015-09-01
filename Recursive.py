@@ -424,8 +424,8 @@ if __name__ == "__main__":
 
   Elist = np.linspace(-3.0,3.0,201)
   Klist = [ConfigAvTopTotal(N,p,nimp,E) for E in Elist]
-  #pl.plot(Elist,Klist)
-  #pl.show()
+  pl.plot(Elist,Klist)
+  pl.show()
 
 
 
