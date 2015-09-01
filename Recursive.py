@@ -419,15 +419,13 @@ def CASubsRandom(N,p,nimp,niter,E):
 
 if __name__ == "__main__":  
   N = 5
-  p = 3
-  nimp = 3
-  eps_imp = 10
-  tau = -10
+  p = 4
+  nimp = 1
 
   Elist = np.linspace(-3.0,3.0,201)
   Klist = [ConfigAvTopTotal(N,p,nimp,E) for E in Elist]
-  pl.plot(Elist,Klist)
-  pl.show()
+  #pl.plot(Elist,Klist)
+  #pl.show()
 
 
 
