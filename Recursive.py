@@ -98,15 +98,20 @@ def HArmStripTop(N,ImpList):
 
 
 def HArmStripCenter(N,ImpList):
-  """Creates the Hamiltonian for an armchair strip populated with center adsorbed impurities"""
+  """Creates the Hamiltonian for an armchair strip populated with center adsorbed impurities.
+  Allows the user to add impurities to the right side of the nanoribbon (which must be connected with appropriate potentials."""
   nimp = len(ImpList)
   H = np.zeros((2*N+nimp,2*N+nimp))
   H[:2*N,:2*N] = HArmStrip(N)
-  
   for i,k in enumerate(ImpList):
-    for j in range(3) + range(N,N+3):
-      H[2*N+i,k+j] = H[k+j,2*N+i] = tau
     H[2*N+i,2*N+i] = eps_imp
+    if k < N:
+      for j in range(3) + range(N,N+3):
+	H[2*N+i,k+j] = H[k+j,2*N+i] = tau
+    if k > N:
+      for j in range(3):
+	print k+j
+	H[2*N+i,k+j] = H[k+j,2*N+i] = tau
   return H
 
 
@@ -177,6 +182,18 @@ def VArmStrip(N):
   VLR, VRL = np.zeros([2*N,2*N]),np.zeros([2*N,2*N])
   for i in range(1,N,2):
     VLR[N+i,i] = VRL[i,N+i] = t
+  return VLR, VRL
+
+
+def VArmStripCenter(N,ImpList):
+  """Calculates the LR and RL connection matrices for the armchair strip."""
+  nimp = len(ImpList)
+  VLR, VRL = np.zeros([2*N+nimp,2*N]),np.zeros([2*N,2*N+nimp])
+  VLR[:2*N,:2*N], VRL[:2*N,:2*N] = VArmStrip(N)
+  for i,k in enumerate(ImpList):
+    if k > N:
+      for j in range(3):
+	VLR[2*N+i,k-N+j] = VRL[k-N+j,2*N+i] = tau
   return VLR, VRL
 
 
@@ -417,16 +434,14 @@ def CASubsRandom(N,p,nimp,niter,E):
   
 
 
+
 if __name__ == "__main__":  
   N = 5
-  p = 4
-  nimp = 1
-
-  Elist = np.linspace(-3.0,3.0,201)
-  Klist = [ConfigAvTopTotal(N,p,nimp,E) for E in Elist]
-  pl.plot(Elist,Klist)
-  pl.show()
-
+  ImpList = [2,6]
+  
+  VLR, VRL = VArmStripCenter(N,ImpList)
+  print VRL[1,:]
+  
 
 
 	
