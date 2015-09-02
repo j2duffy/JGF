@@ -440,41 +440,35 @@ def PadZeros(M,Msize):
   return temp
 
 
-if __name__ == "__main__":  
-  N = 5
-  BigImpList = [[2,6],[]]
-  E = 1.2
-  
+def KuboTest(N,E,BigImpList):
+  """Calculates the conductance of a GNR with top-adsorbed impurities using the Kubo Formula."""
   # Leads
   gL,gR,VLR,VRL = Leads(N,E)
-  
+  BigImpList.append([])		# Need to add one prisine cell to the end to accurately calculate the Kubo
   for ImpList in BigImpList:
     H = HArmStripCenter(N,ImpList)
     g = gGen(E-1j*eta,H)
-    VLRr = PadZeros(VLR,(gL.shape[0],g.shape[0]))		# resized VLR
+    VLRr = PadZeros(VLR,(gL.shape[0],g.shape[0]))	# resized VLR
     VRLr = PadZeros(VRL,(g.shape[0],gL.shape[0]))
     
     gL = RecAdd(gL,g,VLRr,VRLr)
   
     VLR, VRL = VArmStripCenter(N,ImpList)
-  print Kubo(gL,gR,VLR,VRL)
+  return Kubo(gL,gR,VLR,VRL)
+
+
+if __name__ == "__main__":  
+  N = 5
+  BigImpList = [[0]]
   
-  p = 2
-  ImpList = [2,6]
-  print KuboCenter(N,p,E,ImpList)
-  
-  
-  # Build scattering region strip by strip
-  #for ImpList in BigImpList:
-    #H = HArmStripTop(N,ImpList)
-    
-    #VTopLR = np.zeros((gL.shape[0],g.shape[0]))
-    #VTopRL = np.zeros((g.shape[0],gL.shape[0]))
-    #VTopLR[:2*N,:2*N] = VLR
-    #VTopRL[:2*N,:2*N] = VRL
-    
-  #gL = gL[:2*N,:2*N]		# Only need first 2N elements, V kills the rest
-  #return Kubo(gL,gR,VLR,VRL)
+  Elist = np.linspace(-3.0,3.0,201)
+  KTlist = [KuboTest(N,E,BigImpList) for E in Elist]
+  p = 1
+  ImpList = [0]
+  KClist = [KuboCenter(N,p,E,ImpList) for E in Elist]
+  pl.plot(Elist,KTlist)
+  pl.plot(Elist,KClist)
+  pl.show()
   
 
 
