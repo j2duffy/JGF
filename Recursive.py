@@ -110,7 +110,6 @@ def HArmStripCenter(N,ImpList):
 	H[2*N+i,k+j] = H[k+j,2*N+i] = tau
     if k > N:
       for j in range(3):
-	print k+j
 	H[2*N+i,k+j] = H[k+j,2*N+i] = tau
   return H
 
@@ -434,13 +433,48 @@ def CASubsRandom(N,p,nimp,niter,E):
   
 
 
+def PadZeros(M,Msize):
+  """Pads array with zeros up to the specified size"""
+  temp = np.zeros(Msize)
+  temp[:M.shape[0],:M.shape[1]] = M
+  return temp
+
 
 if __name__ == "__main__":  
   N = 5
-  ImpList = [2,6]
+  BigImpList = [[2,6],[]]
+  E = 1.2
   
-  VLR, VRL = VArmStripCenter(N,ImpList)
-  print VRL[1,:]
+  # Leads
+  gL,gR,VLR,VRL = Leads(N,E)
+  
+  for ImpList in BigImpList:
+    H = HArmStripCenter(N,ImpList)
+    g = gGen(E-1j*eta,H)
+    VLRr = PadZeros(VLR,(gL.shape[0],g.shape[0]))		# resized VLR
+    VRLr = PadZeros(VRL,(g.shape[0],gL.shape[0]))
+    
+    gL = RecAdd(gL,g,VLRr,VRLr)
+  
+    VLR, VRL = VArmStripCenter(N,ImpList)
+  print Kubo(gL,gR,VLR,VRL)
+  
+  p = 2
+  ImpList = [2,6]
+  print KuboCenter(N,p,E,ImpList)
+  
+  
+  # Build scattering region strip by strip
+  #for ImpList in BigImpList:
+    #H = HArmStripTop(N,ImpList)
+    
+    #VTopLR = np.zeros((gL.shape[0],g.shape[0]))
+    #VTopRL = np.zeros((g.shape[0],gL.shape[0]))
+    #VTopLR[:2*N,:2*N] = VLR
+    #VTopRL[:2*N,:2*N] = VRL
+    
+  #gL = gL[:2*N,:2*N]		# Only need first 2N elements, V kills the rest
+  #return Kubo(gL,gR,VLR,VRL)
   
 
 
