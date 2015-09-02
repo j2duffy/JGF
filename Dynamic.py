@@ -729,8 +729,8 @@ def SCGNRField(nE,m,n,hw0=hw0,n0=1.0):
 
 
 if __name__ == "__main__":
-  for D in range(10,20):
-    nE, r = 6,[[1,0,0],[3,2,0],[4+D,3+D,0]]
+  for D in range(10,100,10):
+    nE, r = 6,[[1,0,0],[0-D,-1-D,0],[1+D,0+D,0]]
     Vup, Vdown = SCnGNRTop(nE,r)
     fXr = np.vectorize(lambda w: XnRPAGNRTop(nE,r,Vup,Vdown,w)[0,0].real)
     fXi = np.vectorize(lambda w: XnRPAGNRTop(nE,r,Vup,Vdown,w)[0,0].imag)
@@ -738,7 +738,7 @@ if __name__ == "__main__":
     wilist, Xitemp = sample_function(fXi, [0.0,1.0e-2], tol=1e-3)
     Xrlist = Xrtemp[0]
     Xilist = Xitemp[0]
+    np.savetxt("Dynamic_%g.dat" % (D,),zip(wilist,Xilist))
     pl.plot(wrlist,Xrlist)
     pl.plot(wilist,Xilist)
-    pl.savefig("Dynamic_%g.jpg" % (D,))
     pl.show()
