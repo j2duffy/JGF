@@ -472,5 +472,14 @@ if __name__ == "__main__":
   #pl.plot(Elist,KTlist)
   #pl.plot(Elist,KClist)
   #pl.show()
+  
+  N,BigImpList = 7,[[13,12,11]]
+  Elist = np.linspace(-3.0,3.0,201)
+  Klist = [KuboSubs(N,E,BigImpList) for E in Elist]
+  pl.plot(Elist,Klist)
+  x,y = np.loadtxt("SubsTest_7.dat").T
+  pl.plot(x,y)
+  pl.show()
+  
 
 	
