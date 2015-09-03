@@ -408,27 +408,32 @@ def ConcentrationPlot(N,p,E):
 
 
 if __name__ == "__main__":  
-  N = 11
-  p = 20
-  niter = 5000
-  E = 0.0
-  step = 3
+  #N = 11
+  #p = 20
+  #niter = 50
+  #E = 0.0
+  #step = 3
   
-  max_n = len(CenterPositions(N,p))
-  nimpl = range(1,max_n+1,step)
+  #max_n = len(CenterPositions(N,p))
+  #nimpl = range(1,max_n+1,step)
   
-  CAC = [np.average(ConfigAvCenterRandom(N,p,nimp,niter,E)) for nimp in nimpl]
-  CAS = [np.average(ConfigAvSubsRandom(N,p,nimp,niter,E)) for nimp in nimpl]
-  CAT = [np.average(ConfigAvTopRandom(N,p,nimp,niter,E)) for nimp in nimpl]
+  #CAC = [np.average(ConfigAvCenterRandom(N,p,nimp,niter,E)) for nimp in nimpl]
+  #CAS = [np.average(ConfigAvSubsRandom(N,p,nimp,niter,E)) for nimp in nimpl]
+  #CAT = [np.average(ConfigAvTopRandom(N,p,nimp,niter,E)) for nimp in nimpl]
   
-  conc = [nimp/(2.0*N*p) for nimp in nimpl]
+  #conc = [nimp/(2.0*N*p) for nimp in nimpl]
   
-  pl.plot(conc,CAC,label='Center')
-  pl.plot(conc,CAS,label='Subs')
-  pl.plot(conc,CAT,'o',label='Top')
-  pl.legend()
-  pl.savefig('plot.jpg')
-  pl.show()
+  #pl.plot(conc,CAC,label='Center')
+  #pl.plot(conc,CAS,label='Subs')
+  #pl.plot(conc,CAT,'o',label='Top')
+  #pl.legend()
+  #pl.savefig('plot.jpg')
+  #pl.show()
+  
+  for N,p,ImpList in [[4,1,[]],[5,1,[0]],[6,2,[0,1,12,16]],[7,3,[41,40,39]]]:
+    Elist = np.linspace(-3.0,3.0,201)
+    Klist = [KuboSubs(N,p,E,ImpList) for E in Elist]
+    np.savetxt("SubsTest_%g.dat" % (N,),zip(Elist,Klist))  
 
 
 
