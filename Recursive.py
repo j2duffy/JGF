@@ -473,13 +473,5 @@ if __name__ == "__main__":
   #pl.plot(Elist,KClist)
   #pl.show()
   
-  N,BigImpList = 4,[[]]
-  Elist = np.linspace(-3.0,3.0,201)
-  Klist = [KuboSubs(N,E,BigImpList) for E in Elist]
-  pl.plot(Elist,Klist)
-  x,y = np.loadtxt("TopTest_4.dat").T
-  pl.plot(x,y)
-  pl.show()
-  
 
 	
