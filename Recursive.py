@@ -458,18 +458,19 @@ def KuboTest(N,E,BigImpList):
 
 
 if __name__ == "__main__":  
-  N = 5
-  BigImpList = [[0]]
+  #N = 5
+  #BigImpList = [[],[0],[]]
   
-  Elist = np.linspace(-3.0,3.0,201)
-  KTlist = [KuboTest(N,E,BigImpList) for E in Elist]
-  p = 1
-  ImpList = [0]
-  KClist = [KuboCenter(N,p,E,ImpList) for E in Elist]
-  pl.plot(Elist,KTlist)
-  pl.plot(Elist,KClist)
-  pl.show()
+  #Elist = np.linspace(-3.0,3.0,201)
+  #KTlist = [KuboTest(N,E,BigImpList) for E in Elist]
   
-
+  #p = 4
+  #ImpList = [30]
+  #nimp = len(ImpList)
+  
+  #KClist = [KuboCenter(N,p,E,ImpList) for E in Elist]
+  #pl.plot(Elist,KTlist)
+  #pl.plot(Elist,KClist)
+  #pl.show()
 
 	
