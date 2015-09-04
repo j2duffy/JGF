@@ -430,6 +430,7 @@ if __name__ == "__main__":
   #pl.savefig('plot.jpg')
   #pl.show()
   
+
   for N,p,ImpList in [[4,1,[]],[5,1,[0]],[6,2,[0,1,12,16]],[7,3,[41,40,39]]]:
     Elist = np.linspace(-3.0,3.0,201)
     Klist = [KuboTop(N,p,E,ImpList) for E in Elist]

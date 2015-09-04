@@ -7,6 +7,7 @@ from functools import partial
 import profile
 import multiprocessing
 from functionsample import sample_function
+from scipy.interpolate import UnivariateSpline
 
 
 def gRib_Armr(nE,r0,r1,E):
@@ -729,25 +730,33 @@ def SCGNRField(nE,m,n,hw0=hw0,n0=1.0):
 
 
 if __name__ == "__main__":
-  #for D in range(10,100,10):
-    #nE, r = 6,[[1,0,0],[0-D,-1-D,0],[1+D,0+D,0]]
-    #Vup, Vdown = SCnGNRTop(nE,r)
-    #fXr = np.vectorize(lambda w: XnRPAGNRTop(nE,r,Vup,Vdown,w)[0,0].real)
-    #fXi = np.vectorize(lambda w: XnRPAGNRTop(nE,r,Vup,Vdown,w)[0,0].imag)
-    #wrlist, Xrtemp = sample_function(fXr, [0.0,1.0e-2], tol=1e-3)
-    #wilist, Xitemp = sample_function(fXi, [0.0,1.0e-2], tol=1e-3)
-    #Xrlist = Xrtemp[0]
-    #Xilist = Xitemp[0]
-    #np.savetxt("Dynamic_%g.dat" % (D,),zip(wilist,Xilist))
-    #pl.plot(wrlist,Xrlist)
-    #pl.plot(wilist,Xilist)
-    #pl.show()
-  for D in range(10,70,10):
-    x, y = np.loadtxt("Dynamic_%g.dat" % (D,)).T
-    mask = (x < 0.001) > 0.00092
-    #mask = mask > 0.00092
-    #x = x[mask]
-    #y = y[mask]
+  for D in range(80,200,10):
+    nE, r = 6,[[1,0,0],[0-D,-1-D,0],[1+D,0+D,0]]
+    Vup, Vdown = SCnGNRTop(nE,r)
+    fXr = np.vectorize(lambda w: XnRPAGNRTop(nE,r,Vup,Vdown,w)[0,0].real)
+    fXi = np.vectorize(lambda w: XnRPAGNRTop(nE,r,Vup,Vdown,w)[0,0].imag)
+    wrlist, Xrtemp = sample_function(fXr, [0.0,1.0e-2], tol=1e-3)
+    wilist, Xitemp = sample_function(fXi, [0.0,1.0e-2], tol=1e-3)
+    Xrlist = Xrtemp[0]
+    Xilist = Xitemp[0]
+    np.savetxt("Dynamic_%g.dat" % (D,),zip(wilist,Xilist))
+    pl.plot(wrlist,Xrlist)
+    pl.plot(wilist,Xilist)
+    pl.show()
+    
+  #Flist = []
+  #for D in range(80,200,10):
+    #x, y = np.loadtxt("Dynamic_%g.dat" % (D,)).T
+    #y = y - y.min()/2.0 
+    #spline = UnivariateSpline(x,y)
     #pl.plot(x,y)
+    #pl.plot(x,spline(x),'o')
+    #pl.show()
+    #roots = spline.roots()
+    #FWHM = roots[1] - roots[0]
+    #Flist.append(FWHM)
+  #pl.plot(range(10,70,10),Flist,'-o')
   #pl.show()
     
+
+      
