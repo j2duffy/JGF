@@ -444,7 +444,6 @@ def KuboTest(N,E,BigImpList):
   """Calculates the conductance of a GNR with top-adsorbed impurities using the Kubo Formula."""
   # Leads
   gL,gR,VLR,VRL = Leads(N,E)
-  BigImpList.append([])		# Need to add one prisine cell to the end to accurately calculate the Kubo
   for ImpList in BigImpList:
     H = HArmStripCenter(N,ImpList)
     g = gGen(E-1j*eta,H)
@@ -454,24 +453,25 @@ def KuboTest(N,E,BigImpList):
     gL = RecAdd(gL,g,VLRr,VRLr)
   
     VLR, VRL = VArmStripCenter(N,ImpList)
+  gL = gL[:2*N,:2*N]
   return Kubo(gL,gR,VLR,VRL)
 
 
 if __name__ == "__main__":  
-  #N = 5
-  #BigImpList = [[],[0],[]]
+  N = 5
+  BigImpList = [[],[0],[]]
   
-  #Elist = np.linspace(-3.0,3.0,201)
-  #KTlist = [KuboTest(N,E,BigImpList) for E in Elist]
+  Elist = np.linspace(-3.0,3.0,201)
+  KTlist = [KuboTest(N,E,BigImpList) for E in Elist]
   
-  #p = 4
-  #ImpList = [30]
-  #nimp = len(ImpList)
+  p = 4
+  ImpList = [30]
+  nimp = len(ImpList)
   
-  #KClist = [KuboCenter(N,p,E,ImpList) for E in Elist]
-  #pl.plot(Elist,KTlist)
-  #pl.plot(Elist,KClist)
-  #pl.show()
+  KClist = [KuboCenter(N,p,E,ImpList) for E in Elist]
+  pl.plot(Elist,KTlist)
+  pl.plot(Elist,KClist)
+  pl.show()
   
 
 	
