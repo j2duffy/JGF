@@ -10,12 +10,7 @@ from functionsample import sample_function
 from scipy.interpolate import UnivariateSpline
 
 
-def gRib_Armr(nE,r0,r1,E):
-  """A temporary function that should be used to convert between old and new notation"""
-  m1,n1,s1=r0
-  m2,n2,s2=r1
-  s=s2-s1
-  return gRib_Arm(nE,m1,n1,m2,n2,s,E)
+
 
 
 # 1 Impurity Peturbed GFs
@@ -102,56 +97,6 @@ def gMx2GNRTopFast(nE,m1,n1,m2,n2,s,E):
   G[1,1] = GBB
   G[0,1],G[1,0] = 2*(GAB,)
   return G
-
-
-# 3 site GF Matrices
-def gMx3GNR(nE,r0,r1,r2,E):      
-  """Just returns the GF matrix for three atomic positions in a graphene GNR."""
-  g = np.zeros((3,3),dtype=complex)
-  g[0,0] = gRib_Armr(nE,r0,r0,E)
-  g[1,1] = gRib_Armr(nE,r1,r1,E)
-  g[2,2] = gRib_Armr(nE,r2,r2,E)
-  g[0,1] = g[1,0] = gRib_Armr(nE,r0,r1,E)
-  g[0,2] = g[2,0] = gRib_Armr(nE,r0,r2,E)
-  g[1,2] = g[2,1] = gRib_Armr(nE,r1,r2,E)
-  return g
-
-
-# n site GF Matrices
-def gMxnGNR(nE,r,E):      
-  """The GF matrix for n substitutional impurities. Does not account for symmetries at all"""
-  # r is a list of all the relevant position vectors (so a list of lists)
-  n = len(r)
-  g = np.array([[gRib_Armr(nE,r[i],r[j],E) for j in range(n)] for i in range(n)])
-  return g
-
-
-def gMxnGNRTop(nE,r,E): 
-  """Calculates the appropriate matrix for n Top Adsorbed impurities in a GNR."""
-  
-  n = len(r)
-  # Creates the Mx of sites we connect to
-  gPosMx = gMxnGNR(nE,r,E)
-  
-  # Createst the Mx of impurities
-  g_impurity = 1.0/(E-eps_imp)
-  gImpMx = g_impurity*np.eye(n)
-  
-  # Combination Mx
-  gbig = np.zeros([2*n,2*n],dtype=complex)
-  gbig[:n,:n] = gPosMx
-  gbig[n:,n:] = gImpMx
-  
-  # Connection Potential
-  V = np.zeros([2*n,2*n])
-  for i in range(n):
-    V[n+i,i] = V[i,n+i] = tau
-  
-  G = Dyson(gbig,V)
-  
-  # Return the part of the matrix that governs the impurity behaviour. 
-  return G[n:,n:]
-
 
 
 

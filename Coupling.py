@@ -50,7 +50,7 @@ def JBulkCenter(m,n):
 def JGNRSubs(nE,m1,n1,m2,n2,s):
   """The coupling for substitutional impurities in a GNR"""
   def GF(y):
-    return gGNRSubsMx(nE,m1,n1,m2,n2,s,EF+1j*y)
+    return gMx2GNR(nE,m1,n1,m2,n2,s,EF+1j*y)
   return J(GF)
 
 
@@ -72,7 +72,7 @@ def JGNRSubsMx(nE,m1,n1,m2,n2,s):
   """A routine for calculating the coupling in GNRs, modified to work with matrices.
   Unsurprisingly, takes a bit longer than the usual method."""
   def GF(y):
-    return gGNRSubsMx(nE,m1,n1,m2,n2,s,EF+1j*y)
+    return gMx2GNR(nE,m1,n1,m2,n2,s,EF+1j*y)
   def integrand(y):
     VRot = np.array([[-2*Vup,0],[0,-2*Vdown]])
     g = np.array([[Dyson(GF(y),Vup)[1,1],0],[0,Dyson(GF(y),Vdown)[1,1]]])
