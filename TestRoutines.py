@@ -3,6 +3,12 @@ from numpy.linalg import norm
 from Recursive import *
 
 
+def gSubs1(nE,m,n,E):
+  s = 0
+  g = gRib_Arm(nE,m,n,m,n,s,E)
+  return Dyson1(g,eps_imp)
+
+
 def GMx1CenterProbe(nE,mC,nC,mP,nP,sP,E):  
   """Returns the GF Mx of the center adosrbed impurity and also a single probe site.
   The site order is probe,hexagon,impurity site."""
@@ -17,8 +23,8 @@ def GMx1CenterProbe(nE,mC,nC,mP,nP,sP,E):
   gMx[n-1,n-1] = 1.0/(E-eps_imp)
     
   V = np.zeros([n,n],dtype=complex)
-  V[1:n-1,n-1] = tau
-  V[n-1,1:n-1] = tau
+  V[:n-1,n-1] = tau
+  V[n-1,:n-1] = tau
   
   GMx = Dyson(gMx,V)
   
@@ -46,42 +52,49 @@ def GMx1Center(nE,mC,nC,E):
   return GMx
 
 
-def test(E):
-  N = nE - 1
-  gL,gR,VLR,VRL = Leads(N,E+1j*eta)
-  H = HArmStrip(N,CenterList=[0])
+def GMxSubsRec(N,ImpList,E):
+  gL,gR,VLR,VRL = Leads(N,E)
+  H = HArmStrip(N,SubsList=ImpList)
+  gC = gGen(E,H)
+  gL = RecAdd(gL,gC,VLR,VRL)
+  g = RecAdd(gR,gL,VRL,VLR)
+  return g
+
+
+def GMxCenterRec(N,ImpList,E):
+  gL,gR,VLR,VRL = Leads(N,E)
+  H = HArmStrip(N,CenterList=ImpList)
   gC = gGen(E,H)[:2*N,:2*N]
   gL = RecAdd(gL,gC,VLR,VRL)
   g = RecAdd(gR,gL,VRL,VLR)
-  return g[0,0]
+  return g
 
 
-def test2(E):
-  N = nE - 1
+def GMxCenterRec2(N,ImpList,E):
+  """Calculates the GF of a strip in an AGNR in the presence of center adsorbed impurities"""
+  nimp = len(ImpList)
   gL,gR,VLR,VRL = Leads(N,E)
-  H = HArmStrip(N,CenterList=[0])
+  H = HArmStrip(N,CenterList=ImpList)
   gC = gGen(E,H)
-  VLRtemp,VRLtemp = np.zeros((2*N,2*N+1)), np.zeros((2*N+1,2*N))
+  VLRtemp,VRLtemp = np.zeros((2*N,2*N+nimp)), np.zeros((2*N+nimp,2*N))
   VLRtemp[:2*N,:2*N], VRLtemp[:2*N,:2*N] = VLR, VRL
   gL = RecAdd(gL,gC,VLRtemp,VRLtemp)
-  VLRtemp,VRLtemp = np.zeros((2*N+1,2*N)), np.zeros((2*N,2*N+1))
+  VLRtemp,VRLtemp = np.zeros((2*N+nimp,2*N)), np.zeros((2*N,2*N+nimp))
   VLRtemp[:2*N,:2*N], VRLtemp[:2*N,:2*N] = VLR, VRL
   g = RecAdd(gR,gL,VRLtemp,VLRtemp)
-  return g[0,0]
+  return g
 
 
 if __name__ == "__main__":  
-  nE = 6
-  mC = 1
-  nC = 0
-  E = 1.2
-  #print GMx1Center(nE,mC,nC,E+1j*eta)[0,0]
+  nE = 9
+  N = nE - 1
+  mC,nC = 3,0
+  ImpList = [2]
+  E = 1.1 + 1j*eta
+  print GMx1Center(nE,mC,nC,E)[0,0]
+  print GMxCenterRec2(N,ImpList,E)[2,2]
 
-  Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
-  Glist = [GMx1Center(nE,mC,nC,E)[0,0] for E in Elist]
-  Tlist = [test(E) for E in Elist]
-  pl.plot(Elist,Glist)
-  pl.plot(Elist,Tlist,'o')
-  pl.show()
+
+
   
 

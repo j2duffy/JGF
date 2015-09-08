@@ -1,5 +1,4 @@
 """Auxiliary routines, mostly for matrix creation, for various systems"""
-
 from GF import *
 
 def Dyson1(g,V):
