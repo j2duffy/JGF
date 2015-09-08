@@ -74,7 +74,7 @@ def BulkMxGen2(r,E):
   return g_mx
 
 
-def gBulkSubsMx(m,n,s,E):
+def gMx2Bulk(m,n,s,E):
   """ Returns the GF matrix for two atomic sites in bulk graphene"""
   g = np.zeros((2,2),dtype=complex)
   g[0,0],g[1,1] = 2*(gBulk_kZ(0,0,0,E),)

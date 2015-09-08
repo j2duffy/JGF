@@ -1,27 +1,42 @@
 from GFRoutines import *
 from numpy.linalg import norm
+from Recursive import *
+
+
+def GMxTest(nE,mC,nC,mP,nP,sP,E):  
+  """Probes the GF of a given position in the presence of a center adorbed impurity.
+  May have to be some distance from the hexagon, since otherwise we're adding sites unnecessarily"""
+  n = 8		# Total number of sites (hexagon + impurity + probe)
+  
+  rC = np.array([mC,nC,0])	# Position of center adsorbed impurity (bottom left site)
+  rHex = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])		# All of the sites of a hexagon (w.r.t bottom left)
+  r = np.concatenate(([[mP,nP,sP]],rHex + rC))	# Our complete list of positions, probe site, hexagon
+  
+  gMx = np.zeros((8,8),dtype=complex)
+  gMx[:n-1,:n-1] = gMxnGNR(nE,r,E)
+  gMx[7,7] = 1.0/(E-eps_imp)
+    
+  V = np.zeros([n,n],dtype=complex)
+  V[1:n-1,n-1] = tau
+  V[n-1,1:n-1] = tau
+  
+  GMx = Dyson(gMx,V)
+  
+  return GMx[0,0]
+
 
 if __name__ == "__main__":  
-  m1 = 1
-  n1 = 0
+  nE = 6
+  mC = 1
+  nC = 0
   
-  r1 = np.array([m1,n1,0])
-  hex1 = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])
-  r = hex1 + r1
+  mP = 1
+  nP = 0
+  sP = 0
+  E = 1.2 + 1j*eta
+  print GMxTest(nE,mC,nC,mP,nP,sP,E)
   
-  
-  #rcol = r[:,np.newaxis]
-  #rij = r-rcol
-  #n = len(rij)
-  #rflat = rij.reshape(n*n,3)
-  #rSflat = map(SymSector,rflat)
-  #rUnique = set(map(tuple,rSflat))
-  #dic = {k:gBulkList(E,k) for k in rUnique}
-  #gflat = np.array([dic[tuple(r)] for r in rSflat])
-  #g_mx = gflat.reshape(n,n)  
-  #return g_mx
-  
-  #g_mx = np.zeros([14,14],dtype=complex)
-  #g_mx[:12,:12] = BulkMxGen(r,E)
-  #g_impurity = 1.0/(E-eps_imp)
-  #g_mx[12,12] = g_mx[13,13] = g_impurity
+  N = nE - 1
+  gL,gR,VLR,VRL = Leads(N,E)
+  H = HArmStrip(N,CenterList=[0])
+  gC = gGen(E,H)

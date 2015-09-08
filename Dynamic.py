@@ -24,15 +24,6 @@ def g1GNRTop(nE,m,n,E):
   return G00
 
 
-# 2 site GF Matrices
-def gMx2Bulk(m,n,s,E):
-  """ Returns the GF matrix for two atomic sites in bulk graphene"""
-  g = np.zeros((2,2),dtype=complex)
-  g[0,0],g[1,1] = 2*(gBulk_kZ(0,0,0,E),)
-  g[0,1],g[1,0] = 2*(gBulk_kZ(m,n,s,E),)
-  return g
-
-
 def gMx2BulkCenter(m,n,E):
   """A routine that calculates the 2x2 matrix for Center adsorbed impurities"""
   D = [m,n,0]

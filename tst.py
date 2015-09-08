@@ -7,6 +7,9 @@ from numpy.testing import assert_allclose
 #assert_allclose(JGNRSubs(nE,m1,n1,m2,n2,s),8.9053121966e-07)
 #print "Passed coupling tests"
 
+#m,n,s = 3,1,0
+#assert_allclose( JBulkSubs(3,1,0),-0.000871492243211 )
+
 #print "Dynamic Tests"
 
 #print "Testing SC1GNRTop and X1RPAGNRTop"
@@ -62,17 +65,19 @@ from numpy.testing import assert_allclose
 #assert_allclose( XnHFGNRSubs(nE,r,[1,0],Vup,Vdown,0.3),(-0.000549720171215+1.05613653854e-06j) )
 
 
-#print "Testing SCnGNRTop"
-#nE,r = 5,[[1,0,0],[2,1,1],[0,-2,0],[10,9,1]]
-#assert_allclose( SCnGNRTop(nE,r,n0=1.0),
-#(np.array([[-5.8605745 ,  0.        ,  0.        ,  0.        ],
-#[ 0.        , -5.86060756,  0.        ,  0.        ],
-#[ 0.        ,  0.        , -5.87387876,  0.        ],
-#[ 0.        ,  0.        ,  0.        , -5.85995626]]), np.array([[ 3.8605745 ,  0.        ,  0.        ,  0.        ],
-#[ 0.        ,  3.86060756,  0.        ,  0.        ],
-#[ 0.        ,  0.        ,  3.87387876,  0.        ],
-#[ 0.        ,  0.        ,  0.        ,  3.85995626]]))		)
-#assert_allclose( XnHFGNRSubs(nE,r,[1,1],Vup,Vdown,0.1), (-0.0725780991078-0.000502830908154j) )
+print "Testing SCnGNRTop"
+nE,r = 5,[[1,0,0],[2,1,1],[0,-2,0],[10,9,1]]
+assert_allclose( SCnGNRTop(nE,r),
+(np.array([[-5.8605745 ,  0.        ,  0.        ,  0.        ],
+[ 0.        , -5.86060756,  0.        ,  0.        ],
+[ 0.        ,  0.        , -5.87387876,  0.        ],
+[ 0.        ,  0.        ,  0.        , -5.85995626]]), np.array([[ 3.8605745 ,  0.        ,  0.        ,  0.        ],
+[ 0.        ,  3.86060756,  0.        ,  0.        ],
+[ 0.        ,  0.        ,  3.87387876,  0.        ],
+[ 0.        ,  0.        ,  0.        ,  3.85995626]]))		)
+# This will evaluate incorrectly unless this test is done on its own. Which is disturbing.
+print "Testing XnHFGNRTop"
+assert_allclose( XnHFGNRTop(nE,r,[1,1],Vup,Vdown,0.1),(-0.108515546142-5.7631916817e-12j) )
 
 
 

@@ -29,7 +29,7 @@ def J(GF):
 def JBulkSubs(m,n,s):
   """The Coupling calculation in bulk graphene for substitutional impurities."""
   def GF(y):
-    return gBulkSubsMx(m,n,s,EF+1j*y)
+    return gMx2Bulk(m,n,s,EF+1j*y)
   return J(GF)
 
 
@@ -85,7 +85,7 @@ def JBulkSubsMx(m,n,s):
   """A routine for calculating the coupling in Bulk, modified to work with matrices.
   Unsurprisingly, takes a bit longer than the usual method."""
   def GF(y):
-    return gBulkSubsMx(m,n,s,EF+1j*y)
+    return gMx2Bulk(m,n,s,EF+1j*y)
   def integrand(y):
     VRot = np.array([[-2*Vup,0],[0,-2*Vdown]])
     g = np.array([[Dyson(GF(y),Vup)[1,1],0],[0,Dyson(GF(y),Vdown)[1,1]]])
