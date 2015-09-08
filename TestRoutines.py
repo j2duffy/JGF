@@ -38,8 +38,8 @@ def GMx1Center(nE,mC,nC,E):
   gMx[n-1,n-1] = 1.0/(E-eps_imp)	# Final site is that of the impurity
     
   V = np.zeros([n,n],dtype=complex)
-  V[1:n-1,n-1] = tau
-  V[n-1,1:n-1] = tau
+  V[:n-1,n-1] = tau
+  V[n-1,:n-1] = tau
   
   GMx = Dyson(gMx,V)
   
@@ -58,7 +58,7 @@ def test(E):
 
 def test2(E):
   N = nE - 1
-  gL,gR,VLR,VRL = Leads(N,E+1j*eta)
+  gL,gR,VLR,VRL = Leads(N,E)
   H = HArmStrip(N,CenterList=[0])
   gC = gGen(E,H)
   VLRtemp,VRLtemp = np.zeros((2*N,2*N+1)), np.zeros((2*N+1,2*N))
@@ -74,17 +74,14 @@ if __name__ == "__main__":
   nE = 6
   mC = 1
   nC = 0
+  E = 1.2
+  #print GMx1Center(nE,mC,nC,E+1j*eta)[0,0]
 
-  #Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
-  #Glist = [GMx1Center(nE,mC,nC,E)[0,0] for E in Elist]
-  #pl.plot(Elist,Glist)
-  #pl.show()
-  
   Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
-  T1list = [test(E) for E in Elist]
-  T2list = [test(E) for E in Elist]
-  pl.plot(Elist,T1list)
-  pl.plot(Elist,T2list)
+  Glist = [GMx1Center(nE,mC,nC,E)[0,0] for E in Elist]
+  Tlist = [test(E) for E in Elist]
+  pl.plot(Elist,Glist)
+  pl.plot(Elist,Tlist,'o')
   pl.show()
   
 

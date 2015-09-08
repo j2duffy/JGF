@@ -167,7 +167,7 @@ def Leads(N,E):
   Also returns the connection matrices, because we always seem to need them."""
   HC = HArmStrip(N,p=1)
   VLR, VRL = VArmStrip(N)	
-  gC = gGen(E-1j*eta,HC)	# The advanced GF
+  gC = gGen(E,HC)
   gL = RubioSancho(gC,VRL,VLR)
   gR = RubioSancho(gC,VLR,VRL)
   return gL,gR,VLR,VRL
@@ -186,13 +186,13 @@ def Kubo(gL,gR,VLR,VRL):
 
 def KuboPristine(N,E):
   """Calculates the conductance of a pristine GNR using the Kubo Formula"""
-  gL,gR,VLR,VRL = Leads(N,E)
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)	# Get the ADVANCED GF
   return Kubo(gL,gR,VLR,VRL)
 
 
 def KuboSubs(N,p,E,ImpList):
   """Calculates the conductance of a GNR with substitutional impurities (given in ImpList) using the Kubo Formula."""
-  gL,gR,VLR,VRL = Leads(N,E)
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)
   # Scattering region and connection matrices 
   HM = HArmStrip(N,p,SubsList=ImpList)
   gM = gGen(E-1j*eta,HM)
@@ -208,7 +208,7 @@ def KuboSubs(N,p,E,ImpList):
 def KuboTop(N,p,E,ImpList):
   """Calculates the conductance of a GNR with top-adsorbed impurities (given in ImpList) using the Kubo Formula."""
   nimp = len(ImpList)
-  gL,gR,VLR,VRL = Leads(N,E)
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)
 
   # Scattering region and connection matrices 
   HM =  HArmStrip(N,p,TopList=ImpList)
@@ -229,7 +229,7 @@ def KuboCenter(N,p,E,ImpList):
   The impurities are given in ImpList and labelled with the bottom left connecting site."""
   nimp = len(ImpList)
   # Leads 
-  gL,gR,VLR,VRL = Leads(N,E)
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)
 
   # Scattering region and connection matrices 
   HM = HArmStrip(N,p,CenterList=ImpList)
@@ -248,7 +248,7 @@ def KuboCenter(N,p,E,ImpList):
 
 def ConfigAvSubsTotal(N,p,nimp,E):
   """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p). Averages all cases."""
-  gL,gR,VLR,VRL = Leads(N,E)
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)
   
   KT = 0
   for ImpList in combinations(range(2*N*p),nimp):	# For every possible combination of positions
@@ -267,7 +267,7 @@ def ConfigAvSubsTotal(N,p,nimp,E):
 
 def ConfigAvTopTotal(N,p,nimp,E):
   """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p). Averages all cases."""
-  gL,gR,VLR,VRL = Leads(N,E)
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)
   
   KT = 0
   for ImpList in combinations(range(2*N*p),nimp):	# For every possible combination of positions
@@ -288,7 +288,7 @@ def ConfigAvTopTotal(N,p,nimp,E):
 
 def ConfigAvCenterTotal(N,p,nimp,E):
   """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p). Averages all cases."""
-  gL,gR,VLR,VRL = Leads(N,E)
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)
   
   # Should have this escape clause in any case, should probably raise an exception
   if nimp > len(CenterPositions(N,p)): 
@@ -317,7 +317,7 @@ def ConfigAvSubsRandom(N,p,nimp,niter,E):
   """Calculates the configurational average for nimp substitutional impurities in an armchair nanoribbons (N,p).
   Randomly chooses niter configurations and returns a list of the results of the Kubo Formula applied in these iterations.
   Samples WITH replacement, which is not ideal"""
-  gL,gR,VLR,VRL = Leads(N,E)
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)
 
   Klist = []
   for i in range(niter):	# For every possible combination of positions
@@ -340,7 +340,7 @@ def ConfigAvTopRandom(N,p,nimp,niter,E):
   """Calculates the configurational average for nimp top-adsorbed impurities in an armchair nanoribbons (N,p).
   Randomly chooses niter configurations and returns a list of the results of the Kubo Formula applied in these iterations.
   Samples WITH replacement, which is not ideal"""
-  gL,gR,VLR,VRL = Leads(N,E)
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)
   Klist = []
   for i in range(niter):
     ImpList = random.sample(range(2*N*p),nimp)		# Get a random sample of positions
@@ -368,7 +368,7 @@ def ConfigAvCenterRandom(N,p,nimp,niter,E):
   if nimp > len(CenterPositions(N,p)): 
     print "Too many impurities!"
     return
-  gL,gR,VLR,VRL = Leads(N,E)
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)
   Klist = []
   for i in range(niter):
     ImpList = random.sample(CenterPositions(N,p),nimp)		# Get a random sample of positions
