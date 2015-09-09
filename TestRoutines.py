@@ -9,6 +9,13 @@ def gSubs1(nE,m,n,E):
   return Dyson1(g,eps_imp)
 
 
+def GMx2Subs(nE,mI,nI,mP,nP,s,E):
+  """Creates the GF matrix for a single subsitutional impurity. Order is Probe -> subsitutional"""
+  g = gMx2GNR(nE,mP,nP,mI,nI,s,E)
+  V = [[0,0],[0,eps_imp]]
+  return Dyson(g,V)
+
+
 def GMx1CenterProbe(nE,mC,nC,mP,nP,sP,E):  
   """Returns the GF Mx of the center adosrbed impurity and also a single probe site.
   The site order is probe,hexagon,impurity site."""
@@ -86,13 +93,29 @@ def GMxCenterRec2(N,ImpList,E):
 
 
 if __name__ == "__main__":  
-  nE = 9
-  N = nE - 1
-  mC,nC = 3,0
-  ImpList = [2]
-  E = 1.1 + 1j*eta
-  print GMx1Center(nE,mC,nC,E)[0,0]
-  print GMxCenterRec2(N,ImpList,E)[2,2]
+  nE = 8
+  mI = 3
+  nI = 2
+  mP = 3
+  nP = 2
+  s = 0
+  E = 1j*eta
+  
+  print GMx2Subs(nE,mI,nI,mP,nP,s,E)[1,1]
+  print gSubs1(nE,mI,nI,E)
+
+  
+  #nE = 9
+  #mC,nC = 1,0
+  #sP = 0
+  #E = 1j*eta
+  
+  #Dlist = range(1,60)
+  #m = 1
+  #glist = [GMx1CenterProbe(nE,mC,nC,m+D,0+D,sP,E)[0,0].imag for D in Dlist]
+  #pl.plot(Dlist,glist)
+  #pl.savefig("plot.png")
+  #pl.show()
 
 
 
