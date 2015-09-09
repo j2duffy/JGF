@@ -31,8 +31,8 @@ def cumav(l):
 
 
 def PadZeros(M,Msize):
-  """Pads array with zeros up to the specified size"""
-  temp = np.zeros(Msize)
+  """Pads a 2d array with zeros up to the specified size"""
+  temp = np.zeros(Msize,dtype=M.dtype)
   temp[:M.shape[0],:M.shape[1]] = M
   return temp
 
@@ -221,7 +221,6 @@ def KuboPristine(N,E):
   return Kubo(gL,gR,VLR,VRL)
 
 
-<<<<<<< HEAD
 def KuboSubs(N,p,E,ImpList):
   """Calculates the conductance of a GNR with substitutional impurities (given in ImpList) using the Kubo Formula."""
   gL,gR,VLR,VRL = Leads(N,E-1j*eta)

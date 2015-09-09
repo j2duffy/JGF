@@ -60,6 +60,7 @@ def GMx1Center(nE,mC,nC,E):
 
 
 def GMxSubsRec(N,ImpList,E):
+  """Calculates the GF mx of a strip in an AGNR in the presence of subsitutional impurities"""
   gL,gR,VLR,VRL = Leads(N,E)
   H = HArmStrip(N,SubsList=ImpList)
   gC = gGen(E,H)
@@ -80,29 +81,31 @@ def GMxCenterRec(N,ImpList,E):
 def GMxCenterRec2(N,ImpList,E):
   """Calculates the GF of a strip in an AGNR in the presence of center adsorbed impurities"""
   nimp = len(ImpList)
-  gL,gR,VLR,VRL = Leads(N,E)
-  H = HArmStrip(N,CenterList=ImpList)
+  gL,gR,VLR,VRL = Leads(N,E)		# Get Leads
+  H = HArmStrip(N,CenterList=ImpList)	# Hamiltonian with Center adsorbed impurities
   gC = gGen(E,H)
-  VLRtemp,VRLtemp = np.zeros((2*N,2*N+nimp)), np.zeros((2*N+nimp,2*N))
-  VLRtemp[:2*N,:2*N], VRLtemp[:2*N,:2*N] = VLR, VRL
-  gL = RecAdd(gL,gC,VLRtemp,VRLtemp)
-  VLRtemp,VRLtemp = np.zeros((2*N+nimp,2*N)), np.zeros((2*N,2*N+nimp))
-  VLRtemp[:2*N,:2*N], VRLtemp[:2*N,:2*N] = VLR, VRL
-  g = RecAdd(gR,gL,VRLtemp,VLRtemp)
+  VLRb, VRLb = PadZeros(VLR,(2*N,2*N+nimp)), PadZeros(VRL,(2*N+nimp,2*N))	# To get the full GF, VLR and VRL must be padded to match left and right cells.
+  gL = RecAdd(gL,gC,VLRb,VRLb)
+  VLRb, VRLb = PadZeros(VLR,(2*N+nimp,2*N)), PadZeros(VRL,(2*N,2*N+nimp))
+  g = RecAdd(gR,gL,VRLb,VLRb)
   return g
 
 
 if __name__ == "__main__":  
-  nE = 8
-  mI = 3
-  nI = 2
-  mP = 3
-  nP = 2
+  nE = 9
+  mI,nI = 1,0
+  mP,nP = 3,0
   s = 0
-  E = 1j*eta
+  E = -1j*eta
   
-  print GMx2Subs(nE,mI,nI,mP,nP,s,E)[1,1]
-  print gSubs1(nE,mI,nI,E)
+  print 
+  
+  Dlist = range(1,60)
+  glist = [GMx2Subs(nE,mI,nI,mP+D,nP+D,s,E)[0,0].imag for D in Dlist]
+  print glist[-1]
+  #pl.plot(Dlist,glist)
+  #pl.savefig("plot.png")
+  #pl.show()
 
   
   #nE = 9
