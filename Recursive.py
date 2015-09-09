@@ -30,6 +30,13 @@ def cumav(l):
   return np.cumsum(l)/np.arange(1,len(l)+1)
 
 
+def PadZeros(M,Msize):
+  """Pads array with zeros up to the specified size"""
+  temp = np.zeros(Msize)
+  temp[:M.shape[0],:M.shape[1]] = M
+  return temp
+
+
 def CenterPositions(N,p):
   """Returns all valid positions for center adsorbed impurities in a BigArmStrip(N,p).
   Positions are NOT in obvious order"""
@@ -41,6 +48,20 @@ def CenterPositions(N,p):
   return ss + ls
 
 
+def AllPositions(N,p):
+  """Gives all of the possible positions in a nanoribbon of width N length p."""
+  return [[i,j] for i in range(p) for j in range(2*N)]
+
+
+def ImpConvert(p,ImpListMess):
+  """Converts a list of impurities from (lead,pos) notation to a [[imps in lead 1],[imps in lead 2]...] notation."""
+  ImpListOrdered = [[] for i in range(p)]
+  for i,j in ImpListMess:
+    ImpListOrdered[i].append(j)
+  return ImpListOrdered
+
+
+
 
 def HArmStrip(N,p=1,SubsList=[],TopList=[],CenterList=[]):
   """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
@@ -49,7 +70,6 @@ def HArmStrip(N,p=1,SubsList=[],TopList=[],CenterList=[]):
   ntop = len(TopList)	# Number of top adsorbed impurities
   ncenter = len(CenterList)	# Number of center adsorbed impurities
   H = np.zeros((2*N*p+ntop+ncenter,2*N*p+ntop+ncenter))		# Make sure our hamiltonian has space for sites+center+top
-
   # nn elements
   for j in range(0,2*p*N-N+1,N):
     for i in range(j,j+N-1):
@@ -89,6 +109,18 @@ def VArmStrip(N):
   VLR, VRL = np.zeros([2*N,2*N]),np.zeros([2*N,2*N])
   for i in range(1,N,2):
     VLR[N+i,i] = VRL[i,N+i] = t
+  return VLR, VRL
+
+
+def VArmStripCenter(N,ImpList):
+  """Calculates the LR and RL connection matrices for the armchair strip."""
+  nimp = len(ImpList)
+  VLR, VRL = np.zeros([2*N+nimp,2*N]),np.zeros([2*N,2*N+nimp])
+  VLR[:2*N,:2*N], VRL[:2*N,:2*N] = VArmStrip(N)
+  for i,k in enumerate(ImpList):
+    if k > N:
+      for j in range(3):
+	VLR[2*N+i,k-N+j] = VRL[k-N+j,2*N+i] = tau
   return VLR, VRL
 
 
@@ -180,7 +212,6 @@ def Kubo(gL,gR,VLR,VRL):
   GRRa, GRLa, GLRa, GLLa = gOffDiagonal(gR,gL,gL,gL,gL,VLR,VRL)
   # Calculates Gtilde, the imaginary part of the advanced GF
   GRRt, GRLt, GLRt, GLLt = GRRa.imag, GRLa.imag, GLRa.imag, GLLa.imag
-  
   return 2*np.trace( dot(dot(-GRLt,VLR),dot(GRLt,VLR)) + dot(dot(GLLt,VLR),dot(GRRt,VRL)) + dot(dot(GRRt,VRL),dot(GLLt,VLR)) - dot(dot(GLRt,VRL),dot(GLRt,VRL)) )
 
 
@@ -190,6 +221,7 @@ def KuboPristine(N,E):
   return Kubo(gL,gR,VLR,VRL)
 
 
+<<<<<<< HEAD
 def KuboSubs(N,p,E,ImpList):
   """Calculates the conductance of a GNR with substitutional impurities (given in ImpList) using the Kubo Formula."""
   gL,gR,VLR,VRL = Leads(N,E-1j*eta)
@@ -421,7 +453,10 @@ if __name__ == "__main__":
   #CAS = [np.average(ConfigAvSubsRandom(N,p,nimp,niter,E)) for nimp in nimpl]
   #CAT = [np.average(ConfigAvTopRandom(N,p,nimp,niter,E)) for nimp in nimpl]
   
-  #conc = [nimp/(2.0*N*p) for nimp in nimpl]
+  #KClist = [KuboCenter(N,p,E,ImpList) for E in Elist]
+  #pl.plot(Elist,KTlist)
+  #pl.plot(Elist,KClist)
+  #pl.show()
   
   #pl.plot(conc,CAC,label='Center')
   #pl.plot(conc,CAS,label='Subs')
@@ -435,12 +470,6 @@ if __name__ == "__main__":
     Elist = np.linspace(-3.0,3.0,201)
     Klist = [KuboTop(N,p,E,ImpList) for E in Elist]
     np.savetxt("TopTest_%g.dat" % (N,),zip(Elist,Klist))  
-
-
-
-
-
-
 
 
 	
