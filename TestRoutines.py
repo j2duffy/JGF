@@ -78,48 +78,46 @@ def GMxCenterRec(N,ImpList,E):
   return g
 
 
-def GMxCenterRec2(N,ImpList,E):
+def GMxCenterRec2(N,p,ImpList,E):
   """Calculates the GF of a strip in an AGNR in the presence of center adsorbed impurities"""
   nimp = len(ImpList)
   gL,gR,VLR,VRL = Leads(N,E)		# Get Leads
-  H = HArmStrip(N,CenterList=ImpList)	# Hamiltonian with Center adsorbed impurities
+  H = HArmStrip(N,p,CenterList=ImpList)	# Hamiltonian with Center adsorbed impurities
   gC = gGen(E,H)
-  VLRb, VRLb = PadZeros(VLR,(2*N,2*N+nimp)), PadZeros(VRL,(2*N+nimp,2*N))	# To get the full GF, VLR and VRL must be padded to match left and right cells.
+  sizeP = gL.shape[0]
+  sizeI = gC.shape[0]
+  VLRb, VRLb = PadZeros(VLR,(sizeP,sizeI)), PadZeros(VRL,(sizeI,sizeP))	# To get the full GF, VLR and VRL must be padded to match left and right cells.
   gL = RecAdd(gL,gC,VLRb,VRLb)
-  VLRb, VRLb = PadZeros(VLR,(2*N+nimp,2*N)), PadZeros(VRL,(2*N,2*N+nimp))
+  VLRb, VRLb = PadZeros(VLR,(sizeI,sizeP)), PadZeros(VRL,(sizeP,sizeI))
   g = RecAdd(gR,gL,VRLb,VLRb)
   return g
 
 
 if __name__ == "__main__":  
-  nE = 9
-  mI,nI = 1,0
-  mP,nP = 3,0
-  s = 0
-  E = -1j*eta
+  N = 5
+  p = 1
+  ImpList = [0]
+  E = 1.1+1j*eta
+  print GMxCenterRec2(N,p,ImpList,E)
   
-  print 
-  
-  Dlist = range(1,60)
-  glist = [GMx2Subs(nE,mI,nI,mP+D,nP+D,s,E)[0,0].imag for D in Dlist]
-  print glist[-1]
-  #pl.plot(Dlist,glist)
-  #pl.savefig("plot.png")
+  #N = 5
+  #p = 1
+  #ImpList = [0]
+  #Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
+  #glist = np.array([GMxCenterRec2(N,p,ImpList,E)[0,0] for E in Elist])
+  #pl.plot(Elist.real,glist.real)
+  #pl.plot(Elist.real,glist.imag)
   #pl.show()
-
   
-  #nE = 9
-  #mC,nC = 1,0
-  #sP = 0
-  #E = 1j*eta
-  
-  #Dlist = range(1,60)
-  #m = 1
-  #glist = [GMx1CenterProbe(nE,mC,nC,m+D,0+D,sP,E)[0,0].imag for D in Dlist]
-  #pl.plot(Dlist,glist)
-  #pl.savefig("plot.png")
+  #nE = N+1
+  #mC = 1
+  #nC = 0
+  #Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
+  #glist = np.array([GMx1Center(nE,mC,nC,E)[0,0] for E in Elist])
+  #pl.plot(Elist.real,glist.real)
   #pl.show()
-
+    
+  
 
 
   
