@@ -112,18 +112,6 @@ def VArmStrip(N):
   return VLR, VRL
 
 
-def VArmStripCenter(N,ImpList):
-  """Calculates the LR and RL connection matrices for the armchair strip."""
-  nimp = len(ImpList)
-  VLR, VRL = np.zeros([2*N+nimp,2*N]),np.zeros([2*N,2*N+nimp])
-  VLR[:2*N,:2*N], VRL[:2*N,:2*N] = VArmStrip(N)
-  for i,k in enumerate(ImpList):
-    if k > N:
-      for j in range(3):
-	VLR[2*N+i,k-N+j] = VRL[k-N+j,2*N+i] = tau
-  return VLR, VRL
-
-
 def VArmStripBigLSmallR(N,p):
   """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip."""
   VLR = np.zeros((2*N*p,2*N))
