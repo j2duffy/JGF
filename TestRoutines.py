@@ -30,8 +30,8 @@ def GMx1CenterProbe(nE,mC,nC,mP,nP,sP,E):
   gMx[n-1,n-1] = 1.0/(E-eps_imp)
     
   V = np.zeros([n,n],dtype=complex)
-  V[:n-1,n-1] = tau
-  V[n-1,:n-1] = tau
+  V[1:n-1,n-1] = tau		# 1 -> n-2 sites are hexagon sites, they connect to n-1, the impurity site
+  V[n-1,1:n-1] = tau
   
   GMx = Dyson(gMx,V)
   
@@ -79,7 +79,8 @@ def GMxCenterRec(N,ImpList,E):
 
 
 def GMxCenterRec2(N,p,ImpList,E):
-  """Calculates the GF of a strip in an AGNR in the presence of center adsorbed impurities"""
+  """Calculates the GF of a strip in an AGNR in the presence of center adsorbed impurities.
+  Doesn't work for p = 2 or more because of the way your potentials work"""
   nimp = len(ImpList)
   gL,gR,VLR,VRL = Leads(N,E)		# Get Leads
   H = HArmStrip(N,p,CenterList=ImpList)	# Hamiltonian with Center adsorbed impurities
@@ -98,7 +99,10 @@ if __name__ == "__main__":
   p = 1
   ImpList = [0]
   E = 1.1+1j*eta
-  print GMxCenterRec2(N,p,ImpList,E)
+  print GMxCenterRec2(N,p,ImpList,E)[9,9]
+  
+  nE,mC,nC,mP,nP,sP = 6,1,0,3,-2,0
+  print GMx1CenterProbe(nE,mC,nC,mP,nP,sP,E)[0,0]
   
   #N = 5
   #p = 1
