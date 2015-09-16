@@ -3,7 +3,6 @@
 # The N numbering convention is used everywhere unless noted.
 from numpy import dot
 from GF import *
-from operator import mul
 import random
 from itertools import combinations
 
@@ -39,7 +38,7 @@ def cumav(l):
 
 
 def PadZeros(M,Msize):
-  """Pads array with zeros up to the specified size"""
+  """Pads a 2d array with zeros up to the specified size"""
   temp = np.zeros(Msize)
   temp[:M.shape[0],:M.shape[1]] = M
   return temp
@@ -395,7 +394,7 @@ def ConfigAvCenterTotal(N,p,nimp,E):
   imp_pos = CP(N,p)	# Generates all possible positions in [cell,site] notation
   gL,gR,VLR,VRL = Leads(N,E)
   for i in combinations(imp_pos,nimp):	# Gets every possible combination of positions
-    BigImpList = ImpConvert(p,i)	# Conver the list to [[sites][sites]...] notation
+    BigImpList = ImpConvert(p,i)	# Convert the list to [[sites][sites]...] notation
     GL = gL				# Otherwise this gets overwritten every time
     for ImpList in BigImpList + [[]]:	# Always add an extra cell.
       H = HArmStripCenter(N,ImpList)
@@ -433,22 +432,42 @@ def ConfigAvCenterTotal(N,p,nimp,E):
   #return Klist
 
 
+def ConcentrationPlot(N,p,E):
+  max_n = len(CenterPositions(N,p))
+  
+  nimpl = range(1,max_n+1)
+  
+  CAC = [ConfigAvCenterTotal(N,p,nimp,E) for nimp in nimpl]
+  CAS = [ConfigAvSubsTotal(N,p,nimp,E) for nimp in nimpl]
+  CAT = [ConfigAvTopTotal(N,p,nimp,E) for nimp in nimpl]
+  
+  conc = [nimp/(2.0*N*p) for nimp in nimpl]
+  
+  pl.plot(conc,CAC,label='Center')
+  pl.plot(conc,CAS,label='Subs')
+  pl.plot(conc,CAT,'o',label='Top')
+  pl.legend()
+  pl.savefig('plot.jpg')
+  pl.show()
+
 
 if __name__ == "__main__":  
   N = 8
   p = 1
-  nimp = 2
-  eps_imp = 1
-  tau = -0.1
+  E = 0.0
+  ConcentrationPlot(N,p,E)
+  #nimp = 3
+  #eps_imp = 5
+  #tau = -1
   
-  Elist = np.linspace(-3.0,3.0,201)
-  CASlist = [ConfigAvSubsTotal(N,p,nimp,E) for E in Elist]
-  CATlist = [ConfigAvTopTotal(N,p,nimp,E) for E in Elist]
-  CAClist = [ConfigAvCenterTotal(N,p,nimp,E) for E in Elist]
-  pl.plot(Elist,CASlist)
-  pl.plot(Elist,CATlist)
-  pl.plot(Elist,CAClist)
-  pl.show()
+  #Elist = np.linspace(-3.0,3.0,201)
+  #CASlist = [ConfigAvSubsTotal(N,p,nimp,E) for E in Elist]
+  #CATlist = [ConfigAvTopTotal(N,p,nimp,E) for E in Elist]
+  #CAClist = [ConfigAvCenterTotal(N,p,nimp,E) for E in Elist]
+  #pl.plot(Elist,CASlist)
+  #pl.plot(Elist,CATlist)
+  #pl.plot(Elist,CAClist)
+  #pl.show()
   
 
 
