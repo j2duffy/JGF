@@ -282,7 +282,7 @@ def Leads(N,E):
   Also returns the connection matrices, because we always seem to need them."""
   HC = HArmStrip(N)
   VLR, VRL = VArmStrip(N)	
-  gC = gGen(E-1j*eta,HC)	# The advanced GF
+  gC = gGen(E,HC)	# The advanced GF
   gL = RubioSancho(gC,VRL,VLR)
   gR = RubioSancho(gC,VLR,VRL)
   return gL,gR,VLR,VRL
@@ -301,14 +301,14 @@ def Kubo(gL,gR,VLR,VRL):
 
 def KuboPristine(N,E):
   """Calculates the conductance of a pristine GNR using the Kubo Formula"""
-  gL,gR,VLR,VRL = Leads(N,E)
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)	# Gets the advanced GF
   return Kubo(gL,gR,VLR,VRL)
 
 
 def KuboSubs(N,E,BigImpList):
   """Calculates the conductance of a GNR with substitutional impurities using the Kubo Formula."""
   # Get Leads
-  gL,gR,VLR,VRL = Leads(N,E)
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)	# Gets the advanced GF
   # Build scattering region strip by strip
   for ImpList in BigImpList:
     H = HArmStripSubs(N,ImpList)
@@ -320,7 +320,7 @@ def KuboSubs(N,E,BigImpList):
 def KuboTop(N,E,BigImpList):
   """Calculates the conductance of a GNR with top-adsorbed impurities using the Kubo Formula."""
   # Get Leads
-  gL,gR,VLR,VRL = Leads(N,E)
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)	# Gets the advanced GF
   # Build scattering region strip by strip
   for ImpList in BigImpList:
     H = HArmStripTop(N,ImpList)
@@ -337,7 +337,7 @@ def KuboTop(N,E,BigImpList):
 def KuboCenter(N,p,E,ImpList):
   """Calculates the conductance of a GNR with top-adsorbed impurities using the Kubo Formula."""
   # Leads
-  gL,gR,VLR,VRL = Leads(N,E)
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)	# Gets the advanced GF
   for ImpList in BigImpList + [[]]:		# Always add an extra cell.
     H = HArmStripCenter(N,ImpList)
     g = gGen(E-1j*eta,H)
@@ -355,7 +355,7 @@ def ConfigAvSubsTotal(N,p,nimp,E):
   """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p). Averages all cases."""
   KT = 0	# Total of all conductance measurements
   imp_pos = AllPositions(N,p)	# Generates all possible positions in [cell,site] notation
-  gL,gR,VLR,VRL = Leads(N,E)
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)	# Gets the advanced GF
   for i in combinations(imp_pos,nimp):	# Gets every possible combination of positions
     BigImpList = ImpConvert(p,i)	# Conver the list to [[sites][sites]...] notation
     GL = gL				# Otherwise this gets overwritten every time
@@ -371,7 +371,7 @@ def ConfigAvTopTotal(N,p,nimp,E):
   """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p). Averages all cases."""
   KT = 0	# Total of all conductance measurements
   imp_pos = AllPositions(N,p)	# Generates all possible positions in [cell,site] notation
-  gL,gR,VLR,VRL = Leads(N,E)
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)	# Gets the advanced GF
   for i in combinations(imp_pos,nimp):	# Gets every possible combination of positions
     BigImpList = ImpConvert(p,i)	# Conver the list to [[sites][sites]...] notation
     GL = gL				# Otherwise this gets overwritten every time
@@ -392,7 +392,7 @@ def ConfigAvCenterTotal(N,p,nimp,E):
   """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p). Averages all cases."""
   KT = 0	# Total of all conductance measurements
   imp_pos = CP(N,p)	# Generates all possible positions in [cell,site] notation
-  gL,gR,VLR,VRL = Leads(N,E)
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)	# Gets the advanced GF
   for i in combinations(imp_pos,nimp):	# Gets every possible combination of positions
     BigImpList = ImpConvert(p,i)	# Convert the list to [[sites][sites]...] notation
     GL = gL				# Otherwise this gets overwritten every time
@@ -409,27 +409,25 @@ def ConfigAvCenterTotal(N,p,nimp,E):
 
 
 
-#def CASubsRandom(N,p,nimp,niter,E):
-  #"""Calculates the configurational average for nimp substitutional impurities in an armchair nanoribbons (N,p).
-  #Randomly chooses niter configurations and returns a list of the results of the Kubo Formula applied in these iterations.
-  #Samples WITH replacement, which is not ideal"""
-  #gL,gR,VLR,VRL = Leads(N,E)
+def CASubsRandom(N,p,nimp,niter,E):
+  """Calculates the configurational average for nimp substitutional impurities in an armchair nanoribbons (N,p).
+  Randomly chooses niter configurations and returns a list of the results of the Kubo Formula applied in these iterations.
+  Samples WITH replacement, which is not ideal"""
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)	# Gets the advanced GF
+  imp_pos = AllPositions(N,p)	# Generates all possible positions in [cell,site] notation
 
-  #Klist = []
-  #for i in range(niter):	# For every possible combination of positions
-    #ImpList = random.sample(range(2*N*p),nimp)		# Get a random sample of 
-    ## Scattering region and connection matrices 
-    #HM = HBigArmStripSubs(N,p,ImpList)
-    #gM = gGen(E-1j*eta,HM)
-    #VbLsR, VsRbL = VArmStripBigLSmallR(N,p)		# Notation VbLsR means a big strip on the left connects to a small strip on the right
-    #VsLbR, VbRsL = VArmStripSmallLBigR(N,p)
-
-    ## Calculate the advanced GFs
-    #GR = RecAdd(gR,gM,VsRbL,VbLsR)[:2*N,:2*N]	# The new rightmost cell
-
-    #K = Kubo(gL,GR,VLR,VRL)
-    #Klist.append(K)
-  #return Klist
+  Klist = []
+  for i in range(niter):	# Repeat niter times
+    ImpListMess = random.sample(imp_pos,nimp)		# Get a random sample of positions in [cell,site] notation
+    BigImpList = ImpConvert(p,ImpListMess)	# Convert the list to [[sites][sites]...] notation
+    GL = gL				# Otherwise this gets overwritten every time
+    for ImpList in BigImpList:
+      H = HArmStripSubs(N,ImpList)
+      g = gGen(E-1j*eta,H)
+      GL = RecAdd(GL,g,VLR,VRL)
+    K = Kubo(GL,gR,VLR,VRL)
+    Klist.append(K)
+  return Klist
 
 
 def ConcentrationPlot(N,p,E):
@@ -453,22 +451,11 @@ def ConcentrationPlot(N,p,E):
 
 if __name__ == "__main__":  
   N = 8
-  p = 1
-  E = 0.0
-  ConcentrationPlot(N,p,E)
-  #nimp = 3
-  #eps_imp = 5
-  #tau = -1
-  
-  #Elist = np.linspace(-3.0,3.0,201)
-  #CASlist = [ConfigAvSubsTotal(N,p,nimp,E) for E in Elist]
-  #CATlist = [ConfigAvTopTotal(N,p,nimp,E) for E in Elist]
-  #CAClist = [ConfigAvCenterTotal(N,p,nimp,E) for E in Elist]
-  #pl.plot(Elist,CASlist)
-  #pl.plot(Elist,CATlist)
-  #pl.plot(Elist,CAClist)
-  #pl.show()
-  
+  p = 2
+  E = 1.2
+  nimp = 3
+  niter = 100000
+  print np.average(CASubsRandom(N,p,nimp,niter,E))
 
 
 	
