@@ -11,17 +11,17 @@ rtol = 1.0e-8		# Default tolerance for recursive methods.
 
 
 def choose(n, k):
-    """A fast way to calculate binomial coefficients by Andrew Dalke (contrib)."""
-    if 0 <= k <= n:
-        ntok = 1
-        ktok = 1
-        for t in xrange(1, min(k, n - k) + 1):
-            ntok *= n
-            ktok *= t
-            n -= 1
-        return ntok // ktok
-    else:
-        return 0
+  """A fast way to calculate binomial coefficients by Andrew Dalke (contrib)."""
+  if 0 <= k <= n:
+    ntok = 1
+    ktok = 1
+    for t in xrange(1, min(k, n - k) + 1):
+      ntok *= n
+      ktok *= t
+      n -= 1
+    return ntok // ktok
+  else:
+    return 0
 
 
 def CumAv(l):
@@ -37,21 +37,21 @@ def PadZeros(M,Msize):
 
 
 
-def CP(N,p):
-  """Lists all the possible center adsorbed positions in [cell,site] notation"""
+def CenterPositions(N,p):
+  """Lists all the possible center adsorbed positions in a nanoribbons in [cell,site] notation"""
   l = [[i,j] for i in range(p-1) for j in range(0,N-2,2) + range(N+1,2*N-2,2)]
   return l + [[p-1,j] for j in range(0,N-2,2)]
 
 
 def AllPositions(N,p):
-  """Gives all of the possible positions in a nanoribbon of width N length p."""
+  """Gives all of the possible sites in a nanoribbon in [cell,site] notation"""
   return [[i,j] for i in range(p) for j in range(2*N)]
 
 
-def ImpConvert(p,ImpListMess):
-  """Converts a list of impurities from (lead,pos) notation to a [[imps in lead 1],[imps in lead 2]...] notation."""
+def ImpListConvert(p,ImpList):
+  """Converts a list of impurities from [cell,site] notation to a [[imps in lead 1],[imps in lead 2]...] notation."""
   ImpListOrdered = [[] for i in range(p)]
-  for i,j in ImpListMess:
+  for i,j in ImpList:
     ImpListOrdered[i].append(j)
   return ImpListOrdered
 
@@ -266,7 +266,7 @@ def ConfigAvSubsTotal(N,p,nimp,E):
   imp_pos = AllPositions(N,p)	# Generates all possible positions in [cell,site] notation
   gL,gR,VLR,VRL = Leads(N,E-1j*eta)	# Gets the advanced GF
   for i in combinations(imp_pos,nimp):	# Gets every possible combination of positions
-    BigImpList = ImpConvert(p,i)	# Conver the list to [[sites][sites]...] notation
+    BigImpList = ImpListConvert(p,i)	# Conver the list to [[sites][sites]...] notation
     GL = gL				# Otherwise this gets overwritten every time
     for ImpList in BigImpList:
       H = HArmStripSubs(N,ImpList)
@@ -282,7 +282,7 @@ def ConfigAvTopTotal(N,p,nimp,E):
   imp_pos = AllPositions(N,p)	# Generates all possible positions in [cell,site] notation
   gL,gR,VLR,VRL = Leads(N,E-1j*eta)	# Gets the advanced GF
   for i in combinations(imp_pos,nimp):	# Gets every possible combination of positions
-    BigImpList = ImpConvert(p,i)	# Conver the list to [[sites][sites]...] notation
+    BigImpList = ImpListConvert(p,i)	# Conver the list to [[sites][sites]...] notation
     GL = gL				# Otherwise this gets overwritten every time
     for ImpList in BigImpList:
       H = HArmStripTop(N,ImpList)
@@ -300,10 +300,10 @@ def ConfigAvTopTotal(N,p,nimp,E):
 def ConfigAvCenterTotal(N,p,nimp,E):
   """Calculates the Kubo Formula for every possible case of nimp substitutional impurities in a ribbon of (N,p). Averages all cases."""
   KT = 0	# Total of all conductance measurements
-  imp_pos = CP(N,p)	# Generates all possible positions in [cell,site] notation
+  imp_pos = CenterPositions(N,p)	# Generates all possible positions in [cell,site] notation
   gL,gR,VLR,VRL = Leads(N,E-1j*eta)	# Gets the advanced GF
   for i in combinations(imp_pos,nimp):	# Gets every possible combination of positions
-    BigImpList = ImpConvert(p,i)	# Convert the list to [[sites][sites]...] notation
+    BigImpList = ImpListConvert(p,i)	# Convert the list to [[sites][sites]...] notation
     GL = gL				# Otherwise this gets overwritten every time
     for ImpList in BigImpList + [[]]:	# Always add an extra cell.
       H = HArmStripCenter(N,ImpList)
@@ -328,7 +328,7 @@ def CASubsRandom(N,p,nimp,niter,E):
   Klist = []
   for i in range(niter):	# Repeat niter times
     ImpListMess = random.sample(imp_pos,nimp)		# Get a random sample of positions in [cell,site] notation
-    BigImpList = ImpConvert(p,ImpListMess)	# Convert the list to [[sites][sites]...] notation
+    BigImpList = ImpListConvert(p,ImpListMess)	# Convert the list to [[sites][sites]...] notation
     GL = gL				# Otherwise this gets overwritten every time
     for ImpList in BigImpList:
       H = HArmStripSubs(N,ImpList)
@@ -349,7 +349,7 @@ def CATopRandom(N,p,nimp,niter,E):
   Klist = []
   for i in range(niter):	# Repeat niter times
     ImpListMess = random.sample(imp_pos,nimp)		# Get a random sample of positions in [cell,site] notation
-    BigImpList = ImpConvert(p,ImpListMess)	# Convert the list to [[sites][sites]...] notation
+    BigImpList = ImpListConvert(p,ImpListMess)	# Convert the list to [[sites][sites]...] notation
     GL = gL				# Otherwise this gets overwritten every time
     for ImpList in BigImpList:
       H = HArmStripTop(N,ImpList)
@@ -370,12 +370,12 @@ def CACenterRandom(N,p,nimp,niter,E):
   Randomly chooses niter configurations and returns a list of the results of the Kubo Formula applied in these iterations.
   Samples WITH replacement, which is not ideal"""
   gL,gR,VLR,VRL = Leads(N,E-1j*eta)	# Gets the advanced GF
-  imp_pos = CP(N,p)	# Generates all possible positions in [cell,site] notation
+  imp_pos = CenterPositions(N,p)	# Generates all possible positions in [cell,site] notation
 
   Klist = []
   for i in range(niter):	# Repeat niter times
     ImpListMess = random.sample(imp_pos,nimp)		# Get a random sample of positions in [cell,site] notation
-    BigImpList = ImpConvert(p,ImpListMess)	# Convert the list to [[sites][sites]...] notation
+    BigImpList = ImpListConvert(p,ImpListMess)	# Convert the list to [[sites][sites]...] notation
     GL = gL				# Otherwise this gets overwritten every time
     for ImpList in BigImpList + [[]]:
       H = HArmStripCenter(N,ImpList)
@@ -391,7 +391,7 @@ def CACenterRandom(N,p,nimp,niter,E):
 
 
 def ConcentrationPlot(N,p,E):
-  max_n = len(CP(N,p))
+  max_n = len(CenterPositions(N,p))
   
   nimpl = range(1,max_n+1)
   
