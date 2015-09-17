@@ -38,25 +38,14 @@ def cumav(l):
 
 
 def PadZeros(M,Msize):
-  """Pads a 2d array with zeros up to the specified size"""
+  """Pads a real 2d array with zeros up to the specified size"""
   temp = np.zeros(Msize)
   temp[:M.shape[0],:M.shape[1]] = M
   return temp
 
 
-def CenterPositions(N,p):
-  """Returns all valid positions for center adsorbed impurities in a BigArmStrip(N,p)
-  Positions are NOT in logical order.
-  This is not valid in your current code."""
-  l = []
-  # Short strip first 
-  ss = [i for j in range(0,2*N*p-2*N+1,2*N) for i in range(j,j+N-2,2) ]
-  # Long strip
-  ls = [i for j in range(N,2*N*p-3*N+1,2*N) for i in range(j+1,j+N-2,2) ]
-  return ss + ls
-
-
 def CP(N,p):
+  """Lists all the possible center adsorbed positions in [cell,site] notation"""
   l = [[i,j] for i in range(p-1) for j in range(0,N-2,2) + range(N+1,2*N-2,2)]
   return l + [[p-1,j] for j in range(0,N-2,2)]
 
@@ -125,61 +114,6 @@ def HArmStripCenter(N,ImpList):
   return H
 
 
-def HBigArmStrip(N,p):
-  """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width."""
-  H = np.zeros((2*N*p,2*N*p))
-  # nn elements
-  for j in range(0,2*p*N-N+1,N):
-    for i in range(j,j+N-1):
-      H[i,i+1] = H[i+1,i] = t
-  # Other elements
-  for j in range(0,2*p*N-2*N+1,2*N):
-    for i in range(j,j+N,2):
-      H[i,i+N] = H[i+N,i] = t
-  for j in range(N,2*p*N-3*N+1,2*N):
-    for i in range(j+1,j+N,2):
-      H[i,i+N] = H[i+N,i] = t
-  return H
-
-
-def HBigArmStripSubs(N,p,ImpList):
-  """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
-  Adds an impurity with energy eps_imp at every site in ImpList."""
-  H = HBigArmStrip(N,p)
-  for i in ImpList:
-    H[i,i] = eps_imp
-  return H
-
-
-def HBigArmStripTop(N,p,ImpList):
-  """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
-  Populates the strip with a number of top-adsorbed impurities given in Imp_list. 
-  These are added in the higher elements of the mx."""
-  nimp = len(ImpList)
-  H = np.zeros((2*N*p+nimp,2*N*p+nimp))
-  H[:2*N*p,:2*N*p] = HBigArmStrip(N,p)
-  
-  for i,k in enumerate(ImpList):
-    H[2*N*p+i,k] = H[k,2*N*p+i] = tau
-    H[2*N*p+i,2*N*p+i] = eps_imp
-  return H
-
-
-def HBigArmStripCenter(N,p,ImpList):
-  """Creates the Hamiltonian for an armchair strip N atoms across and p "unit cells" in width.
-  Populates the strip with a number of center-adsorbed impurities given in Imp_list. 
-  These are added in the higher elements of the mx."""
-  nimp = len(ImpList)
-  H = np.zeros((2*N*p+nimp,2*N*p+nimp))
-  H[:2*N*p,:2*N*p] = HBigArmStrip(N,p)
-  
-  for i,k in enumerate(ImpList):
-    for j in range(3) + range(N,N+3):
-      H[2*N*p+i,k+j] = H[k+j,2*N*p+i] = tau
-    H[2*N*p+i,2*N*p+i] = eps_imp
-  return H
-
-
 
 def gGen(E,H):
   """Calculates the GF given a Hamiltonian"""
@@ -204,24 +138,6 @@ def VArmStripCenter(N,ImpList):
     if k > N:
       for j in range(3):
 	VLR[2*N+i,k-N+j] = VRL[k-N+j,2*N+i] = tau
-  return VLR, VRL
-
-
-def VArmStripBigLSmallR(N,p):
-  """Connection matrices for the RIGHT SIDE of the Big Strip to the LEFT SIDE of the regular strip."""
-  VLR = np.zeros((2*N*p,2*N))
-  VRL = np.zeros((2*N,2*N*p))
-  for i in range(1,N,2):
-    VLR[2*p*N-N+i,i] = VRL[i,2*p*N-N+i] = t
-  return VLR, VRL
-   
-   
-def VArmStripSmallLBigR(N,p):
-  """Connection matrices for the LEFT SIDE of the Big Strip to the RIGHT SIDE of the regular strip."""
-  VLR = np.zeros((2*N,2*N*p))
-  VRL = np.zeros((2*N*p,2*N))
-  for i in range(1,N,2):
-    VLR[N+i,i] = VRL[i,N+i] = t
   return VLR, VRL
 
 
@@ -405,7 +321,7 @@ def ConfigAvCenterTotal(N,p,nimp,E):
       GL = RecAdd(GL,g,VLRr,VRLr)
       VLR, VRL = VArmStripCenter(N,ImpList)
     KT += Kubo(GL,gR,VLR,VRL)
-  return KT/choose(len(CenterPositions(N,p)),nimp)		# Choose should give the size of our list of combinations
+  return KT/choose(len(imp_pos),nimp)		# Choose should give the size of our list of combinations
 
 
 
@@ -482,7 +398,7 @@ def CACenterRandom(N,p,nimp,niter,E):
 
 
 def ConcentrationPlot(N,p,E):
-  max_n = len(CenterPositions(N,p))
+  max_n = len(CP(N,p))
   
   nimpl = range(1,max_n+1)
   
@@ -503,8 +419,8 @@ def ConcentrationPlot(N,p,E):
 if __name__ == "__main__":  
   N = 4
   p = 3
-  nimp = 1
-  niter = 50
+  nimp = 2
+  niter = 500
 
   Elist = np.linspace(-3.0,3.0,201)
   CTlist = [ConfigAvCenterTotal(N,p,nimp,E) for E in Elist]
