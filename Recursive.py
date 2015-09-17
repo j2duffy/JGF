@@ -24,15 +24,7 @@ def choose(n, k):
         return 0
 
 
-def random_combination(iterable, r):
-  "Random selection from itertools.combinations(iterable, r)"
-  pool = tuple(iterable)
-  n = len(pool)
-  indices = sorted(random.sample(xrange(n), r))
-  return tuple(pool[i] for i in indices)
-
-
-def cumav(l):
+def CumAv(l):
   """Gets the cumulative average of a list (or a 1d array)"""
   return np.cumsum(l)/np.arange(1,len(l)+1)
 
@@ -42,6 +34,7 @@ def PadZeros(M,Msize):
   temp = np.zeros(Msize)
   temp[:M.shape[0],:M.shape[1]] = M
   return temp
+
 
 
 def CP(N,p):
