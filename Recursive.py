@@ -430,6 +430,32 @@ def CASubsRandom(N,p,nimp,niter,E):
   return Klist
 
 
+def CATestRandom(N,p,nimp,niter,E):
+  """Calculates the configurational average for nimp top-adsorbed impurities in an armchair nanoribbons (N,p).
+  Randomly chooses niter configurations and returns a list of the results of the Kubo Formula applied in these iterations.
+  Samples WITH replacement, which is not ideal"""
+  gL,gR,VLR,VRL = Leads(N,E-1j*eta)	# Gets the advanced GF
+  imp_pos = AllPositions(N,p)	# Generates all possible positions in [cell,site] notation
+
+  Klist = []
+  for i in range(niter):	# Repeat niter times
+    ImpListMess = random.sample(imp_pos,nimp)		# Get a random sample of positions in [cell,site] notation
+    BigImpList = ImpConvert(p,ImpListMess)	# Convert the list to [[sites][sites]...] notation
+    GL = gL				# Otherwise this gets overwritten every time
+    for ImpList in BigImpList:
+      H = HArmStripTop(N,ImpList)
+      g = gGen(E-1j*eta,H)
+      VTopLR = np.zeros((GL.shape[0],g.shape[0]))
+      VTopRL = np.zeros((g.shape[0],GL.shape[0]))
+      VTopLR[:2*N,:2*N] = VLR
+      VTopRL[:2*N,:2*N] = VRL
+      GL = RecAdd(GL,g,VTopLR,VTopRL)
+    GL = GL[:2*N,:2*N]
+    K = Kubo(GL,gR,VLR,VRL)
+    Klist.append(K)
+  return Klist
+
+
 def ConcentrationPlot(N,p,E):
   max_n = len(CenterPositions(N,p))
   
@@ -454,8 +480,8 @@ if __name__ == "__main__":
   p = 2
   E = 1.2
   nimp = 3
-  niter = 100000
-  print np.average(CASubsRandom(N,p,nimp,niter,E))
+  niter = 5
+  print CATestRandom(N,p,nimp,niter,E)
 
 
 	

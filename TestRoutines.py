@@ -102,9 +102,10 @@ def GFTest(N,E):
 
 if __name__ == "__main__":  
   N = 5
-  E = 1.2+1j*eta
-  
-  print GFTest(N,E)
+  Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
+  Glist = [GFTest(N,E)[0,0] for E in Elist]
+  pl.plot(Elist,Glist)
+  pl.show()
   
   #N = 5
   #p = 1
