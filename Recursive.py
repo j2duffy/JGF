@@ -123,7 +123,7 @@ def VArmStrip(N):
 
 
 def VArmStripCenter(N,ImpList):
-  """Calculates the LR and RL connection matrices for the armchair strip."""
+  """Calculates the LR and RL connection matrices for the armchair strip with center adsorbed impurities"""
   nimp = len(ImpList)
   VLR, VRL = np.zeros([2*N+nimp,2*N]),np.zeros([2*N,2*N+nimp])
   VLR[:2*N,:2*N], VRL[:2*N,:2*N] = VArmStrip(N)
@@ -243,7 +243,7 @@ def KuboTop(N,E,BigImpList):
   return Kubo(gL,gR,VLR,VRL)
 
 
-def KuboCenter(N,p,E,ImpList):
+def KuboCenter(N,E,ImpList):
   """Calculates the conductance of a GNR with top-adsorbed impurities using the Kubo Formula."""
   # Leads
   gL,gR,VLR,VRL = Leads(N,E-1j*eta)	# Gets the advanced GF
@@ -415,12 +415,8 @@ if __name__ == "__main__":
   nimp = 2
   niter = 500
 
-  Elist = np.linspace(-3.0,3.0,201)
-  CTlist = [ConfigAvCenterTotal(N,p,nimp,E) for E in Elist]
-  CRlist = [np.average(CACenterRandom(N,p,nimp,niter,E)) for E in Elist]
-  pl.plot(Elist.real,CTlist)
-  pl.plot(Elist.real,CRlist)
-  pl.show()
+  
+  Klist = KuboCenter(N,E,ImpList)
 
 
 	
