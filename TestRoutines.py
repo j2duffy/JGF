@@ -101,29 +101,13 @@ def GFTest(N,E):
 
 
 if __name__ == "__main__":  
-  N = 5
+  nE = 9
+  mC,nC = 3,0
   Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
-  Glist = [GFTest(N,E)[0,0] for E in Elist]
-  pl.plot(Elist,Glist)
+  Glist = np.array([GMx1Center(nE,mC,nC,E)[:6,:6].sum() for E in Elist])
+  pl.plot(Elist.real,Glist.real)
+  pl.plot(Elist.real,Glist.imag)
   pl.show()
-  
-  #N = 5
-  #p = 1
-  #ImpList = [0]
-  #Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
-  #glist = np.array([GMxCenterRec2(N,p,ImpList,E)[0,0] for E in Elist])
-  #pl.plot(Elist.real,glist.real)
-  #pl.plot(Elist.real,glist.imag)
-  #pl.show()
-  
-  #nE = N+1
-  #mC = 1
-  #nC = 0
-  #Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
-  #glist = np.array([GMx1Center(nE,mC,nC,E)[0,0] for E in Elist])
-  #pl.plot(Elist.real,glist.real)
-  #pl.show()
-    
   
 
 

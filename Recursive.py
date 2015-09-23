@@ -243,7 +243,7 @@ def KuboTop(N,E,BigImpList):
   return Kubo(gL,gR,VLR,VRL)
 
 
-def KuboCenter(N,E,ImpList):
+def KuboCenter(N,E,BigImpList):
   """Calculates the conductance of a GNR with top-adsorbed impurities using the Kubo Formula."""
   # Leads
   gL,gR,VLR,VRL = Leads(N,E-1j*eta)	# Gets the advanced GF
@@ -410,13 +410,27 @@ def ConcentrationPlot(N,p,E):
 
 
 if __name__ == "__main__":  
-  N = 4
-  p = 3
-  nimp = 2
+  N = 11
+  p = 40
+  E = 0.0
   niter = 500
-
+  steps = 3
   
-  Klist = KuboCenter(N,E,ImpList)
+  max_n = len(CenterPositions(N,p))
+  nimpl = range(1,max_n+1,steps)
+  
+  CAC = [np.average(CACenterRandom(N,p,nimp,niter,E)) for nimp in nimpl]
+  CAS = [np.average(CASubsRandom(N,p,nimp,niter,E)) for nimp in nimpl]
+  CAT = [np.average(CATopRandom(N,p,nimp,niter,E)) for nimp in nimpl]
+  
+  conc = [nimp/(2.0*N*p) for nimp in nimpl]
+  
+  pl.plot(conc,CAC,label='Center')
+  pl.plot(conc,CAS,label='Subs')
+  pl.plot(conc,CAT,'o',label='Top')
+  pl.legend()
+  pl.savefig('plot.png')
+  pl.show()
 
 
 	
