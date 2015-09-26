@@ -413,7 +413,7 @@ if __name__ == "__main__":
   N = 11
   p = 40
   E = 0.0
-  niter = 500
+  niter = 5000
   steps = 3
   
   max_n = len(CenterPositions(N,p))

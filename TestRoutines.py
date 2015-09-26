@@ -100,14 +100,36 @@ def GFTest(N,E):
   return gR
 
 
+def GammaTest(nE,mC,nC,E):  
+  """Returns the GF Mx of all of the connecting elements to the center adsorbed impurity.
+  mC, nC give the location of the center-adsorbed impurity"""
+  rC = np.array([mC,nC,0])	# Position of center adsorbed impurity (bottom left site)
+  rHex = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])		# All of the sites of a hexagon (w.r.t bottom left)  
+  return  gMxnGNR(nE,rHex+rC,E)
+
+
 if __name__ == "__main__":  
   nE = 9
-  mC,nC = 3,0
+  mC,nC = 1,0
   Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
-  Glist = np.array([GMx1Center(nE,mC,nC,E)[:6,:6].sum() for E in Elist])
+  Glist = np.array([GammaTest(nE,mC,nC,E)[:6,:6].sum() for E in Elist])
   pl.plot(Elist.real,Glist.real)
   pl.plot(Elist.real,Glist.imag)
   pl.show()
+  
+  #nE = 9
+  #mC,nC = 1,0
+  #E = 0.0+1j*eta
+  #gAA = 1.0/(E-eps_imp)
+  #Gamma = GammaTest(nE,mC,nC,E)[:6,:6].sum()
+  #g = GMx1Center(nE,mC,nC,E)[6,6]
+  #print gAA/(1.0-gAA*Gamma*t**2), g
+  
+  #Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
+  #glist = np.array([1.0/(E-eps_imp) for E in Elist])
+  #pl.plot(Elist.real,glist.real)
+  #pl.plot(Elist.real,glist.imag)
+  #pl.show()
   
 
 
