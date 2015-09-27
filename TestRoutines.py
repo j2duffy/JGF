@@ -16,26 +16,39 @@ def GMx2Subs(nE,mI,nI,mP,nP,s,E):
   return Dyson(g,V)
 
 
-def GMx1CenterProbe(nE,mC,nC,mP,nP,sP,E):  
-  """Returns the GF Mx of the center adosrbed impurity and also a single probe site.
-  The site order is probe,hexagon,impurity site."""
-  n = 8		# Total number of sites (hexagon + impurity + probe)
+
+def gTop1(nE,m,n,E):      
+  """Calculates the GF of a top adsorbed impurity in a GNR"""
+  # Introduce the connecting GFs
+  g = np.zeros((2,2),dtype=complex)
+  g[0,0] = gRib_Arm(nE,m,n,m,n,0,E)
+
+  #Introduce the impurity GFs
+  g[1,1] = 1.0/(E-eps_imp)
   
+  # The peturbation connects the impurities to the lattice
+  V = np.zeros([2,2],dtype=complex)
+  V[1,0] = V[0,1] = tau
+  
+  G = Dyson(g,V)
+  
+  # Return the part of the matrix that governs the impurity behaviour. 
+  return G
+
+
+def gMxGNRgamma(nE,mC,nC,E):  
+  """Returns the GF Mx of all of the connecting elements to the center adsorbed impurity.
+  mC, nC give the location of the center-adsorbed impurity"""
   rC = np.array([mC,nC,0])	# Position of center adsorbed impurity (bottom left site)
-  rHex = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])		# All of the sites of a hexagon (w.r.t bottom left)
+  rHex = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])		# All of the sites of a hexagon (w.r.t bottom left)  
+  return  gMxnGNR(nE,rHex+rC,E)
+
+
+def gMxGNRgammaProbe(nE,mC,nC,mP,nP,sP,E):
+  rC = np.array([mC,nC,0])	# Position of center adsorbed impurity (bottom left site)
+  rHex = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])		# All of the sites of a hexagon (w.r.t bottom left)  
   r = np.concatenate(([[mP,nP,sP]],rHex + rC))	# Our complete list of positions, probe site, hexagon
-  
-  gMx = np.zeros((n,n),dtype=complex)
-  gMx[:n-1,:n-1] = gMxnGNR(nE,r,E)
-  gMx[n-1,n-1] = 1.0/(E-eps_imp)
-    
-  V = np.zeros([n,n],dtype=complex)
-  V[1:n-1,n-1] = tau		# 1 -> n-2 sites are hexagon sites, they connect to n-1, the impurity site
-  V[n-1,1:n-1] = tau
-  
-  GMx = Dyson(gMx,V)
-  
-  return GMx
+  return  gMxnGNR(nE,r,E)
 
 
 def GMx1Center(nE,mC,nC,E):  
@@ -53,6 +66,28 @@ def GMx1Center(nE,mC,nC,E):
   V = np.zeros([n,n],dtype=complex)
   V[:n-1,n-1] = tau
   V[n-1,:n-1] = tau
+  
+  GMx = Dyson(gMx,V)
+  
+  return GMx
+
+
+def GMx1CenterProbe(nE,mC,nC,mP,nP,sP,E):  
+  """Returns the GF Mx of the center adosrbed impurity and also a single probe site.
+  The site order is probe,hexagon,impurity site."""
+  n = 8		# Total number of sites (hexagon + impurity + probe)
+  
+  rC = np.array([mC,nC,0])	# Position of center adsorbed impurity (bottom left site)
+  rHex = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])		# All of the sites of a hexagon (w.r.t bottom left)
+  r = np.concatenate(([[mP,nP,sP]],rHex + rC))	# Our complete list of positions, probe site, hexagon
+  
+  gMx = np.zeros((n,n),dtype=complex)
+  gMx[:n-1,:n-1] = gMxnGNR(nE,r,E)
+  gMx[n-1,n-1] = 1.0/(E-eps_imp)
+    
+  V = np.zeros([n,n],dtype=complex)
+  V[1:n-1,n-1] = tau		# 1 -> n-2 sites are hexagon sites, they connect to n-1, the impurity site
+  V[n-1,1:n-1] = tau
   
   GMx = Dyson(gMx,V)
   
@@ -100,28 +135,22 @@ def GFTest(N,E):
   return gR
 
 
-def GammaTest(nE,mC,nC,E):  
-  """Returns the GF Mx of all of the connecting elements to the center adsorbed impurity.
-  mC, nC give the location of the center-adsorbed impurity"""
-  rC = np.array([mC,nC,0])	# Position of center adsorbed impurity (bottom left site)
-  rHex = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])		# All of the sites of a hexagon (w.r.t bottom left)  
-  return  gMxnGNR(nE,rHex+rC,E)
+
 
 
 if __name__ == "__main__":  
   nE = 9
-  mC,nC = 1,0
-  Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
-  Glist = np.array([GammaTest(nE,mC,nC,E)[:6,:6].sum() for E in Elist])
-  pl.plot(Elist.real,Glist.real)
-  pl.plot(Elist.real,Glist.imag)
-  pl.show()
+  mC,nC = 3,0
+  mP,nP = -4,-6
+  E = 0.0+1j*eta
+  print mC,nC,mP,nP,gMxGNRgammaProbe(nE,mC,nC,mP,nP,0,E)[0,1:].sum()
+
   
   #nE = 9
   #mC,nC = 1,0
   #E = 0.0+1j*eta
   #gAA = 1.0/(E-eps_imp)
-  #Gamma = GammaTest(nE,mC,nC,E)[:6,:6].sum()
+  #Gamma = gMxGNRgamma(nE,mC,nC,E)[:6,:6].sum()
   #g = GMx1Center(nE,mC,nC,E)[6,6]
   #print gAA/(1.0-gAA*Gamma*t**2), g
   
