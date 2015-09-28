@@ -139,12 +139,18 @@ def GFTest(N,E):
 
 
 if __name__ == "__main__":  
-  nE = 9
-  mC,nC = 3,0
-  mP,nP = -4,-6
+  nE = 6
+  m1,n1 = 1,0
+  m2,n2 = 1,0
+  s = 0
   E = 0.0+1j*eta
-  print mC,nC,mP,nP,gMxGNRgammaProbe(nE,mC,nC,mP,nP,0,E)[0,1:].sum()
-
+  Dlist = range(-20,20)
+  glist = np.array([gRib_Arm(nE,m1,n1,m2+D,n2+D,1,E) for D in Dlist])
+  pl.plot(Dlist,glist.real,label='Re')
+  pl.plot(Dlist,glist.imag,label='Im')
+  pl.legend()
+  pl.savefig('GF.png')
+  pl.show()
   
   #nE = 9
   #mC,nC = 1,0
