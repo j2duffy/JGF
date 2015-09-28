@@ -1,11 +1,5 @@
 """Coupling routines for various systems"""
-
 from GFRoutines import *
-from scipy import optimize
-from numpy.linalg import norm, det
-from functools import partial
-import profile
-import multiprocessing
 
 
 global mag_m, band_shift, Vup, Vdown		# Do mag_m and band_shift still need to be here?
@@ -212,5 +206,12 @@ def Line_CouplingSPA(DA):
 
 
 if __name__ == "__main__":
-  r0,r1,r2 = [[0,0,0],[1,0,0],[5,0,1]]
-  print JBulkTop3(r0,r1,r2)
+  #Dlist = range(1,10)
+  #Jlist = [JBulkSubs(D,D,0) for D in Dlist]
+  #pl.plot(Dlist,Jlist)
+  #pl.show()
+  
+  Dlist = range(1,10)
+  Jlist = [JBulkSubs(D,-D,0) for D in Dlist]
+  pl.plot(Dlist,Jlist)
+  pl.show()
