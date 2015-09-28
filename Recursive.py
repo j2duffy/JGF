@@ -410,11 +410,11 @@ def ConcentrationPlot(N,p,E):
 
 
 if __name__ == "__main__":  
-  N = 11
+  N = 32
   p = 40
   E = 0.0
   niter = 5000
-  steps = 3
+  steps = 40
   
   max_n = len(CenterPositions(N,p))
   nimpl = range(1,max_n+1,steps)
