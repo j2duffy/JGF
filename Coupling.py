@@ -1,6 +1,6 @@
 """Coupling routines for various systems"""
 from GFRoutines import *
-
+from scipy.optimize import curve_fit
 
 global mag_m, band_shift, Vup, Vdown		# Do mag_m and band_shift still need to be here?
 # Self-consistency crap
@@ -205,13 +205,21 @@ def Line_CouplingSPA(DA):
   return temp.dot(X00)[0,1]
 
 
+
 if __name__ == "__main__":
-  #Dlist = range(1,10)
-  #Jlist = [JBulkSubs(D,D,0) for D in Dlist]
-  #pl.plot(Dlist,Jlist)
-  #pl.show()
-  
-  Dlist = range(1,10)
-  Jlist = [JBulkSubs(D,-D,0) for D in Dlist]
+  pl.subplot(1,2,1)
+  pl.ylabel('J')
+  pl.xlabel('E')
+  Dlist = range(3,20)
+  Jlist = [JBulkCenter(D,D) for D in Dlist]
   pl.plot(Dlist,Jlist)
+  
+  pl.subplot(1,2,2)
+  pl.xlabel('E')
+  Dlist = range(3,20)
+  Jlist = [JBulkCenter(D,-D) for D in Dlist]
+  pl.plot(Dlist,Jlist)
+
+  pl.savefig('JBulkCenter.pdf')
   pl.show()
+  
