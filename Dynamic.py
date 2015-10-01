@@ -610,14 +610,6 @@ def SC2BulkCenter(m,n,n0=1.0):
 
 
 
-def GNR_DOS(nE,m1,n1,m2,n2,s,V,E):
-  """Temporary function for checking the GNR DOS in the presence of one impurity.
-  Probably a bit unnecessary in general and due for retirement after its brief period of service."""
-  g_mx = gGNRSubsMx(nE,m1,n1,m2,n2,s,E)
-  g_V = Dyson(g_mx,V)[1,1]
-  return -g_V.imag/pi
-
-
 def SCField(GFup,GFdown,n0=1.0):
   """Calculate Vup/Vdown for a single substitutional impurity in a GNR, assuming that the zeeman field is applied ubiquitously"""
   # This returns values for the up/down spin that are only separated by a sign. There is a symmetry here that you are not exploiting.
