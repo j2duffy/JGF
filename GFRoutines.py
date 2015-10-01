@@ -122,7 +122,7 @@ def gBulkTop3Mx(r0,r1,r2,E):
   return G[3:6,3:6]
 
 
-def gBulkCenterMx(m,n,E):
+def gMx2BulkCenter(m,n,E):
   """A routine that calculates the 2x2 matrix for Center adsorbed impurities"""
   D = [m,n,0]
   hex1 = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])
@@ -181,6 +181,16 @@ def gBulkCenterMxMulti(m,n,E):
   g_mx[12,12] = g_mx[13,13] = g_impurity
   
   return g_mx
+
+
+def g1GNRTop(nE,m,n,E):
+  """Returns the GF for the Top Adsorbed impurity in a GNR
+  Suffers from a difference of convention with most of your code, where the connecting atoms are labelled first and the impurities last.
+  However, this may be a more logical way of doing it (you are more interested in the impurity positions."""
+  g00 = 1.0/(E-eps_imp)
+  g11 = gRib_Arm(nE,m,n,m,n,0,E)
+  G00 = g00/(1.0-tau**2 *g00*g11)
+  return G00
 
 
 def gMx2GNR(nE,m1,n1,m2,n2,s,E):      

@@ -11,46 +11,6 @@ from scipy.interpolate import UnivariateSpline
 
 
 
-# 1 Impurity Peturbed GFs
-def g1GNRTop(nE,m,n,E):
-  """Returns the GF for the Top Adsorbed impurity in a GNR
-  Suffers from a difference of convention with most of your code, where the connecting atoms are labelled first and the impurities last.
-  However, this may be a more logical way of doing it (you are more interested in the impurity positions."""
-  g00 = 1.0/(E-eps_imp)
-  g11 = gRib_Arm(nE,m,n,m,n,0,E)
-  G00 = g00/(1.0-tau**2 *g00*g11)
-  return G00
-
-
-def gMx2BulkCenter(m,n,E):
-  """A routine that calculates the 2x2 matrix for Center adsorbed impurities"""
-  D = [m,n,0]
-  hex1 = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])
-  hex2 = hex1 + D
-  r = np.concatenate((hex1,hex2))
-  
-  g_mx = np.zeros([14,14],dtype=complex)
-  g_mx[:12,:12] = BulkMxGen(r,E)
-  g_impurity = 1.0/(E-eps_imp)
-  g_mx[12,12] = g_mx[13,13] = g_impurity
-
-  V = np.zeros([14,14],dtype=complex)
-  V[:6,12] = tau
-  V[12,:6] = tau
-  V[6:12,13] = tau
-  V[13,6:12] = tau
-  
-  g_new = Dyson(g_mx,V)
-
-  g_impur =  np.zeros([2,2],dtype=complex)
-  g_impur[0,0] = g_new[12,12]
-  g_impur[0,1] = g_new[12,13]
-  g_impur[1,0] = g_new[13,12]
-  g_impur[1,1] = g_new[13,13]
-
-  return g_impur
-
-
 def gMx2SI(m1,n1,m2,n2,s,E):
   """Returns the GF matrix for two atomic positions in semi-infinite graphene."""
   g = np.zeros((2,2),dtype=complex)

@@ -4,17 +4,23 @@ from Recursive import *
 from numpy.testing import assert_allclose
 
 
-print "Recursive Tests"
-N = 5
-p = 2
-E = 1.4
-BigImpList = [[1,5],[0,5]]
-assert_allclose( KuboSubs(N,E,BigImpList), 1.1538872955920438 )
+print "GFRoutines Tests"
 
-N,p,nimp,E = 10,2,1,1.2
-assert_allclose( ConfigAvCenterTotal(N,p,nimp,E), 4.779161746646767 )
+assert_allclose( g1GNRTop(7,3,1,0.5+1j*eta), (-1.71776225693-2.09386180634j) )
 
-print "Recursive Tests Passed"
+print "GFRoutines tests passed"
+
+#print "Recursive Tests"
+#N = 5
+#p = 2
+#E = 1.4
+#BigImpList = [[1,5],[0,5]]
+#assert_allclose( KuboSubs(N,E,BigImpList), 1.1538872955920438 )
+
+#N,p,nimp,E = 10,2,1,1.2
+#assert_allclose( ConfigAvCenterTotal(N,p,nimp,E), 4.779161746646767 )
+
+#print "Recursive Tests Passed"
 
 
 #print "Coupling Tests"
@@ -60,9 +66,9 @@ print "Recursive Tests Passed"
 
 
 
-#print "Testing SC2BulkCenter"
-#m,n = 3,2
-#assert_allclose((-3.7636285014641575, 4.775961447320155), SC2BulkCenter(m,n))
+print "Testing SC2BulkCenter"
+m,n = 3,2
+assert_allclose((-3.7636285014641575, 4.775961447320155), SC2BulkCenter(m,n))
 
 
 #print "Testing SCnGNRSubs"

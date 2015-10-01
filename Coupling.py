@@ -37,7 +37,7 @@ def JBulkTop(m,n,s):
 def JBulkCenter(m,n):
   """The coupling for center-adsorbed impurities in bulk graphene"""
   def GF(y):
-    return gBulkCenterMx(m,n,EF+1j*y)
+    return gMx2BulkCenter(m,n,EF+1j*y)
   return J(GF)
 
 
