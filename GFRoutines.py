@@ -183,6 +183,17 @@ def gBulkCenterMxMulti(m,n,E):
   return g_mx
 
 
+
+def gMx2SI(m1,n1,m2,n2,s,E):
+  """Returns the GF matrix for two atomic positions in semi-infinite graphene."""
+  g = np.zeros((2,2),dtype=complex)
+  g[0,0] = gSI_kZ(m1,n1,m1,n1,0,E)
+  g[1,1]= gSI_kZ(m2,n2,m2,n2,0,E)
+  g[0,1] = gSI_kZ(m1,n1,m2,n2,s,E)
+  g[1,0] = g[0,1]
+  return g
+
+
 def g1GNRTop(nE,m,n,E):
   """Returns the GF for the Top Adsorbed impurity in a GNR
   Suffers from a difference of convention with most of your code, where the connecting atoms are labelled first and the impurities last.
@@ -227,9 +238,10 @@ def gGNRTopMx(nE,m1,n1,m2,n2,s,E):
   return G[2:4,2:4]
 
 
-def gGNRTopMxFast(nE,m1,n1,m2,n2,s,E):      
+def gMx2GNRTopFast(nE,m1,n1,m2,n2,s,E):      
   """A faster version of gGNRTopMx. 
-  Uses the analytic results of Dyson's formula to get a speed up of a factor of 2."""
+  Uses Dyson's formula in a more specific way to speed everything up.
+  Gets a speed up of a factor of about 2."""
   
   # Introduce the connecting GFs
   gaa = gRib_Arm(nE,m1,n1,m1,n1,0,E)

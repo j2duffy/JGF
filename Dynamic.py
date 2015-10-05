@@ -10,45 +10,6 @@ from functionsample import sample_function
 from scipy.interpolate import UnivariateSpline
 
 
-
-def gMx2SI(m1,n1,m2,n2,s,E):
-  """Returns the GF matrix for two atomic positions in semi-infinite graphene."""
-  g = np.zeros((2,2),dtype=complex)
-  g[0,0] = gSI_kZ(m1,n1,m1,n1,0,E)
-  g[1,1]= gSI_kZ(m2,n2,m2,n2,0,E)
-  g[0,1] = gSI_kZ(m1,n1,m2,n2,s,E)
-  g[1,0] = g[0,1]
-  return g
-
-
-def gMx2GNRTopFast(nE,m1,n1,m2,n2,s,E):      
-  """A faster version of gGNRTopMx. 
-  Uses Dyson's formula in a more specific way to speed everything up.
-  Gets a speed up of a factor of about 2."""
-  
-  # Introduce the connecting GFs
-  gaa = gRib_Arm(nE,m1,n1,m1,n1,0,E)
-  gbb = gRib_Arm(nE,m2,n2,m2,n2,0,E)
-  gab,gba = 2*(gRib_Arm(nE,m1,n1,m2,n2,s,E),)
-  
-  #Introduce the impurity GFs
-  g_impurity = 1.0/(E-eps_imp)
-  gAA,gBB = 2*(g_impurity,)
-  
-  GAA = (gAA - gAA*gbb*gBB*t**2)/(1 - gbb*gBB*t**2 - gAA*gab*gba*gBB*t**4 + 
-  gaa*gAA*t**2*(-1 + gbb*gBB*t**2))
-  GBB = (gBB - gaa*gAA*gBB*t**2)/(1 - gbb*gBB*t**2 - gAA*gab*gba*gBB*t**4 + 
-  gaa*gAA*t**2*(-1 + gbb*gBB*t**2))
-  GAB = -((gAA*gab*gBB*t**2)/(-1 + gbb*gBB*t**2 + gAA*gab*gba*gBB*t**4 + gaa*gAA*(t**2 - gbb*gBB*t**4)))
-  
-  G = np.zeros((2,2),dtype=complex)
-  G[0,0] = GAA
-  G[1,1] = GBB
-  G[0,1],G[1,0] = 2*(GAB,)
-  return G
-
-
-
 def X1HF(GF,Vup,Vdown,w):
   """Calculates the Hartree-Fock spin susceptibility for a general GF"""
   def spin_sus_int12(y):
@@ -616,7 +577,8 @@ def SCGNRField(nE,m,n,hw0=hw0,n0=1.0):
 
 
 if __name__ == "__main__":
-  #for D in range(10,50,10):
+  #Dlist = range(300,700,10)
+  #for D in Dlist:
     #nE, r = 6,[[1,0,0],[0-D,-1-D,0],[1+D,0+D,0]]
     #Vup, Vdown = SCnGNRTop(nE,r)
     #fXr = np.vectorize(lambda w: XnRPAGNRTop(nE,r,Vup,Vdown,w)[0,0].real)
@@ -626,23 +588,25 @@ if __name__ == "__main__":
     #Xrlist = Xrtemp[0]
     #Xilist = Xitemp[0]
     #np.savetxt("Dynamic_%g.dat" % (D,),zip(wilist,Xilist))
-    #pl.plot(wrlist,Xrlist)
-    #pl.plot(wilist,Xilist)
-    #pl.show()
+    ##pl.plot(wrlist,Xrlist)
+    ##pl.plot(wilist,Xilist)
+    ##pl.show()
     
+  Dlist = range(300,700,10)
   Flist = []
-  for D in [130]:
+  for D in Dlist:
     x, y = np.loadtxt("Dynamic_%g.dat" % (D,)).T
-    #y = y - y.min()/2.0 
-    #spline = UnivariateSpline(x,y)
-    pl.plot(x,y)
+    y = y - y.min()/2.0 
+    spline = UnivariateSpline(x,y)
+    #pl.plot(x,y)
     #pl.plot(x,spline(x),'o')
-    pl.show()
-    #roots = spline.roots()
-    #FWHM = roots[1] - roots[0]
-    #Flist.append(FWHM)
-  #pl.plot(range(80,140,10),Flist,'-o')
-  #pl.show()
+    #pl.show()
+    roots = spline.roots()
+    FWHM = roots[1] - roots[0]
+    Flist.append(FWHM)
+  pl.plot(Dlist,Flist,'-o')
+  pl.savefig('plot.png')
+  pl.show()
     
 
       
