@@ -38,6 +38,7 @@ def SymSector(r):
   return [m,n,s]
 
 
+
 def BulkMxGen(r,E):
   """Given a list of positions in bulk graphene, calculates the relevant matrix of GFs"""
   rcol = r[:,np.newaxis]

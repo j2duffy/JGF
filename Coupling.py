@@ -207,19 +207,21 @@ def Line_CouplingSPA(DA):
 
 
 if __name__ == "__main__":
-  pl.subplot(1,2,1)
   pl.ylabel('J')
   pl.xlabel('E')
-  Dlist = range(3,20)
+  Dlist = range(80,100)
   Jlist = [JBulkCenter(D,D) for D in Dlist]
+  np.savetxt('data.dat',zip(Dlist,Jlist))
   pl.plot(Dlist,Jlist)
-  
-  pl.subplot(1,2,2)
-  pl.xlabel('E')
-  Dlist = range(3,20)
-  Jlist = [JBulkCenter(D,-D) for D in Dlist]
-  pl.plot(Dlist,Jlist)
-
-  pl.savefig('JBulkCenter.pdf')
   pl.show()
+  
+  #f = lambda a,b,x: a+b*x
+  #x,y = np.loadtxt('data.dat').T
+  #xl = [log(x).real for x in x]
+  #yl = [log(y).real for y in y]
+  #popt,pcov = curve_fit(f,xl,yl,p0=(0,-10))
+  #a,b = popt
+  #pl.plot(xl,[f(a,b,x) for x in xl])
+  #pl.plot(xl,yl)
+  #pl.show()
   

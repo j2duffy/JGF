@@ -135,38 +135,53 @@ def GFTest(N,E):
   return gR
 
 
+def GammaBulk(m,n,E):
+  """The Gamma function in bulk graphene. 
+  Only one integral, and not checked enough.
+  Should not work around zero"""
+  def int_temp(kZ):
+    q = acos( (E**2 - t**2 - 4.0*t**2 *cos(kZ)**2)/(4.0*t**2 *cos(kZ) ) )
+    if q.imag < 0.0: q = -q
+    
+    sig = copysign(1,m+n)
+    f = t*( 1.0 + 2.0*cos(kZ)*exp(sig*1j*q) )
+    ft = t*( 1.0 + 2.0*cos(kZ)*exp(-sig*1j*q) )
+    
+    Const = 1j/(4*pi*t**2)
+    Den = cos(kZ)*sin(q)
+    
+    temp1 = 2.0*E**3/t**2 + t*exp(-2.0*1j*q)*f**3 + t*exp(2.0*1j*q)*ft**3
+    temp2 = exp( 1j*(sig*q*(m+n) + kZ*(m-n) ) )
+    
+    return Const*temp1*temp2/Den
 
+  return C_int(int_temp,-pi/2,pi/2)
+
+
+def gMx2BulkCenter(m,n,E):
+  """Calculates the matrix of connecting sites for a center adsorbed impurity in bulk"""
+  D = [m,n,0]
+  hex1 = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])
+  hex2 = hex1 + D
+  r = np.concatenate((hex1,hex2))
+  
+  return BulkMxGen(r,E)
 
 
 if __name__ == "__main__":  
-  nE = 6
-  m1,n1 = 1,0
-  m2,n2 = 1,0
-  s = 0
-  E = 0.0+1j*eta
-  Dlist = range(-20,20)
-  glist = np.array([gRib_Arm(nE,m1,n1,m2+D,n2+D,1,E) for D in Dlist])
-  pl.plot(Dlist,glist.real,label='Re')
-  pl.plot(Dlist,glist.imag,label='Im')
-  pl.legend()
-  pl.savefig('GF.png')
-  pl.show()
-  
-  #nE = 9
-  #mC,nC = 1,0
-  #E = 0.0+1j*eta
-  #gAA = 1.0/(E-eps_imp)
-  #Gamma = gMxGNRgamma(nE,mC,nC,E)[:6,:6].sum()
-  #g = GMx1Center(nE,mC,nC,E)[6,6]
-  #print gAA/(1.0-gAA*Gamma*t**2), g
-  
-  #Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
-  #glist = np.array([1.0/(E-eps_imp) for E in Elist])
-  #pl.plot(Elist.real,glist.real)
-  #pl.plot(Elist.real,glist.imag)
+  #m,n = 3,0
+  #Elist = np.linspace(-4.0+1j*eta,4.0+1j*eta,201)
+  #Glist = np.array([GammaBulk(m,n,E) for E in Elist])
+  #pl.plot(Elist.real,Glist.real)
+  #pl.plot(Elist.real,Glist.imag)
   #pl.show()
   
+  m,n = 3,0
+  E = 1.1+1j*eta
+  print gMx2BulkCenter(m,n,E)[6:,6:].sum()
+  
 
+     
 
   
 
