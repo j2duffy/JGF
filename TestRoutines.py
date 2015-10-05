@@ -2,6 +2,8 @@ from GFRoutines import *
 from numpy.linalg import norm
 from Recursive import *
 
+from scipy.integrate import dblquad
+
 
 def gSubs1(nE,m,n,E):
   s = 0
@@ -135,6 +137,28 @@ def GFTest(N,E):
   return gR
 
 
+def GammaBulkDouble(m,n,E):
+  """The Gamma function in bulk graphene. 
+  Both integrals"""
+  def int_temp(kA,kZ):    
+    f = 1.0 + 2.0*cos(kZ)*exp(1j*kA) 
+    ft = 1.0 + 2.0*cos(kZ)*exp(-1j*kA)
+    
+    Const = 1.0/(2.0*pi**2)
+    Den = E**2 - t**2 *abs(f)**2
+    
+    temp1 = 2.0*E*abs(f)**2 + t*exp(-2.0*1j*kA)*f**3 + t*exp(2.0*1j*kA)*ft**3
+    temp2 = exp( 1j*(kA*(m+n) + kZ*(m-n) ) )
+    
+    return Const*temp1*temp2/Den 
+  
+  Gre = dblquad(lambda kA,kZ: int_temp(kA,kZ).real, -pi/2.0, pi/2.0, lambda kA: -pi, lambda kA: pi)[0]
+  Gim = dblquad(lambda kA,kZ: int_temp(kA,kZ).imag, -pi/2.0, pi/2.0, lambda kA: -pi, lambda kA: pi)[0]
+  return Gre + 1j*Gim
+
+
+
+
 def GammaBulk(m,n,E):
   """The Gamma function in bulk graphene. 
   Only one integral, and not checked enough.
@@ -144,8 +168,8 @@ def GammaBulk(m,n,E):
     if q.imag < 0.0: q = -q
     
     sig = copysign(1,m+n)
-    f = t*( 1.0 + 2.0*cos(kZ)*exp(sig*1j*q) )
-    ft = t*( 1.0 + 2.0*cos(kZ)*exp(-sig*1j*q) )
+    f = 1.0 + 2.0*cos(kZ)*exp(sig*1j*q)
+    ft = 1.0 + 2.0*cos(kZ)*exp(-sig*1j*q)
     
     Const = 1j/(4*pi*t**2)
     Den = cos(kZ)*sin(q)
@@ -178,7 +202,8 @@ if __name__ == "__main__":
   
   m,n = 3,0
   E = 1.1+1j*eta
-  print gMx2BulkCenter(m,n,E)[6:,6:].sum()
+  print GammaBulk(m,n,E)
+  print GammaBulkDouble(m,n,E)
   
 
      
