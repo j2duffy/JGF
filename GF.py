@@ -225,14 +225,12 @@ def gSIZigtest(DA1,DA2,DZ,s_lat,E):		# You need to change the sublattice notatio
 
 
 if __name__ == "__main__":   
-  nE = 7
-  Elist = np.linspace(-3.5+1j*eta,3.5+1j*eta,201)
-  
-  m,n,s = 1,0,0
-  glist = [- gRib_Arm(nE,m,n,m,n,s,E).imag/pi for E in Elist]
-  pl.plot(Elist.real,glist)
-  pl.xlabel('E')
-  pl.ylabel('LDOS')
-  
-  pl.savefig('LDOS_GNR.pdf')
+  DA = -5
+  Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
+  glist = np.array([gBulk_kZ(DA,DA,0,E) for E in Elist])
+  gSPAlist = np.array([gBulkArmSPA(DA,E) for E in Elist])
+  pl.plot(Elist.real,glist.real)
+  pl.plot(Elist.real,glist.imag)
+  pl.plot(Elist.real,gSPAlist.real,'o')
+  pl.plot(Elist.real,gSPAlist.imag,'o')
   pl.show()

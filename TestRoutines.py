@@ -138,8 +138,8 @@ def GFTest(N,E):
 
 
 def GammaBulkDouble(m,n,E):
-  """The Gamma function in bulk graphene. 
-  Both integrals"""
+  """The Gamma function (Gamma_ab) in bulk graphene.
+  Performs the double integration, partly for testing, partly because this is the only way to get a working Gamma function around zero."""
   def int_temp(kA,kZ):    
     f = 1.0 + 2.0*cos(kZ)*exp(1j*kA) 
     ft = 1.0 + 2.0*cos(kZ)*exp(-1j*kA)
@@ -157,12 +157,8 @@ def GammaBulkDouble(m,n,E):
   return Gre + 1j*Gim
 
 
-
-
 def GammaBulk(m,n,E):
-  """The Gamma function in bulk graphene. 
-  Only one integral, and not checked enough.
-  Should not work around zero"""
+  """The Gamma function (Gamma_ab) in bulk graphene."""
   def int_temp(kZ):
     q = acos( (E**2 - t**2 - 4.0*t**2 *cos(kZ)**2)/(4.0*t**2 *cos(kZ) ) )
     if q.imag < 0.0: q = -q
@@ -174,7 +170,7 @@ def GammaBulk(m,n,E):
     Const = 1j/(4*pi*t**2)
     Den = cos(kZ)*sin(q)
     
-    temp1 = 2.0*E**3/t**2 + t*exp(-2.0*1j*q)*f**3 + t*exp(2.0*1j*q)*ft**3
+    temp1 = 2.0*E**3/t**2 + t*exp(-sig*2.0*1j*q)*f**3 + t*exp(sig*2.0*1j*q)*ft**3
     temp2 = exp( 1j*(sig*q*(m+n) + kZ*(m-n) ) )
     
     return Const*temp1*temp2/Den
@@ -192,18 +188,40 @@ def gMx2BulkCenter(m,n,E):
   return BulkMxGen(r,E)
 
 
+def gBulkGammaSPA(DA,E):
+  """The Gamma term in bulk"""
+  sig = copysign(1.0,-E.real)
+
+  temp_a1 = 1j*sig*E*exp( sig*2*1j*abs(DA)*acos( (E**2 - 5*t**2)/(4*t**2) ) ) 
+  temp_a2 = ( (E**2-9*t**2)*(-E**2+t**2) )**(1.0/4.0)
+  temp_a3 = sqrt( -sig*( 1j/(abs(DA)*pi*(3*t**2 + E**2) )  )  )
+  temp_a4 = (E**4 - 27*t**4 + 2*E**2 *t*(4+9*t))/(4*t**3)
+  ga = (temp_a1/temp_a2)*temp_a3*temp_a4
+
+  temp_b1 = 1j*sig*( E*exp(sig*2*1j*abs(DA)*acos( -sqrt( 1 - E**2/t**2 ) ) ) )
+  temp_b2 = sqrt(3*t**2 + E**2)*( E**2*(t**2 - E**2) )**(1.0/4.0)
+  temp_b3 = sqrt( sig*(1j/(pi*abs(DA))) )
+  temp_b4 = (2*E**2 *t - 2*E**2)/t**3
+  gb = (temp_b1/temp_b2)*temp_b3*temp_b4
+
+  g = ga + gb
+
+  return g
+
+
 if __name__ == "__main__":  
-  #m,n = 3,0
-  #Elist = np.linspace(-4.0+1j*eta,4.0+1j*eta,201)
-  #Glist = np.array([GammaBulk(m,n,E) for E in Elist])
-  #pl.plot(Elist.real,Glist.real)
-  #pl.plot(Elist.real,Glist.imag)
-  #pl.show()
+  #m,n = 5,0
+  #E = 1.1+1j*eta
+  #print GammaBulk(m,n,E)
+  #print gMx2BulkCenter(m,n,E)[:6,6:].sum()
   
-  m,n = 3,0
-  E = 1.1+1j*eta
-  print GammaBulk(m,n,E)
-  print GammaBulkDouble(m,n,E)
+  DA = 5
+  Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
+  glist = [GammaBulk(DA,DA,E) for E in Elist]
+  #gSPAlist = [gBulkGammaSPA(DA,E) for E in Elist]
+  pl.plot(Elist,glist)
+  #pl.plot(Elist,gSPAlist)
+  pl.show()
   
 
      

@@ -577,36 +577,50 @@ def SCGNRField(nE,m,n,hw0=hw0,n0=1.0):
 
 
 if __name__ == "__main__":
-  #Dlist = range(300,700,10)
-  #for D in Dlist:
-    #nE, r = 6,[[1,0,0],[0-D,-1-D,0],[1+D,0+D,0]]
-    #Vup, Vdown = SCnGNRTop(nE,r)
-    #fXr = np.vectorize(lambda w: XnRPAGNRTop(nE,r,Vup,Vdown,w)[0,0].real)
-    #fXi = np.vectorize(lambda w: XnRPAGNRTop(nE,r,Vup,Vdown,w)[0,0].imag)
-    #wrlist, Xrtemp = sample_function(fXr, [0.0006,0.0016], tol=1e-3)
-    #wilist, Xitemp = sample_function(fXi, [0.0006,0.0016], tol=1e-4)
-    #Xrlist = Xrtemp[0]
-    #Xilist = Xitemp[0]
-    #np.savetxt("Dynamic_%g.dat" % (D,),zip(wilist,Xilist))
-    ##pl.plot(wrlist,Xrlist)
-    ##pl.plot(wilist,Xilist)
-    ##pl.show()
-    
-  Dlist = range(300,700,10)
-  Flist = []
+  #nE = 6
+  #m,n = 1,0
+  #Vup, Vdown = SC1GNRTop(nE,m,n)
+  #fXi = np.vectorize(lambda w: X1RPAGNRTop(nE,m,n,Vup,Vdown,w).imag)
+  #wilist, Xitemp = sample_function(fXi, [0.0,0.002], tol=1e-3)
+  #Xilist = Xitemp[0]
+  #spline = UnivariateSpline(wilist,Xilist-Xilist.min()/2.0)
+  #pl.plot(wilist,Xilist)
+  #pl.plot(wilist,spline(wilist))
+  #pl.show()
+  #roots = spline.roots()
+  #FWHM = roots[1] - roots[0]
+  #print FWHM
+  
+  Dlist = range(600,1000,10)
   for D in Dlist:
-    x, y = np.loadtxt("Dynamic_%g.dat" % (D,)).T
-    y = y - y.min()/2.0 
-    spline = UnivariateSpline(x,y)
-    #pl.plot(x,y)
-    #pl.plot(x,spline(x),'o')
+    nE, r = 6,[[1,0,0],[0-D,-1-D,0],[1+D,0+D,0]]
+    Vup, Vdown = SCnGNRTop(nE,r)
+    fXr = np.vectorize(lambda w: XnRPAGNRTop(nE,r,Vup,Vdown,w)[0,0].real)
+    fXi = np.vectorize(lambda w: XnRPAGNRTop(nE,r,Vup,Vdown,w)[0,0].imag)
+    wrlist, Xrtemp = sample_function(fXr, [0.0006,0.0016], tol=1e-3)
+    wilist, Xitemp = sample_function(fXi, [0.0006,0.0016], tol=1e-4)
+    Xrlist = Xrtemp[0]
+    Xilist = Xitemp[0]
+    np.savetxt("Dynamic_%g.dat" % (D,),zip(wilist,Xilist))
+    #pl.plot(wrlist,Xrlist)
+    #pl.plot(wilist,Xilist)
     #pl.show()
-    roots = spline.roots()
-    FWHM = roots[1] - roots[0]
-    Flist.append(FWHM)
-  pl.plot(Dlist,Flist,'-o')
-  pl.savefig('plot.png')
-  pl.show()
+    
+  #Dlist = range(300,700,10)
+  #Flist = []
+  #for D in Dlist:
+    #x, y = np.loadtxt("Dynamic_%g.dat" % (D,)).T
+    #y = y - y.min()/2.0 
+    #spline = UnivariateSpline(x,y)
+    ##pl.plot(x,y)
+    ##pl.plot(x,spline(x),'o')
+    ##pl.show()
+    #roots = spline.roots()
+    #FWHM = roots[1] - roots[0]
+    #Flist.append(FWHM)
+  #pl.plot(Dlist,Flist,'-o')
+  #pl.savefig('plot.png')
+  #pl.show()
     
 
       
