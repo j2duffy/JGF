@@ -192,16 +192,16 @@ def gBulkGammaSPA(DA,E):
   """The Gamma term in bulk"""
   sig = copysign(1.0,-E.real)
 
-  temp_a1 = 1j*sig*E*exp( sig*2*1j*abs(DA)*acos( (E**2 - 5*t**2)/(4*t**2) ) ) 
+  temp_a1 = 1j*sig*exp( sig*2*1j*abs(DA)*acos( (E**2 - 5*t**2)/(4*t**2) ) ) 
   temp_a2 = ( (E**2-9*t**2)*(-E**2+t**2) )**(1.0/4.0)
   temp_a3 = sqrt( -sig*( 1j/(abs(DA)*pi*(3*t**2 + E**2) )  )  )
-  temp_a4 = (E**4 - 27*t**4 + 2*E**2 *t*(4+9*t))/(4*t**3)
+  temp_a4 = ((E-t)*(E+3*t)**3)/(4*t**3)
   ga = (temp_a1/temp_a2)*temp_a3*temp_a4
 
-  temp_b1 = 1j*sig*( E*exp(sig*2*1j*abs(DA)*acos( -sqrt( 1 - E**2/t**2 ) ) ) )
+  temp_b1 = 1j*sig*( exp(sig*2*1j*abs(DA)*acos( -sqrt( 1 - E**2/t**2 ) ) ) )
   temp_b2 = sqrt(3*t**2 + E**2)*( E**2*(t**2 - E**2) )**(1.0/4.0)
   temp_b3 = sqrt( sig*(1j/(pi*abs(DA))) )
-  temp_b4 = (2*E**2 *t - 2*E**2)/t**3
+  temp_b4 = (2*E**3 *(t-E))/t**3
   gb = (temp_b1/temp_b2)*temp_b3*temp_b4
 
   g = ga + gb
@@ -218,9 +218,9 @@ if __name__ == "__main__":
   DA = 5
   Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
   glist = [GammaBulk(DA,DA,E) for E in Elist]
-  #gSPAlist = [gBulkGammaSPA(DA,E) for E in Elist]
+  gSPAlist = [gBulkGammaSPA(DA,E) for E in Elist]
   pl.plot(Elist,glist)
-  #pl.plot(Elist,gSPAlist)
+  pl.plot(Elist,gSPAlist)
   pl.show()
   
 

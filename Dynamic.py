@@ -577,22 +577,44 @@ def SCGNRField(nE,m,n,hw0=hw0,n0=1.0):
 
 
 if __name__ == "__main__":
-  nE = 6
-  m,n = 3,0
-  Vup, Vdown = SC1GNRTop(nE,m,n)
-  fXi = np.vectorize(lambda w: X1RPAGNRTop(nE,m,n,Vup,Vdown,w).imag)
-  wilist, Xitemp = sample_function(fXi, [0.000969466,0.0009694665], tol=1e-3)
-  Xilist = Xitemp[0]
-  Xilist = Xilist-Xilist.min()/2.0
-  spline = UnivariateSpline(wilist,Xilist)
-  pl.plot(wilist,Xilist)
-  pl.plot(wilist,spline(wilist),'o')
-  pl.savefig('plot.png')
-  pl.show()
-  roots = spline.roots()
-  FWHM = roots[1] - roots[0]
-  print FWHM
+  # Single Impurity
+  #nE = 6
+  #m,n = 1,0
+  #Vup, Vdown = SC1GNRTop(nE,m,n)
+  #Flist = []
+  #wflist = [0.0,0.1,0.2,0.3,0.4,0.5,0.6]
+  #for wf in wflist:
+    #fXi = np.vectorize(lambda w: X1RPAGNRTop(nE,m,n,Vup,Vdown,w).imag)
+    #wilist, Xitemp = sample_function(fXi, [0.0,1.0e-2], tol=1e-3)
+    #Xilist = Xitemp[0]
+    #Xilist = Xilist-Xilist.min()/2.0
+    #spline = UnivariateSpline(wilist,Xilist)
+    ##pl.plot(wilist,Xilist)
+    ##pl.plot(wilist,spline(wilist),'o')
+    ##pl.savefig('plot.png')
+    ##pl.show()
+    #roots = spline.roots()
+    #FWHM = roots[1] - roots[0]
+    #Flist.append(FWHM)
+  #pl.plot(wflist,Flist)
+  #pl.savefig('plot.png')
+  #pl.show()
   
+  
+  # Double Impurity
+  nE,m1,n1,m2,n2,s = 6,1,0,3,2,0
+  Vup, Vdown = SC2GNRTop(nE,m1,n1,m2,n2,s)
+  #fXr = np.vectorize(lambda w: X2RPAGNRTop(nE,m1,n1,m2,n2,s,Vup,Vdown,w)[0,0].real)
+  fXi = np.vectorize(lambda w: X2RPAGNRTop(nE,m1,n1,m2,n2,s,Vup,Vdown,w)[0,0].imag)
+  #wrlist, Xrtemp = sample_function(fXr, [0.0,1.0e-2], tol=1e-3)
+  wilist, Xitemp = sample_function(fXi, [0.0,1.0e-2], tol=1e-4)
+  #Xrlist = Xrtemp[0]
+  Xilist = Xitemp[0]
+  #pl.plot(wrlist,Xrlist)
+  pl.plot(wilist,Xilist)
+  pl.show()
+  
+  #Triple Impurity
   #Dlist = range(600,1000,10)
   #for D in Dlist:
     #nE, r = 6,[[1,0,0],[0-D,-1-D,0],[1+D,0+D,0]]
