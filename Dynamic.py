@@ -602,16 +602,28 @@ if __name__ == "__main__":
   
   
   # Double Impurity
-  nE,m1,n1,m2,n2,s = 6,1,0,3,2,0
-  Vup, Vdown = SC2GNRTop(nE,m1,n1,m2,n2,s)
-  #fXr = np.vectorize(lambda w: X2RPAGNRTop(nE,m1,n1,m2,n2,s,Vup,Vdown,w)[0,0].real)
-  fXi = np.vectorize(lambda w: X2RPAGNRTop(nE,m1,n1,m2,n2,s,Vup,Vdown,w)[0,0].imag)
-  #wrlist, Xrtemp = sample_function(fXr, [0.0,1.0e-2], tol=1e-3)
-  wilist, Xitemp = sample_function(fXi, [0.0,1.0e-2], tol=1e-4)
-  #Xrlist = Xrtemp[0]
-  Xilist = Xitemp[0]
-  #pl.plot(wrlist,Xrlist)
-  pl.plot(wilist,Xilist)
+  nE,m1,n1, = 6,3,0
+  Flist = []
+  Dlist = range(3,9)
+  intervallist = [[0.000974,0.000977],[0.0009745,0.0009747],[0.00097453,0.00097455],[0.000974535,0.00097454],[0.000974535,0.00097454],[0.000974535,0.00097454]]
+  for D,interval in zip(Dlist,intervallist):
+    m2,n2,s = 1+D,D,0
+    Vup, Vdown = SC2GNRTop(nE,m1,n1,m2,n2,s)
+    fXi = np.vectorize(lambda w: X2RPAGNRTop(nE,m1,n1,m2,n2,s,Vup,Vdown,w)[0,0].imag)
+    wilist, Xitemp = sample_function(fXi, interval, tol=1e-3)
+    Xilist = Xitemp[0]
+    Xilist = Xilist-Xilist.min()/2.0
+    spline = UnivariateSpline(wilist,Xilist)
+    #pl.plot(wilist,spline(wilist),'o')
+    #pl.plot(wilist,Xilist)
+    #pl.savefig('plot.png')
+    #pl.show()
+    roots = spline.roots()
+    FWHM = roots[1] - roots[0]
+    Flist.append(FWHM)
+  pl.plot(Dlist,Flist,'o')
+  pl.plot(Dlist,[2.88851733331e-12 for D in Dlist])
+  pl.savefig('plot.png')
   pl.show()
   
   #Triple Impurity

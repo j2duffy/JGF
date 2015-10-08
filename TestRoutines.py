@@ -167,10 +167,10 @@ def GammaBulk(m,n,E):
     f = 1.0 + 2.0*cos(kZ)*exp(sig*1j*q)
     ft = 1.0 + 2.0*cos(kZ)*exp(-sig*1j*q)
     
-    Const = 1j/(4*pi*t**2)
+    Const = 1j/(4*pi*t**4)
     Den = cos(kZ)*sin(q)
     
-    temp1 = 2.0*E**3/t**2 + t*exp(-sig*2.0*1j*q)*f**3 + t*exp(sig*2.0*1j*q)*ft**3
+    temp1 = 2.0*E**3 + t**3 *exp(-sig*2.0*1j*q)*f**3 + t**3 *exp(sig*2.0*1j*q)*ft**3
     temp2 = exp( 1j*(sig*q*(m+n) + kZ*(m-n) ) )
     
     return Const*temp1*temp2/Den
@@ -193,16 +193,18 @@ def gBulkGammaSPA(DA,E):
   sig = copysign(1.0,-E.real)
 
   temp_a1 = 1j*sig*exp( sig*2*1j*abs(DA)*acos( (E**2 - 5*t**2)/(4*t**2) ) ) 
-  temp_a2 = ( (E**2-9*t**2)*(-E**2+t**2) )**(1.0/4.0)
+  temp_a2 = ((E-t)*(E+3*t)**3)
   temp_a3 = sqrt( -sig*( 1j/(abs(DA)*pi*(3*t**2 + E**2) )  )  )
-  temp_a4 = ((E-t)*(E+3*t)**3)/(4*t**3)
-  ga = (temp_a1/temp_a2)*temp_a3*temp_a4
+  temp_a4 = 4*t**3 *( (E**2-9*t**2)*(-E**2+t**2) )**(1.0/4.0)
 
-  temp_b1 = 1j*sig*( exp(sig*2*1j*abs(DA)*acos( -sqrt( 1 - E**2/t**2 ) ) ) )
-  temp_b2 = sqrt(3*t**2 + E**2)*( E**2*(t**2 - E**2) )**(1.0/4.0)
+  ga = temp_a1*temp_a2*temp_a3/temp_a4
+
+  temp_b1 = 1j*sig*exp(sig*2*1j*abs(DA)*acos( -sqrt( 1 - E**2/t**2 ) ) )
+  temp_b2 = (2*E**3 *(t-E))
   temp_b3 = sqrt( sig*(1j/(pi*abs(DA))) )
-  temp_b4 = (2*E**3 *(t-E))/t**3
-  gb = (temp_b1/temp_b2)*temp_b3*temp_b4
+  temp_b4 = t**3 *sqrt(3*t**2 + E**2)*( E**2*(t**2 - E**2) )**(1.0/4.0)
+
+  gb = temp_b1*temp_b3*temp_b2/temp_b4
 
   g = ga + gb
 
@@ -210,18 +212,22 @@ def gBulkGammaSPA(DA,E):
 
 
 if __name__ == "__main__":  
-  #m,n = 5,0
-  #E = 1.1+1j*eta
+  #m,n = -5,1
+  #E = 1.4+1j*eta
   #print GammaBulk(m,n,E)
   #print gMx2BulkCenter(m,n,E)[:6,6:].sum()
   
   DA = 5
-  Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
-  glist = [GammaBulk(DA,DA,E) for E in Elist]
-  gSPAlist = [gBulkGammaSPA(DA,E) for E in Elist]
-  pl.plot(Elist,glist)
-  pl.plot(Elist,gSPAlist)
-  pl.show()
+  E = 1.2+1j*eta
+  print gBulkGammaSPA(DA,E)
+  
+  #DA = 5
+  #Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
+  #glist = [GammaBulk(DA,DA,E) for E in Elist]
+  #gSPAlist = [gBulkGammaSPA(DA,E) for E in Elist]
+  #pl.plot(Elist,glist)
+  #pl.plot(Elist,gSPAlist)
+  #pl.show()
   
 
      

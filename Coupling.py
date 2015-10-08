@@ -207,10 +207,12 @@ def Line_CouplingSPA(DA):
 
 
 if __name__ == "__main__":
-  #pl.ylabel('J')
-  #pl.xlabel('E')
-  #Dlist = range(80,100)
-  #Jlist = [JBulkCenter(D,D) for D in Dlist]
-  #np.savetxt('data.dat',zip(Dlist,Jlist))
+  nE,m1,n1,s = 6,1,0,0
+  m2,n2 = 1,0
+  Dlist = range(2,50)
+  Jlist = [JGNRSubs(nE,m1,n1,m2+D,n2+D,s) for D in Dlist]
+  f = lambda a,b,c,x: a+b*x**c
+  popt, pcov = curve_fit(f, Dlist, Jlist)
   #pl.plot(Dlist,Jlist)
   #pl.show()
+  #print popt
