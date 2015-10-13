@@ -211,23 +211,24 @@ def gBulkGammaSPA(DA,E):
   return g
 
 
-if __name__ == "__main__":  
-  #m,n = -5,1
-  #E = 1.4+1j*eta
-  #print GammaBulk(m,n,E)
-  #print gMx2BulkCenter(m,n,E)[:6,6:].sum()
-  
+if __name__ == "__main__":    
   DA = 5
-  E = 1.2+1j*eta
-  print gBulkGammaSPA(DA,E)
-  
-  #DA = 5
-  #Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
-  #glist = [GammaBulk(DA,DA,E) for E in Elist]
-  #gSPAlist = [gBulkGammaSPA(DA,E) for E in Elist]
-  #pl.plot(Elist,glist)
-  #pl.plot(Elist,gSPAlist)
-  #pl.show()
+  Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,101)
+  glist = np.array([GammaBulk(DA,DA,E) for E in Elist])
+  gSPAlist = np.array([gBulkGammaSPA(DA,E) for E in Elist])
+  pl.plot()
+
+  pl.subplot(1,2,1)
+  pl.plot(Elist.real,glist.real)
+  pl.plot(Elist.real,gSPAlist.real,'o')
+  pl.xlabel('E')
+  pl.ylabel('$\Gamma$')
+  pl.subplot(1,2,2)
+  pl.plot(Elist.real,glist.imag)
+  pl.plot(Elist.real,gSPAlist.imag,'o')
+  pl.xlabel('E')
+  pl.savefig('SPAGamma.pdf')
+  pl.show()
   
 
      

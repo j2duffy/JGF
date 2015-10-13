@@ -4,7 +4,7 @@ from scipy.optimize import curve_fit
 
 global mag_m, band_shift, Vup, Vdown		# Do mag_m and band_shift still need to be here?
 # Self-consistency crap
-mag_m = 0.9
+mag_m = 0.001
 band_shift = 0.0
 ex_split = U*mag_m
 hw0 = 1e-3
@@ -195,24 +195,21 @@ def Line_CouplingSPA(DA):
     return ex_split**2/pi**2 *Line_SPA(EF+1j*y).real
 
   return quad(integrand, eta, np.inf, epsabs=0.0, epsrel=1.0e-2, limit=200 )[0]
-  """Gets the RPA spin susceptibility for graphene"""
-  X00 = np.zeros((2,2),dtype=complex)
-  X00[0,0] = X00HF_GNR(nE,m1,n1,w)
-  X00[1,1] = X00HF_GNR(nE,m2,n2,w)
-  X00[0,1],X00[1,0] = 2*(XHF_GNR(nE,m1,n1,m2,n2,s,w),)
-  
-  temp = inv( np.eye(len(X00)) + X00.dot(U) )
-  return temp.dot(X00)[0,1]
 
 
 
 if __name__ == "__main__":
-  nE,m1,n1,s = 6,1,0,0
-  m2,n2 = 1,0
-  Dlist = range(2,50)
-  Jlist = [JGNRSubs(nE,m1,n1,m2+D,n2+D,s) for D in Dlist]
-  f = lambda a,b,c,x: a+b*x**c
-  popt, pcov = curve_fit(f, Dlist, Jlist)
-  #pl.plot(Dlist,Jlist)
+  print Line_CouplingSPA(5)
+  
+  #pl.ylabel('J')
+  #for nP, s in [[1,0],[2,1],[3,-1]]:
+    #pl.subplot(1,3,nP)
+    #DAlist = np.arange(1500,2000,100)
+    #Jlist = np.array([ Line_Coupling3(DA,s) for DA in DAlist])
+    
+    #pl.plot(DAlist,Jlist)
+    #pl.xlabel('DA')
+    #pl.xticks([1500,1700,1900])
+  #pl.savefig('Jline.pdf')
   #pl.show()
-  #print popt
+
