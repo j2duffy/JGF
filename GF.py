@@ -226,6 +226,6 @@ def gSIZigtest(DA1,DA2,DZ,s_lat,E):		# You need to change the sublattice notatio
 
 if __name__ == "__main__":   
   nE = 6
-  m1,n1,m2,n2,s = 3,0,4,2,-1
+  m,n,s = 5,5,-1
   E = 1j*eta
-  print gRib_Arm(nE,m1,n1,m2,n2,s,E)**2
+  print gBulk_kZ(m,n,s,E)**2

@@ -1,6 +1,7 @@
 """Coupling routines for various systems"""
 from GFRoutines import *
 from scipy.optimize import curve_fit
+from numpy.linalg import det
 
 global mag_m, band_shift, Vup, Vdown		# Do mag_m and band_shift still need to be here?
 # Self-consistency crap
@@ -199,17 +200,31 @@ def Line_CouplingSPA(DA):
 
 
 if __name__ == "__main__":
-  print Line_CouplingSPA(5)
+  DA,s = 5,1
+  print Line_CouplingRKKY(DA,s)
   
-  #pl.ylabel('J')
-  #for nP, s in [[1,0],[2,1],[3,-1]]:
-    #pl.subplot(1,3,nP)
-    #DAlist = np.arange(1500,2000,100)
-    #Jlist = np.array([ Line_Coupling3(DA,s) for DA in DAlist])
-    
-    #pl.plot(DAlist,Jlist)
-    #pl.xlabel('DA')
-    #pl.xticks([1500,1700,1900])
-  #pl.savefig('Jline.pdf')
-  #pl.show()
+  # finite lines
+  #n = 2
+  #DA = 3
+  #s = 0
+  #E = 1.2+1j*eta
 
+  
+  #rA = [[i,-i,0] for i in range(n)]
+  #rB = [[DA+i,DA-i,s] for i in range(n)]
+  #r = np.array(rA+rB)
+  #g = BulkMxGen(r,E)
+  
+  #gup = Dyson(g,Vup)
+  #gdown = Dyson(g,Vdown)
+  #gupBA = gup[n:,:n]
+  #gdownAB = gdown[:n,n:]
+  #print 1.0/pi*log( det(np.eye(*gupBA.shape) + ex_split**2 *gupBA.dot(gdownAB) )  ).real 
+  
+  #gupBB = gup[n:,n:]
+  #gdownBB = gdown[n:,n:]
+  #print 1.0/pi*log( det(np.eye(*gupBB.shape)-ex_split*gupBB)*det(np.eye(*gdownBB.shape)+ex_split*gdownBB) ).real
+  
+  #print det(np.eye(*gupBA.shape) + ex_split**2 *gupBA.dot(gdownAB) )
+  #print det( (np.eye(*gupBB.shape)-ex_split*gupBB).dot((np.eye(*gdownBB.shape)+ex_split*gdownBB)) )
+  
