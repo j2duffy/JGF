@@ -8,7 +8,7 @@ global mag_m, band_shift, Vup, Vdown		# Do mag_m and band_shift still need to be
 mag_m = 0.001
 band_shift = 0.0
 ex_split = U*mag_m
-hw0 = 1e-3
+hw0 = 0.0
 Vdown = band_shift + (ex_split + hw0)/2.0
 Vup = band_shift - (ex_split + hw0)/2.0
 
@@ -198,28 +198,26 @@ def Line_CouplingSPA(DA):
   return quad(integrand, eta, np.inf, epsabs=0.0, epsrel=1.0e-2, limit=200 )[0]
 
 
+def JLineFinite(n,DA,s):
+  """A general routine for calculating the coupling between two impurities"""
+  def integrand(y):  
+    rA = [[i,-i,0] for i in range(n)]
+    rB = [[DA+i,DA-i,s] for i in range(n)]
+    r = np.array(rA+rB)
+    g = BulkMxGen(r,EF+1j*y)
+    
+    gup = Dyson(g,Vup)
+    gdown = Dyson(g,Vdown)
+    gupBA = gup[n:,:n]
+    gdownAB = gdown[:n,n:]
+    return 1.0/pi*log( abs( det(np.eye(*gupBA.shape) + ex_split**2 *gupBA.dot(gdownAB) ) ) ).real
+
+  C = quad(integrand, eta, np.inf, epsabs=0.0e0, epsrel=1.0e-4, limit=200 )
+  return C[0]/n
 
 if __name__ == "__main__":
-  DA,s = 5,1
-  print Line_CouplingRKKY(DA,s)
-  
-  # finite lines
-  #n = 2
-  #DA = 3
-  #s = 0
-  #E = 1.2+1j*eta
-
-  
-  #rA = [[i,-i,0] for i in range(n)]
-  #rB = [[DA+i,DA-i,s] for i in range(n)]
-  #r = np.array(rA+rB)
-  #g = BulkMxGen(r,E)
-  
-  #gup = Dyson(g,Vup)
-  #gdown = Dyson(g,Vdown)
-  #gupBA = gup[n:,:n]
-  #gdownAB = gdown[:n,n:]
-  #print 1.0/pi*log( det(np.eye(*gupBA.shape) + ex_split**2 *gupBA.dot(gdownAB) )  ).real 
+  n = 500
+  print JLineFinite(n,50,0), Line_Coupling3(50,0)  
   
   #gupBB = gup[n:,n:]
   #gdownBB = gdown[n:,n:]

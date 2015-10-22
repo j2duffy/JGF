@@ -410,11 +410,11 @@ def ConcentrationPlot(N,p,E):
 
 
 if __name__ == "__main__":  
-  N = 32
-  p = 40
+  N = 8
+  p = 3
   E = 0.0
-  niter = 5000
-  steps = 40
+  niter = 10000
+  steps = 1
   
   max_n = len(CenterPositions(N,p))
   nimpl = range(1,max_n+1,steps)
@@ -429,8 +429,11 @@ if __name__ == "__main__":
   pl.plot(conc,CAS,label='Subs')
   pl.plot(conc,CAT,'o',label='Top')
   pl.legend()
-  pl.savefig('plot.png')
+  np.savetxt('CAconcentration.dat',zip(nimpl,CAC,CAS,CAT))
+  pl.savefig('CAconcentration.pdf')
   pl.show()
+
+    
 
 
 	
