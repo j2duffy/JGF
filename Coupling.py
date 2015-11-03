@@ -5,7 +5,7 @@ from numpy.linalg import det
 
 global mag_m, band_shift, Vup, Vdown		# Do mag_m and band_shift still need to be here?
 # Self-consistency crap
-mag_m = 0.001
+mag_m = 0.01
 band_shift = 0.0
 ex_split = U*mag_m
 hw0 = 0.0
@@ -211,18 +211,29 @@ def JLineFinite(n,DA,s):
     gupBA = gup[n:,:n]
     gdownAB = gdown[:n,n:]
     return 1.0/pi*log( abs( det(np.eye(*gupBA.shape) + ex_split**2 *gupBA.dot(gdownAB) ) ) ).real
-
+  
   C = quad(integrand, eta, np.inf, epsabs=0.0e0, epsrel=1.0e-4, limit=200 )
   return C[0]/n
 
+
+def ftest(DA,s,E):
+  integral = C_int(lambda kZ: gLine_kZ(DA,kZ,s,E)**2,-pi/2.0, pi/2.0,) 
+  return integral
+
+
 if __name__ == "__main__":
-  n = 500
-  print JLineFinite(n,50,0), Line_Coupling3(50,0)  
+  pl.figure(figsize=(16,6))
+  pl.subplot(1,2,1)
+  pl.ylabel("J")
+  pl.xlabel("DA")
+  D,J = np.loadtxt("JBulkSubsAC.dat").T
+  pl.plot(D,J)
   
-  #gupBB = gup[n:,n:]
-  #gdownBB = gdown[n:,n:]
-  #print 1.0/pi*log( det(np.eye(*gupBB.shape)-ex_split*gupBB)*det(np.eye(*gdownBB.shape)+ex_split*gdownBB) ).real
+  pl.subplot(1,2,2)
+  pl.xlabel("DA")
+  D,J = np.loadtxt("JBulkSubsZZ.dat").T
+  pl.plot(D,J)
   
-  #print det(np.eye(*gupBA.shape) + ex_split**2 *gupBA.dot(gdownAB) )
-  #print det( (np.eye(*gupBB.shape)-ex_split*gupBB).dot((np.eye(*gdownBB.shape)+ex_split*gdownBB)) )
+  pl.savefig("JBulkSubs.pdf")
+  pl.show()
   

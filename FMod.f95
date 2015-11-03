@@ -79,7 +79,7 @@ implicit none
 
   contains
 
-    function g_term (ky)
+    function g_term(ky)
     implicit none
       complex(8) :: g_term
       real(8), intent(in) :: ky

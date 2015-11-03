@@ -409,6 +409,7 @@ def ConcentrationPlot(N,p,E):
   pl.show()
 
 
+
 if __name__ == "__main__":  
   N = 8
   p = 3

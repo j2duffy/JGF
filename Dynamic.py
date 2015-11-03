@@ -575,6 +575,25 @@ def SCGNRField(nE,m,n,hw0=hw0,n0=1.0):
   return SCField(GFup,GFdown,n0)
 
 
+def gImpTest():
+  def GF(y,V):
+    g = 1.0/(EF+1j*y-eps_imp)
+    return Dyson1(g,V).real
+  return SC1(GF)
+
+
+def X1ImpTest(Vup,Vdown,w):
+  """Calculates the Hartree-Fock spin susceptibility for a substitutional impurity Bulk Graphene"""
+  def GF(E,V):
+    g = 1.0/(E-eps_imp)
+    return Dyson1(g,V)
+  return X1HF(GF,Vup,Vdown,w)
+
+
+def X1RPATest(Vup,Vdown,w):
+  """Calculates the on-site RPA spin susceptibility for a substitutional impurity in bulk graphene"""
+  X0 = X1ImpTest(Vup,Vdown,w)
+  return X0/(1.0+U*X0)
 
 if __name__ == "__main__":
   # Single Impurity
@@ -632,22 +651,22 @@ if __name__ == "__main__":
     #pl.plot(wilist,Xilist)
     #pl.show()
     
-  Dlist = range(200,3000,100)
-  Flist = []
-  for D in Dlist:
-    x, y = np.loadtxt("Dynamic_%g.dat" % (D,)).T
-    y = y - y.min()/2.0 
-    spline = UnivariateSpline(x,y)
-    #pl.plot(x,y)
-    #pl.plot(x,spline(x),'o')
-    #pl.show()
-    roots = spline.roots()
-    FWHM = roots[1] - roots[0]
-    Flist.append(FWHM)
-  pl.plot(Dlist,Flist,'-o')
-  pl.plot(Dlist,[6.52913207722e-06 for D in Dlist])
-  pl.savefig('plot.png')
-  pl.show()
+  #Dlist = range(200,3000,100)
+  #Flist = []
+  #for D in Dlist:
+    #x, y = np.loadtxt("Dynamic_%g.dat" % (D,)).T
+    #y = y - y.min()/2.0 
+    #spline = UnivariateSpline(x,y)
+    ##pl.plot(x,y)
+    ##pl.plot(x,spline(x),'o')
+    ##pl.show()
+    #roots = spline.roots()
+    #FWHM = roots[1] - roots[0]
+    #Flist.append(FWHM)
+  #pl.plot(Dlist,Flist,'-o')
+  #pl.plot(Dlist,[6.52913207722e-06 for D in Dlist])
+  #pl.savefig('plot.png')
+  #pl.show()
     
 
       

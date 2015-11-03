@@ -130,6 +130,25 @@ def gBulkArmSPA(DA,E):
   return g
 
 
+def gBulkZigSPA(DZ,E):
+  sigplus = copysign(1.0,-E.real)
+  sigminus = copysign(1.0,E.real)
+
+  temp_a1 = 1j*sigplus*E*exp( sigplus*2*1j*abs(DZ)*acos( 0.5*(-1.0+sqrt(E**2/t**2)) ) )/(2.0*pi*t**2) 
+  temp_a2 = ( 4.0-(1.0-sqrt(E**2/t**2))**2 )**(1.0/4.0)
+  temp_a3 = sqrt( -sigplus*1j*pi/(abs(DZ)*(E**2/t**2-sqrt(E**2/t**2)) )  )  
+  ga = (temp_a1/temp_a2)*temp_a3
+
+  temp_b1 = - 1j*sigminus*E*exp( sigminus*2*1j*abs(DZ)*acos( 0.5*(-1.0-sqrt(E**2/t**2)) ) )/(2.0*pi*t**2) 
+  temp_b2 = ( 4.0-(1.0+sqrt(E**2/t**2))**2 )**(1.0/4.0)
+  temp_b3 = sqrt( -sigminus*1j*pi/(abs(DZ)*(E**2/t**2+sqrt(E**2/t**2)) )  ) 
+  gb = (temp_b1/temp_b2)*temp_b3
+
+  g = ga + gb
+
+  return g
+
+
 def gFakeSPA(DA,E):
   """ An SPA thing that I worked out in Mathematica.
     Probably totally wrong."""
@@ -162,7 +181,7 @@ def gLine_ky(DA,ky,s,E,a=1.0):
   else: print "Sublattice error in gLine_ky"
   
 
-def gLine_kZ(DA,kZ,s,E):	# This really needs to be tested against something
+def gLine_kZ(DA,kZ,s,E):
   """The Graphene Green's function, in the k_y, x basis"""
   q = acos((E**2 - t**2 - 4.0*t**2 *cos(kZ)**2)/(4.0*t**2 *cos(kZ)))
   if q.imag < 0.0: q = -q
@@ -223,9 +242,47 @@ def gSIZigtest(DA1,DA2,DZ,s_lat,E):		# You need to change the sublattice notatio
   return C_int(int_temp,-pi/2,pi/2)
 
 
+def gSISPA(DZ,DA,E):
+  sig = copysign(1.0,-E.real)
 
-if __name__ == "__main__":   
-  nE = 6
-  m,n,s = 5,5,-1
-  E = 1j*eta
-  print gBulk_kZ(m,n,s,E)**2
+  temp1 = 2.0*1j*sig*( E*exp(sig*2*1j*DA*acos(- sqrt( 1.0 - E**2/t**2 ) ) ) )*sin( DZ*asin(sqrt(E**2+3*t**2)/(2*t)) )**2
+  temp2 = sqrt(3*t**2 + E**2)*( E**2*(t**2 - E**2) )**(1.0/4.0)
+  temp3 = sqrt( sig*(1j/(pi*DA)) )
+  g = (temp1/temp2)*temp3
+  
+  return g
+
+
+if __name__ == "__main__":
+  pl.figure(figsize=(16,6))
+  pl.subplot(1,2,1)
+  pl.ylabel("g(E)")
+  pl.xlabel("E")
+  DZ = 1
+  DA = 3
+  Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
+  glist = np.array([gSI_kZ(DZ,0,DZ+DA,DA,0,E) for E in Elist])
+  gSPAlist = np.array([gSISPA(DZ,DA,E) for E in Elist])
+  pl.savetxt("gSI1.dat",zip(Elist.real,glist.real,glist.imag))
+  pl.savetxt("gSI_SPA1.dat",zip(Elist.real,gSPAlist.real,gSPAlist.imag))
+  pl.plot(Elist.real,glist.real)
+  pl.plot(Elist.real,glist.imag)
+  pl.plot(Elist.real,gSPAlist.real,'o')
+  pl.plot(Elist.real,gSPAlist.imag,'o')
+
+  pl.subplot(1,2,2)
+  DZ = 2
+  DA = 5
+  pl.xlabel("E")
+  Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
+  glist = np.array([gSI_kZ(DZ,0,DZ+DA,DA,0,E) for E in Elist])
+  gSPAlist = np.array([gSISPA(DZ,DA,E) for E in Elist])
+  pl.savetxt("gSI2.dat",zip(Elist.real,glist.real,glist.imag))
+  pl.savetxt("gSI_SPA2.dat",zip(Elist.real,gSPAlist.real,gSPAlist.imag))
+  pl.plot(Elist.real,glist.real)
+  pl.plot(Elist.real,glist.imag)
+  pl.plot(Elist.real,gSPAlist.real,'o')
+  pl.plot(Elist.real,gSPAlist.imag,'o')
+  
+  pl.savefig("gSI_SPA.pdf")
+  pl.show()
