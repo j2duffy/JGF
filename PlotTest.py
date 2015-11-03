@@ -15,19 +15,14 @@ if __name__ == "__main__":
   #pl.show()
   
   sns.set(font_scale=1.5)
-  pl.figure(figsize=(16,6))
+  pl.xlabel("D")
+  pl.ylabel("J(D)")
+  Dlist,Jlist = np.loadtxt("JBulkSubsAC.dat").T
+  pl.plot(Dlist,Jlist,label="AC")
 
-  pl.subplot(1,2,1)
-  pl.ylabel("J")
-  pl.xlabel("DA")
-  D,J = np.loadtxt("JBulkSubsAC.dat").T
-  pl.plot(D,J)
-  
-  pl.subplot(1,2,2)
-  pl.xlabel("DA")
-  D,J = np.loadtxt("JBulkSubsZZ.dat").T
-  pl.plot(D,J)
-  
-  pl.savefig("JBulkSubs.pdf")
+  Dlist,Jlist = np.loadtxt("JBulkSubsZZ.dat").T
+  pl.plot(Dlist,Jlist)
+  pl.legend()
+  pl.savefig("JBulkSubsLog.pdf")
   pl.show()
   
