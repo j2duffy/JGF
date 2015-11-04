@@ -216,24 +216,17 @@ def JLineFinite(n,DA,s):
   return C[0]/n
 
 
-def ftest(DA,s,E):
-  integral = C_int(lambda kZ: gLine_kZ(DA,kZ,s,E)**2,-pi/2.0, pi/2.0,) 
-  return integral
+def JSISubs(nE,m1,n1,m2,n2,s):
+  """The coupling for top-adsorbed impurities in a GNR"""
+  def GF(y):
+    return gMx2SI(m1,n1,m2,n2,s,EF+1j*y)
+  return J(GF)
+
 
 
 if __name__ == "__main__":
-  pl.figure(figsize=(16,6))
-  pl.subplot(1,2,1)
-  pl.ylabel("J")
-  pl.xlabel("DA")
-  D,J = np.loadtxt("JBulkSubsAC.dat").T
-  pl.plot(D,J)
-  
-  pl.subplot(1,2,2)
-  pl.xlabel("DA")
-  D,J = np.loadtxt("JBulkSubsZZ.dat").T
-  pl.plot(D,J)
-  
-  pl.savefig("JBulkSubs.pdf")
-  pl.show()
-  
+  nE = 6
+  m1,n1 = 1,0
+  m2,n2 = 3,0
+  s = 0
+  print JSISubs(nE,m1,n1,m2,n2,s)
