@@ -226,7 +226,11 @@ def JSISubs(nE,m1,n1,m2,n2,s):
 
 if __name__ == "__main__":
   nE = 6
-  m1,n1 = 1,0
-  m2,n2 = 3,0
+  m = 1
   s = 0
-  print JSISubs(nE,m1,n1,m2,n2,s)
+  Dlist = range(1,11)
+  for m in [1,2,3]:
+    Jlist = [JSISubs(nE,m,0,m+D,0+D,s) for D in Dlist]
+    np.savetxt("JSISubsDZ%g.dat" % (m,), zip(Dlist,Jlist))
+    pl.plot(Dlist,Jlist)
+  pl.show()

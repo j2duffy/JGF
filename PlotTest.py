@@ -29,21 +29,18 @@ if __name__ == "__main__":
   pl.figure(figsize=(16,6))
   sns.set(font_scale=1.5)
   
-  pl.subplot(1,2,1)
+  pl.subplot(1,3,1)
   pl.xlabel("E")
-  pl.ylabel("g(E)")
-  E,gRe,gIm = np.loadtxt("gBulkAC.dat").T
-  pl.plot(E,gRe,E,gIm)
-  E,gSPARe,gSPAIm = np.loadtxt("gBulkAC.dat").T
-  pl.plot(E,gSPARe,'o',E,gSPAIm,'o')
-  
-  pl.subplot(1,2,2)
+  pl.ylabel("J")
+  D,J = np.loadtxt("JSISubsDZ1.dat").T
+  pl.plot(D,J)
+  pl.subplot(1,3,2)
   pl.xlabel("E")
-  E,gRe,gIm = np.loadtxt("gBulkAC.dat").T
-  pl.plot(E,gRe,E,gIm)
-  E,gSPARe,gSPAIm = np.loadtxt("gBulkAC.dat").T
-  pl.plot(E,gSPARe,'o',E,gSPAIm,'o')
-  
-  pl.savefig("gBulk.pdf")
+  D,J = np.loadtxt("JSISubsDZ2.dat").T
+  pl.plot(D,J)
+  pl.subplot(1,3,3)
+  pl.xlabel("E")
+  D,J = np.loadtxt("JSISubsDZ3.dat").T
+  pl.plot(D,J)
   pl.show()
   
