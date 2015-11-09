@@ -123,6 +123,26 @@ def gBulkTop3Mx(r0,r1,r2,E):
   return G[3:6,3:6]
 
 
+def gMx1BulkCenter(E):  
+  """Gets the GF a Center Adsorbed impurity in bulk graphene.
+  Not tested a whole lot."""
+  n = 7		# Total number of sites (hexagon + impurity)
+  
+  rHex = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])		# All of the sites of a hexagon (w.r.t bottom left)
+  
+  gMx = np.zeros((n,n),dtype=complex)
+  gMx[:n-1,:n-1] = BulkMxGen(rHex,E)	# First n-1 elements are the hexagon sites
+  gMx[n-1,n-1] = 1.0/(E-eps_imp)	# Final site is that of the impurity
+    
+  V = np.zeros([n,n],dtype=complex)
+  V[:n-1,n-1] = tau
+  V[n-1,:n-1] = tau
+  
+  GMx = Dyson(gMx,V)
+  
+  return GMx
+
+
 def gMx2BulkCenter(m,n,E):
   """A routine that calculates the 2x2 matrix for Center adsorbed impurities"""
   D = [m,n,0]
@@ -323,12 +343,9 @@ def gTubeSubsMx(nC,m,n,s,E):
 
 
 if __name__ == "__main__":  
-  nE = 6
-  m1 = 3
-  n1 = 0
-  m2 = 6
-  n2 = 3
-  s = 1
- 
-  E = 1.2 + 1j*eta
-  print gGNRTopMx(nE,m1,n1,m2,n2,s,E)
+  Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
+  glist = [-gMx1BulkCenter(E)[-1,-1].imag/pi for E in Elist]
+  np.savetxt("LDOS_BulkCenter.dat",zip(Elist.real,glist))
+  pl.plot(Elist,glist)
+  pl.savefig("LDOS_BulkCenter.pdf")
+  pl.show()

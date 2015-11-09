@@ -391,47 +391,44 @@ def CACenterRandom(N,p,nimp,niter,E):
 
 
 def ConcentrationPlot(N,p,E):
+  """Returns the total configurational average of the conductance at E for increasing concentrations of impurities"""
   max_n = len(CenterPositions(N,p))
-  
   nimpl = range(1,max_n+1)
   
-  CAC = [ConfigAvCenterTotal(N,p,nimp,E) for nimp in nimpl]
   CAS = [ConfigAvSubsTotal(N,p,nimp,E) for nimp in nimpl]
   CAT = [ConfigAvTopTotal(N,p,nimp,E) for nimp in nimpl]
+  CAC = [ConfigAvCenterTotal(N,p,nimp,E) for nimp in nimpl]
   
   conc = [nimp/(2.0*N*p) for nimp in nimpl]
   
-  pl.plot(conc,CAC,label='Center')
-  pl.plot(conc,CAS,label='Subs')
-  pl.plot(conc,CAT,'o',label='Top')
-  pl.legend()
-  pl.savefig('plot.jpg')
-  pl.show()
+  return conc,CAS,CAT,CAC
 
 
 
 if __name__ == "__main__":  
-  N = 8
+  N = 5
   p = 3
   E = 0.0
-  niter = 10000
-  steps = 1
+  #niter = 10000
+  #steps = 1
   
-  max_n = len(CenterPositions(N,p))
-  nimpl = range(1,max_n+1,steps)
+  #max_n = len(CenterPositions(N,p))
+  #nimpl = range(1,max_n+1,steps)
   
-  CAC = [np.average(CACenterRandom(N,p,nimp,niter,E)) for nimp in nimpl]
-  CAS = [np.average(CASubsRandom(N,p,nimp,niter,E)) for nimp in nimpl]
-  CAT = [np.average(CATopRandom(N,p,nimp,niter,E)) for nimp in nimpl]
+  #CAC = [np.average(CACenterRandom(N,p,nimp,niter,E)) for nimp in nimpl]
+  #CAS = [np.average(CASubsRandom(N,p,nimp,niter,E)) for nimp in nimpl]
+  #CAT = [np.average(CATopRandom(N,p,nimp,niter,E)) for nimp in nimpl]
   
-  conc = [nimp/(2.0*N*p) for nimp in nimpl]
+  #conc = [nimp/(2.0*N*p) for nimp in nimpl]
   
-  pl.plot(conc,CAC,label='Center')
+  conc,CAS,CAT,CAC = ConcentrationPlot(N,p,E)
+  
   pl.plot(conc,CAS,label='Subs')
-  pl.plot(conc,CAT,'o',label='Top')
+  pl.plot(conc,CAT,label='Top')
+  pl.plot(conc,CAC,label='Center')
   pl.legend()
-  np.savetxt('CAconcentration.dat',zip(nimpl,CAC,CAS,CAT))
-  pl.savefig('CAconcentration.pdf')
+  np.savetxt('GCAvconc.dat',zip(conc,CAS,CAT,CAC))
+  pl.savefig('GCAvconc.pdf')
   pl.show()
 
     

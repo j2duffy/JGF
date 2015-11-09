@@ -42,6 +42,13 @@ def JBulkCenter(m,n):
   return J(GF)
 
 
+def JSISubs(nE,m1,n1,m2,n2,s):
+  """The coupling for top-adsorbed impurities in a GNR"""
+  def GF(y):
+    return gMx2SI(m1,n1,m2,n2,s,EF+1j*y)
+  return J(GF)
+
+
 def JGNRSubs(nE,m1,n1,m2,n2,s):
   """The coupling for substitutional impurities in a GNR"""
   def GF(y):
@@ -216,21 +223,24 @@ def JLineFinite(n,DA,s):
   return C[0]/n
 
 
-def JSISubs(nE,m1,n1,m2,n2,s):
-  """The coupling for top-adsorbed impurities in a GNR"""
-  def GF(y):
-    return gMx2SI(m1,n1,m2,n2,s,EF+1j*y)
-  return J(GF)
+
 
 
 
 if __name__ == "__main__":
   nE = 6
-  m = 1
-  s = 0
-  Dlist = range(1,11)
-  for m in [1,2,3]:
-    Jlist = [JSISubs(nE,m,0,m+D,0+D,s) for D in Dlist]
-    np.savetxt("JSISubsDZ%g.dat" % (m,), zip(Dlist,Jlist))
-    pl.plot(Dlist,Jlist)
-  pl.show()
+  for m in range(1,100):
+    s = 0
+    Dlist = np.arange(10,21)
+    Jlist = np.array([JSISubs(nE,m,0,m+D,0+D,s) for D in Dlist])
+    Dlog = np.log(Dlist)
+    Jlog = np.log(abs(Jlist))
+    
+    f = lambda x,a,b: a + b*x
+    popt, pcov = curve_fit(f,Dlog,Jlog)
+    a,b = popt
+    print m, b
+    
+    #pl.plot(Dlog,Jlog)
+    #pl.plot(Dlog,[f(x,a,b) for x in Dlog],'o')
+    #pl.show()

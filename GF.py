@@ -254,35 +254,12 @@ def gSISPA(DZ,DA,E):
 
 
 if __name__ == "__main__":
-  pl.figure(figsize=(16,6))
-  pl.subplot(1,2,1)
-  pl.ylabel("g(E)")
-  pl.xlabel("E")
-  DZ = 1
-  DA = 3
-  Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
-  glist = np.array([gSI_kZ(DZ,0,DZ+DA,DA,0,E) for E in Elist])
-  gSPAlist = np.array([gSISPA(DZ,DA,E) for E in Elist])
-  pl.savetxt("gSI1.dat",zip(Elist.real,glist.real,glist.imag))
-  pl.savetxt("gSI_SPA1.dat",zip(Elist.real,gSPAlist.real,gSPAlist.imag))
-  pl.plot(Elist.real,glist.real)
-  pl.plot(Elist.real,glist.imag)
-  pl.plot(Elist.real,gSPAlist.real,'o')
-  pl.plot(Elist.real,gSPAlist.imag,'o')
-
-  pl.subplot(1,2,2)
-  DZ = 2
-  DA = 5
-  pl.xlabel("E")
-  Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
-  glist = np.array([gSI_kZ(DZ,0,DZ+DA,DA,0,E) for E in Elist])
-  gSPAlist = np.array([gSISPA(DZ,DA,E) for E in Elist])
-  pl.savetxt("gSI2.dat",zip(Elist.real,glist.real,glist.imag))
-  pl.savetxt("gSI_SPA2.dat",zip(Elist.real,gSPAlist.real,gSPAlist.imag))
-  pl.plot(Elist.real,glist.real)
-  pl.plot(Elist.real,glist.imag)
-  pl.plot(Elist.real,gSPAlist.real,'o')
-  pl.plot(Elist.real,gSPAlist.imag,'o')
+  nE = 7
+  mlist = range(1,nE)
+  DOS = lambda E: sum([-gRib_Arm(nE,m,0,m,0,0,E).imag/pi for m in mlist])/(nE-1)
   
-  pl.savefig("gSI_SPA.pdf")
+  Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
+  DOSlist = [DOS(E) for E in Elist]
+  np.savetxt("LDOS_GNR_SC.dat",zip(Elist.real,DOSlist))
+  pl.plot(Elist.real,DOSlist)
   pl.show()
