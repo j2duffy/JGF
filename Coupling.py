@@ -5,7 +5,7 @@ from numpy.linalg import det
 
 global mag_m, band_shift, Vup, Vdown		# Do mag_m and band_shift still need to be here?
 # Self-consistency crap
-mag_m = 0.01
+mag_m = 0.8
 band_shift = 0.0
 ex_split = U*mag_m
 hw0 = 0.0
@@ -218,29 +218,16 @@ def JLineFinite(n,DA,s):
     gupBA = gup[n:,:n]
     gdownAB = gdown[:n,n:]
     return 1.0/pi*log( abs( det(np.eye(*gupBA.shape) + ex_split**2 *gupBA.dot(gdownAB) ) ) ).real
-  
   C = quad(integrand, eta, np.inf, epsabs=0.0e0, epsrel=1.0e-4, limit=200 )
   return C[0]/n
 
 
 
-
-
-
 if __name__ == "__main__":
-  nE = 6
-  for m in range(1,100):
-    s = 0
-    Dlist = np.arange(10,21)
-    Jlist = np.array([JSISubs(nE,m,0,m+D,0+D,s) for D in Dlist])
-    Dlog = np.log(Dlist)
-    Jlog = np.log(abs(Jlist))
-    
-    f = lambda x,a,b: a + b*x
-    popt, pcov = curve_fit(f,Dlog,Jlog)
-    a,b = popt
-    print m, b
-    
-    #pl.plot(Dlog,Jlog)
-    #pl.plot(Dlog,[f(x,a,b) for x in Dlog],'o')
-    #pl.show()
+  DAlist = range(3,10)
+  J1list = [Line_Coupling3(2*DA,0) for DA in DAlist]
+  J2list = [JLineFinite(10,DA,0) for DA in DAlist]
+  pl.plot(DAlist,J1list)
+  pl.plot(DAlist,J2list)
+  pl.show()
+  

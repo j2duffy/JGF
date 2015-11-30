@@ -254,12 +254,9 @@ def gSISPA(DZ,DA,E):
 
 
 if __name__ == "__main__":
-  nE = 7
-  mlist = range(1,nE)
-  DOS = lambda E: sum([-gRib_Arm(nE,m,0,m,0,0,E).imag/pi for m in mlist])/(nE-1)
-  
+  nE,m1,n1,m2,n2,s = 9,1,0,1,0,0
   Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
-  DOSlist = [DOS(E) for E in Elist]
-  np.savetxt("LDOS_GNR_SC.dat",zip(Elist.real,DOSlist))
-  pl.plot(Elist.real,DOSlist)
+  glist = np.array([gRib_Arm(nE,m1,n1,m2,n2,s,E) for E in Elist])
+  pl.plot(Elist,glist.real)
+  pl.plot(Elist,glist.imag)
   pl.show()

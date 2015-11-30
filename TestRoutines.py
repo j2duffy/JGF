@@ -53,6 +53,14 @@ def gMxGNRgammaProbe(nE,mC,nC,mP,nP,sP,E):
   return  gMxnGNR(nE,r,E)
 
 
+def gBulkgammaTest(mP,nP,sP,E):
+  """Given a list of positions in bulk graphene, calculates the relevant matrix of GFs"""  
+  rHex = np.array([[0,0,0],[0,0,1],[1,0,0],[1,-1,1],[1,-1,0],[0,-1,1]])		# All of the sites of a hexagon (w.r.t bottom left)
+  r = np.concatenate(([[mP,nP,sP]],rHex))
+  return BulkMxGen(r,E)
+
+
+
 def GMx1Center(nE,mC,nC,E):  
   """Gets the GF a Center Adsorbed impurity."""
   n = 7		# Total number of sites (hexagon + impurity)
@@ -211,24 +219,38 @@ def gBulkGammaSPA(DA,E):
   return g
 
 
-if __name__ == "__main__":    
-  DA = 5
-  Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,101)
-  glist = np.array([GammaBulk(DA,DA,E) for E in Elist])
-  gSPAlist = np.array([gBulkGammaSPA(DA,E) for E in Elist])
-  pl.plot()
+if __name__ == "__main__":   
+  #nE = 9
+  #mC,nC = 5,1
+  #mP,nP = 2,1
+  #sP = 1
+  #E = 1j*eta
+  #print gMxGNRgammaProbe(nE,mC,nC,mP,nP,sP,E)[0,1:].sum()
+  #print gRib_Arm(6,3,2,4,0,-1,1j*eta)
+  
+  mP,nP,sP = -1,0,0
+  E = 1j*eta
+  print gBulkgammaTest(mP,nP,sP,E)[0,1:].sum()
+  print gBulk_kZ(1,0,0,E) + gBulk_kZ(1,0,1,E) + gBulk_kZ(2,0,0,E) + gBulk_kZ(2,-1,1,E) + gBulk_kZ(2,-1,0,E) + gBulk_kZ(1,-1,1,E)
+  
+  #DA = 5
+  #Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,101)
+  #glist = np.array([GammaBulk(DA,DA,E) for E in Elist])
+  #gSPAlist = np.array([gBulkGammaSPA(DA,E) for E in Elist])
+  #np.savetxt("gGamma.dat",zip(Elist.real,glist.real,glist.imag))
+  #np.savetxt("gGammaSPA.dat",zip(Elist.real,gSPAlist.real,gSPAlist.imag))
 
-  pl.subplot(1,2,1)
-  pl.plot(Elist.real,glist.real)
-  pl.plot(Elist.real,gSPAlist.real,'o')
-  pl.xlabel('E')
-  pl.ylabel('$\Gamma$')
-  pl.subplot(1,2,2)
-  pl.plot(Elist.real,glist.imag)
-  pl.plot(Elist.real,gSPAlist.imag,'o')
-  pl.xlabel('E')
-  pl.savefig('SPAGamma.pdf')
-  pl.show()
+  #pl.subplot(1,2,1)
+  #pl.plot(Elist.real,glist.real)
+  #pl.plot(Elist.real,gSPAlist.real,'o')
+  #pl.xlabel('E')
+  #pl.ylabel('$\Gamma$')
+  #pl.subplot(1,2,2)
+  #pl.plot(Elist.real,glist.imag)
+  #pl.plot(Elist.real,gSPAlist.imag,'o')
+  #pl.xlabel('E')
+  #pl.savefig('SPAGamma.pdf')
+  #pl.show()
   
 
      
