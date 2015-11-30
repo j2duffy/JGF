@@ -220,6 +220,7 @@ def gBulkGammaSPA(DA,E):
 
 
 if __name__ == "__main__":   
+  # the sum of GFs for a nanoribbon
   #nE = 9
   #mC,nC = 5,1
   #mP,nP = 2,1
@@ -228,6 +229,7 @@ if __name__ == "__main__":
   #print gMxGNRgammaProbe(nE,mC,nC,mP,nP,sP,E)[0,1:].sum()
   #print gRib_Arm(6,3,2,4,0,-1,1j*eta)
   
+  # The sum of GFs for bulk
   mP,nP,sP = -1,0,0
   E = 1j*eta
   print gBulkgammaTest(mP,nP,sP,E)[0,1:].sum()
