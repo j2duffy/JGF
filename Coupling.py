@@ -224,9 +224,12 @@ def JLineFinite(n,DA,s):
 
 
 if __name__ == "__main__":
-  DAlist = range(3,10)
+  DAlist = range(5,40)
   J1list = [Line_Coupling3(2*DA,0) for DA in DAlist]
-  J2list = [JLineFinite(10,DA,0) for DA in DAlist]
+  J2list = [JLineFinite(1,DA,0) for DA in DAlist]
+  J3list = [JLineFinite(5,DA,0) for DA in DAlist]
+  J4list = [JLineFinite(10,DA,0) for DA in DAlist]
+  np.savetxt("JLineFinite.dat",zip(DAlist,J1list,J2list,J3list,J4list))
   pl.plot(DAlist,J1list)
   pl.plot(DAlist,J2list)
   pl.show()

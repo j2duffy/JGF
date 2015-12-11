@@ -226,14 +226,14 @@ if __name__ == "__main__":
   #mP,nP = 2,1
   #sP = 1
   #E = 1j*eta
-  #print gMxGNRgammaProbe(nE,mC,nC,mP,nP,sP,E)[0,1:].sum()
-  #print gRib_Arm(6,3,2,4,0,-1,1j*eta)
+  #print gMxGNRgammaProbe(nE,mC,nC,mP,nP,sP,E)[0,1:].sum()**2
+  #print gRib_Arm(6,2,1,5,1,-1,1j*eta)**2
   
   # The sum of GFs for bulk
-  mP,nP,sP = -1,0,0
-  E = 1j*eta
-  print gBulkgammaTest(mP,nP,sP,E)[0,1:].sum()
-  print gBulk_kZ(1,0,0,E) + gBulk_kZ(1,0,1,E) + gBulk_kZ(2,0,0,E) + gBulk_kZ(2,-1,1,E) + gBulk_kZ(2,-1,0,E) + gBulk_kZ(1,-1,1,E)
+  #mP,nP,sP = -1,0,0
+  #E = 1j*eta
+  #print gBulkgammaTest(mP,nP,sP,E)[0,1:].sum()
+  #print gBulk_kZ(1,0,0,E) + gBulk_kZ(1,0,1,E) + gBulk_kZ(2,0,0,E) + gBulk_kZ(2,-1,1,E) + gBulk_kZ(2,-1,0,E) + gBulk_kZ(1,-1,1,E)
   
   #DA = 5
   #Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,101)
@@ -242,17 +242,16 @@ if __name__ == "__main__":
   #np.savetxt("gGamma.dat",zip(Elist.real,glist.real,glist.imag))
   #np.savetxt("gGammaSPA.dat",zip(Elist.real,gSPAlist.real,gSPAlist.imag))
 
-  #pl.subplot(1,2,1)
-  #pl.plot(Elist.real,glist.real)
-  #pl.plot(Elist.real,gSPAlist.real,'o')
-  #pl.xlabel('E')
-  #pl.ylabel('$\Gamma$')
-  #pl.subplot(1,2,2)
-  #pl.plot(Elist.real,glist.imag)
-  #pl.plot(Elist.real,gSPAlist.imag,'o')
-  #pl.xlabel('E')
-  #pl.savefig('SPAGamma.pdf')
-  #pl.show()
+  nE = 9
+  mC,nC = 5,1
+  mP,nP = 2,1
+  sP = 0
+  Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
+  glist1 = np.array([gMxGNRgammaProbe(nE,mC,nC,mP,nP,sP,E)[0,1:].sum()**2 for E in Elist])
+  glist2 = np.array([gRib_Arm(6,2,1,5,1,-1,1j*eta)**2 for E in Elist])
+  pl.plot(Elist,glist1.real)
+  pl.plot(Elist,glist2.real)
+  pl.show()
   
 
      
