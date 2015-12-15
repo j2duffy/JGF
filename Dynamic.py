@@ -624,7 +624,7 @@ if __name__ == "__main__":
 
 
   #Double Impurity
-  #Dlist = range(1000,3000,50)
+  #Dlist = [1000,1050]
   #for D in Dlist: 
     #nE,m1,n1 = 6,1,0
     #m2,n2,s = 1+D,D,0
@@ -637,7 +637,7 @@ if __name__ == "__main__":
     #pl.clf()
     
   #Triple Impurity
-  #nE, r = 6,[[1,0,0],[1501,1500,0],[3001,3000,0]]
+  #nE, r = 6,[[2,0,0],[1502,1500,0],[3004,3000,0]]
   #Vup, Vdown = SCnGNRTop(nE,r)
   #fXr = np.vectorize(lambda w: XnRPAGNRTop(nE,r,Vup,Vdown,w)[0,0].real)
   #fXi = np.vectorize(lambda w: XnRPAGNRTop(nE,r,Vup,Vdown,w)[0,0].imag)
@@ -659,17 +659,19 @@ if __name__ == "__main__":
     #roots = spline.roots()
     #FWHM = roots[1] - roots[0]
     #Flist.append(FWHM)
-  #pl.plot(Dlist,Flist,'-o')
-  #pl.plot(Dlist,[6.52913207722e-06 for D in Dlist])
+  #pl.plot(Dlist,Flist)
   #np.savetxt("XFWHMV1.dat",zip(Dlist,Flist))
   #pl.show()
-
+  
   x, y = np.loadtxt("test.dat").T
   y = y - y.min()/2.0 
   spline = UnivariateSpline(x,y)
+  pl.plot(x,y)
+  pl.plot(x,spline(x),'o')
+  pl.show()
   roots = spline.roots()
   FWHM = roots[1] - roots[0]
   print FWHM
-  
+
 
       
