@@ -3,34 +3,25 @@ import matplotlib
 import pylab as pl
 import seaborn as sns
 
-if __name__ == "__main__":
-  pl.figure(figsize=(14,6))
-  sns.set(font_scale=1.8)
-  
-  pl.subplot(1,2,1)
-  E,gre,gim = np.loadtxt("gSI1.dat").T
-  pl.plot(E,gre,label="Re")
-  pl.plot(E,gim,label="Im")
-  
-  E,gre,gim = np.loadtxt("gSI_SPA1.dat").T
-  pl.plot(E,gre,'o',markevery=3)
-  pl.plot(E,gim,'o',markevery=3)
-  pl.xlabel(r"$E$")
-  pl.ylabel(r"$g(E)$")
-  pl.legend()
+from math import pi, sin
 
-  pl.subplot(1,2,2)
-  E,gre,gim = np.loadtxt("gSI2.dat").T
-  pl.plot(E,gre,label="Re")
-  pl.plot(E,gim,label="Im")
+if __name__ == "__main__":
+  #pl.figure(figsize=(12,6))
+  sns.set(font_scale=1.5)
   
-  E,gre,gim = np.loadtxt("gSI_SPA2.dat").T
-  pl.plot(E,gre,'o',markevery=3)
-  pl.plot(E,gim,'o',markevery=3)
-  pl.xlabel(r"$E$")
-  pl.ylabel(r"$g(E)$")
+  D,J = np.loadtxt("JLinebbLog.dat").T
+  sns.regplot(D,J,label="bb")
+  D,J = np.loadtxt("JLinebwLog.dat").T
+  sns.regplot(D,J,label="bw")
+  D,J = np.loadtxt("JLinewbLog.dat").T
+  sns.regplot(D,J,label="wb")
+  
+  pl.xlabel(r"$\log(D)$")
+  pl.ylabel(r"$\log(J(D))$")
   pl.legend()
+  
+  #pl.ticklabel_format(style="sci",scilimits=(0,100))
 
   pl.tight_layout()
-  pl.savefig("gBulkSPA.pdf")
+  pl.savefig("JLineLog.pdf")
   pl.show()

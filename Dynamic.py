@@ -13,7 +13,7 @@ from scipy.interpolate import UnivariateSpline
 def X1HF(GF,Vup,Vdown,w):
   """Calculates the Hartree-Fock spin susceptibility for a general GF"""
   def spin_sus_int12(y):
-    return hbar/(2.0*pi) *( GF(wf + 1j*y,Vup)*GF(wf + w + 1j*y,Vdown) + GF(wf - 1j*y,Vdown)*GF(wf-w- 1j*y,Vup) )
+    return hbar/(2.0*pi) *( GF(wf + 1j*y,Vup)*GF(wf + w + 1j*y,Vdown) + GF(wf - 1j*y,Vdown)*GF(wf - w - 1j*y,Vup) )
 
   def spin_sus_int3(w_dum):
     return - 1j*hbar/(2.0*pi) *GF(w_dum - 1j*eta,Vup)*GF(w + w_dum + 1j*eta,Vdown)
@@ -597,8 +597,8 @@ def X1RPATest(Vup,Vdown,w):
 
 if __name__ == "__main__":
   #Single Impurity
-  #nE = 9
-  #m,n = 1,0
+  #nE = 6
+  #m,n = 2,0
   #Vup, Vdown = SC1GNRTop(nE,m,n)
   #fXi = np.vectorize(lambda w: X1RPAGNRTop(nE,m,n,Vup,Vdown,w).imag)
   #wilist, Xitemp = sample_function(fXi,[0.0,0.002], tol=1e-3)
@@ -609,6 +609,7 @@ if __name__ == "__main__":
   #print roots[1]-roots[0]
   #pl.plot(wilist,Xilist)
   #pl.show()
+  #np.savetxt("1XV1.dat", zip(wilist,Xilist))
   
   #Flist = []
   #for m in range(1,9):
@@ -623,27 +624,26 @@ if __name__ == "__main__":
   #pl.show()
 
 
+
   #Double Impurity
-  #Dlist = [1000,1050]
-  #for D in Dlist: 
-    #nE,m1,n1 = 6,1,0
-    #m2,n2,s = 1+D,D,0
-    #Vup, Vdown = SC2GNRTop(nE,m1,n1,m2,n2,s)
-    #fXi = np.vectorize(lambda w: X2RPAGNRTop(nE,m1,n1,m2,n2,s,Vup,Vdown,w)[0,0].imag)
-    #wilist, Xitemp = sample_function(fXi, [0.0,0.002], tol=1e-4)
-    #Xilist = Xitemp[0]
-    #pl.plot(wilist,Xilist)
-    #pl.savetxt("Dynamic_%g.dat" % (D,), zip(wilist,Xilist))
-    #pl.clf()
+  nE,m1,n1 = 6,2,0
+  m2,n2,s = 6,3,0
+  Vup, Vdown = SC2GNRTop(nE,m1,n1,m2,n2,s)
+  fXi = np.vectorize(lambda w: X2RPAGNRTop(nE,m1,n1,m2,n2,s,Vup,Vdown,w)[0,0].imag)
+  wilist, Xitemp = sample_function(fXi, [0.0,0.002], tol=1e-4)
+  Xilist = Xitemp[0]
+  pl.plot(wilist,Xilist)
+  pl.show()
+  np.savetxt("2XV1_2.dat", zip(wilist,Xilist))
     
   #Triple Impurity
-  #nE, r = 6,[[2,0,0],[1502,1500,0],[3004,3000,0]]
+  #nE, r = 6,[[1,0,0],[11,10,0],[6,3,0]]
   #Vup, Vdown = SCnGNRTop(nE,r)
   #fXr = np.vectorize(lambda w: XnRPAGNRTop(nE,r,Vup,Vdown,w)[0,0].real)
   #fXi = np.vectorize(lambda w: XnRPAGNRTop(nE,r,Vup,Vdown,w)[0,0].imag)
   #wilist, Xitemp = sample_function(fXi, [0.0,1.0e-2], tol=1e-4)
   #Xilist = Xitemp[0]
-  #np.savetxt("test.dat",zip(wilist,Xilist))
+  #np.savetxt("triple.dat",zip(wilist,Xilist))
   #pl.plot(wilist,Xilist)
   #pl.show()
     
@@ -660,18 +660,17 @@ if __name__ == "__main__":
     #FWHM = roots[1] - roots[0]
     #Flist.append(FWHM)
   #pl.plot(Dlist,Flist)
-  #np.savetxt("XFWHMV1.dat",zip(Dlist,Flist))
+  #np.savetxt("XFWHM_DZ12.dat",zip(Dlist,Flist))
   #pl.show()
   
-  x, y = np.loadtxt("test.dat").T
-  y = y - y.min()/2.0 
-  spline = UnivariateSpline(x,y)
-  pl.plot(x,y)
-  pl.plot(x,spline(x),'o')
-  pl.show()
-  roots = spline.roots()
-  FWHM = roots[1] - roots[0]
-  print FWHM
-
+  #x, y = np.loadtxt("test.dat").T
+  #y = y - y.min()/2.0 
+  #spline = UnivariateSpline(x,y)
+  #pl.plot(x,y)
+  #pl.plot(x,spline(x),'o')
+  #pl.show()
+  #roots = spline.roots()
+  #FWHM = roots[1] - roots[0]
+  #print FWHM
 
       

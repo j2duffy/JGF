@@ -224,13 +224,23 @@ def JLineFinite(n,DA,s):
 
 
 if __name__ == "__main__":
-  DAlist = range(5,40)
-  J1list = [Line_Coupling3(2*DA,0) for DA in DAlist]
-  J2list = [JLineFinite(1,DA,0) for DA in DAlist]
-  J3list = [JLineFinite(5,DA,0) for DA in DAlist]
-  J4list = [JLineFinite(10,DA,0) for DA in DAlist]
-  np.savetxt("JLineFinite.dat",zip(DAlist,J1list,J2list,J3list,J4list))
-  pl.plot(DAlist,J1list)
-  pl.plot(DAlist,J2list)
-  pl.show()
+  Dlist = np.arange(50,110,5)
+  Jlist = np.array([Line_Coupling3(D,-1) for D in Dlist])
+  np.savetxt("JLinewb.dat",zip(Dlist,Jlist))
   
+  Dlog = np.log(Dlist)
+  Jlog = np.log(abs(Jlist))
+  np.savetxt("JLinewbLog.dat",zip(Dlog,Jlog))
+  pl.plot(Dlog,Jlog)
+  
+  f = lambda x,a,b: a + b*x
+  popt, pcov = curve_fit(f, Dlog, Jlog,p0=[1,1])
+  print popt
+  a,b = popt
+  flist = [f(D,a,b) for D in Dlog]
+  pl.plot(Dlog,flist)
+  pl.show()
+
+  #xdata = np.linspace(0, 4, 50)
+  #y = func(xdata, 2.5, 1.3, 0.5)
+  #ydata = y + 0.2 * np.random.normal(size=len(xdata))
