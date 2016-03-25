@@ -597,18 +597,19 @@ def X1RPATest(Vup,Vdown,w):
 
 if __name__ == "__main__":
   #Single Impurity
-  #nE = 6
-  #m,n = 2,0
-  #Vup, Vdown = SC1GNRTop(nE,m,n)
-  #fXi = np.vectorize(lambda w: X1RPAGNRTop(nE,m,n,Vup,Vdown,w).imag)
-  #wilist, Xitemp = sample_function(fXi,[0.0,0.002], tol=1e-3)
-  #Xilist = Xitemp[0]
-  #Xilist = Xilist - Xilist.min()/2.0
+  nE = 6
+  m,n = 3,0
+  Vup, Vdown = SC1GNRTop(nE,m,n)
+  fXi = np.vectorize(lambda w: X1RPAGNRTop(nE,m,n,Vup,Vdown,w).imag)
+  wilist, Xitemp = sample_function(fXi,[0.0,1.0e-2], tol=1e-3)
+  Xilist = Xitemp[0]
+  Xilist = Xilist - Xilist.min()/2.0
   #spline = UnivariateSpline(wilist,Xilist)
   #roots = spline.roots()
   #print roots[1]-roots[0]
-  #pl.plot(wilist,Xilist)
-  #pl.show()
+  pl.savefig("X00_DZ3_EF1.png")
+  pl.plot(wilist,Xilist)
+  pl.show()
   #np.savetxt("1XV1.dat", zip(wilist,Xilist))
   
   #Flist = []
@@ -623,18 +624,16 @@ if __name__ == "__main__":
   #pl.savetxt("X1FWHM.dat",zip(range(1,9),Flist))
   #pl.show()
 
-
-
   #Double Impurity
-  nE,m1,n1 = 6,2,0
-  m2,n2,s = 6,3,0
-  Vup, Vdown = SC2GNRTop(nE,m1,n1,m2,n2,s)
-  fXi = np.vectorize(lambda w: X2RPAGNRTop(nE,m1,n1,m2,n2,s,Vup,Vdown,w)[0,0].imag)
-  wilist, Xitemp = sample_function(fXi, [0.0,0.002], tol=1e-4)
-  Xilist = Xitemp[0]
-  pl.plot(wilist,Xilist)
-  pl.show()
-  np.savetxt("2XV1_2.dat", zip(wilist,Xilist))
+  #nE,m1,n1 = 6,2,0
+  #m2,n2,s = 6,3,0
+  #Vup, Vdown = SC2GNRTop(nE,m1,n1,m2,n2,s)
+  #fXi = np.vectorize(lambda w: X2RPAGNRTop(nE,m1,n1,m2,n2,s,Vup,Vdown,w)[0,0].imag)
+  #wilist, Xitemp = sample_function(fXi, [0.0,0.002], tol=1e-4)
+  #Xilist = Xitemp[0]
+  #pl.plot(wilist,Xilist)
+  #pl.show()
+  #np.savetxt("2XV1_2.dat", zip(wilist,Xilist))
     
   #Triple Impurity
   #nE, r = 6,[[1,0,0],[11,10,0],[6,3,0]]

@@ -17,7 +17,7 @@ hbar = 1.0
 eta = 1.0e-4
 # material parameters
 t = -1.0
-EF = 0.0
+EF = 1
 wf=EF	# This needs a lot of thought/work
 eps_imp = 1.0
 tau = -1.0
@@ -254,9 +254,9 @@ def gSISPA(DZ,DA,E):
 
 
 if __name__ == "__main__":
-  nE,m1,n1,m2,n2,s = 9,1,0,1,0,0
+  i = 3
+  nE,m1,n1,m2,n2,s = 6,i,0,i,0,0
   Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
-  glist = np.array([gRib_Arm(nE,m1,n1,m2,n2,s,E) for E in Elist])
-  pl.plot(Elist,glist.real)
-  pl.plot(Elist,glist.imag)
+  DOSlist = np.array([-gRib_Arm(nE,m1,n1,m2,n2,s,E)/pi for E in Elist])
+  pl.plot(Elist,DOSlist.imag)
   pl.show()
