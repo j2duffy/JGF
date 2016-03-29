@@ -17,7 +17,7 @@ hbar = 1.0
 eta = 1.0e-4
 # material parameters
 t = -1.0
-EF = 1
+EF = 0.9
 wf=EF	# This needs a lot of thought/work
 eps_imp = 1.0
 tau = -1.0
@@ -259,4 +259,5 @@ if __name__ == "__main__":
   Elist = np.linspace(-3.0+1j*eta,3.0+1j*eta,201)
   DOSlist = np.array([-gRib_Arm(nE,m1,n1,m2,n2,s,E)/pi for E in Elist])
   pl.plot(Elist,DOSlist.imag)
+  pl.savefig("LDOS.png")
   pl.show()

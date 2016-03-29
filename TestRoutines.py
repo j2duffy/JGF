@@ -104,41 +104,6 @@ def GMx1CenterProbe(nE,mC,nC,mP,nP,sP,E):
   return GMx
 
 
-#def GMxSubsRec(N,ImpList,E):
-  #"""Calculates the GF mx of a strip in an AGNR in the presence of subsitutional impurities"""
-  #gL,gR,VLR,VRL = Leads(N,E)
-  #H = HArmStrip(N,SubsList=ImpList)
-  #gC = gGen(E,H)
-  #gL = RecAdd(gL,gC,VLR,VRL)
-  #g = RecAdd(gR,gL,VRL,VLR)
-  #return g
-
-
-#def GMxCenterRec(N,ImpList,E):
-  #gL,gR,VLR,VRL = Leads(N,E)
-  #H = HArmStrip(N,CenterList=ImpList)
-  #gC = gGen(E,H)[:2*N,:2*N]
-  #gL = RecAdd(gL,gC,VLR,VRL)
-  #g = RecAdd(gR,gL,VRL,VLR)
-  #return g
-
-
-#def GMxCenterRec2(N,p,ImpList,E):
-  #"""Calculates the GF of a strip in an AGNR in the presence of center adsorbed impurities.
-  #Doesn't work for p = 2 or more because of the way your potentials work"""
-  #nimp = len(ImpList)
-  #gL,gR,VLR,VRL = Leads(N,E)		# Get Leads
-  #H = HArmStrip(N,p,CenterList=ImpList)	# Hamiltonian with Center adsorbed impurities
-  #gC = gGen(E,H)
-  #sizeP = gL.shape[0]
-  #sizeI = gC.shape[0]
-  #VLRb, VRLb = PadZeros(VLR,(sizeP,sizeI)), PadZeros(VRL,(sizeI,sizeP))	# To get the full GF, VLR and VRL must be padded to match left and right cells.
-  #gL = RecAdd(gL,gC,VLRb,VRLb)
-  #VLRb, VRLb = PadZeros(VLR,(sizeI,sizeP)), PadZeros(VRL,(sizeP,sizeI))
-  #g = RecAdd(gR,gL,VRLb,VLRb)
-  #return g
-
-
 def GFTest(N,E):
   gL,gR,VLR,VRL = Leads(N,E)
   gR = RecAdd(gL,gR,VLR,VRL)

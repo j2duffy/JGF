@@ -601,14 +601,14 @@ if __name__ == "__main__":
   m,n = 3,0
   Vup, Vdown = SC1GNRTop(nE,m,n)
   fXi = np.vectorize(lambda w: X1RPAGNRTop(nE,m,n,Vup,Vdown,w).imag)
-  wilist, Xitemp = sample_function(fXi,[0.0,1.0e-2], tol=1e-3)
+  wilist, Xitemp = sample_function(fXi,[0,1.0e-2], tol=1e-3)
   Xilist = Xitemp[0]
   Xilist = Xilist - Xilist.min()/2.0
   #spline = UnivariateSpline(wilist,Xilist)
   #roots = spline.roots()
   #print roots[1]-roots[0]
-  pl.savefig("X00_DZ3_EF1.png")
   pl.plot(wilist,Xilist)
+  pl.savefig("Dynamic.png")
   pl.show()
   #np.savetxt("1XV1.dat", zip(wilist,Xilist))
   
