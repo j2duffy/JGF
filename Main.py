@@ -79,13 +79,11 @@ def PeakHeight():
   
   
 if __name__ == "__main__":   
-  #nE,DZ = 6,3
-  #w,X = np.loadtxt("data/X_DZ%i.dat" % (DZ))
-  #pl.plot(w,X)
-  #pl.savefig("test.png")
-  #pl.show()
+  nE,DZ = 6,1
+  w,X = np.loadtxt("data/X_DZ%i.dat" % (DZ))
+  pl.plot(w,X)
 
-  nE,DZ,EF = 6,3,1.1
+  EF = 1.1
   w,X = np.loadtxt("data/X_nE%i_DZ%i_EF%.1f.dat" % (nE,DZ,EF))
   pl.plot(w,X)
   pl.savefig("test.png")
