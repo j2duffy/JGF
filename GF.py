@@ -17,7 +17,7 @@ hbar = 1.0
 eta = 1.0e-4
 # material parameters
 t = -1.0
-EF = 0.0
+EF = 1.1
 wf=EF	# This needs a lot of thought/work
 eps_imp = 1.0
 tau = -1.0
