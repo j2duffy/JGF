@@ -10,6 +10,8 @@ def Xplot(nE,DZ,interval):
 
 
 def AdjustPlot(nE,DZ):
+  """Plots the susceptibility at various human defined ranges until it finds a well resolved peak.
+  Save the appropriate values"""
   # Initial plot
   w,X = Xplot(nE,DZ,[0,1.0e-2])
   pl.plot(w,X)
@@ -33,7 +35,7 @@ def AdjustPlot(nE,DZ):
     
     
 def AdjustPlotEF(nE,DZ):
-  # Exactly the same as AdjustPlot, except labels the file with EF
+  """Exactly the same as AdjustPlot, except labels the file with EF"""
   # Initial plot
   w,X = Xplot(nE,DZ,[0,1.0e-2])
   pl.plot(w,X)
@@ -80,13 +82,13 @@ def PeakHeight():
   
 if __name__ == "__main__":   
   nE,DZ = 6,1
-  w,X = np.loadtxt("data/X_DZ%i.dat" % (DZ))
-  pl.plot(w,X)
-
-  EF = 1.1
+  EF = 0.9
   w,X = np.loadtxt("data/X_nE%i_DZ%i_EF%.1f.dat" % (nE,DZ,EF))
+  X = X - X.min()/2.0
+  spline = UnivariateSpline(w,X)
+  #r1, r2 = spline.roots() # find the roots
   pl.plot(w,X)
-  pl.savefig("test.png")
+  pl.plot(w,spline(w),'o')
   pl.show()
 
 
