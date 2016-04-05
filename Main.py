@@ -82,7 +82,7 @@ def PeakHeight():
   
 if __name__ == "__main__":   
   nE,DZ = 6,1
-  EF = 0.9
+  EF = 0.0
   w,X = np.loadtxt("data/X_nE%i_DZ%i_EF%.1f.dat" % (nE,DZ,EF))
   X = X - X.min()/2.0
   spline = UnivariateSpline(w,X)
