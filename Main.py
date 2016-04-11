@@ -81,14 +81,18 @@ def PeakHeight():
   
   
 if __name__ == "__main__":   
-  nE,DZ = 6,1
-  EF = 0.0
-  w,X = np.loadtxt("data/X_nE%i_DZ%i_EF%.1f.dat" % (nE,DZ,EF))
-  X = X - X.min()/2.0
-  spline = UnivariateSpline(w,X)
-  #r1, r2 = spline.roots() # find the roots
-  pl.plot(w,X)
-  pl.plot(w,spline(w),'o')
+  nE,DZ = 6,3
+  EFlist = np.arange(0,1.2,0.1)
+  FWHMlist = []
+  for EF in EFlist:
+    w,X = np.loadtxt("data/X_nE%i_DZ%i_EF%.1f.dat" % (nE,DZ,EF))
+    X = X - X.min()/2.0
+    spline = UnivariateSpline(w,X)
+    r1, r2 = spline.roots() # find the roots
+    FWHMlist.append(r2 - r1)
+
+  pl.plot(EFlist,FWHMlist)
+  pl.savefig("test.png")
   pl.show()
 
 
