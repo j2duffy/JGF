@@ -604,13 +604,9 @@ if __name__ == "__main__":
   wilist, Xitemp = sample_function(fXi,[0,1.0e-2], tol=1e-3)
   Xilist = Xitemp[0]
   Xilist = Xilist - Xilist.min()/2.0
-  #spline = UnivariateSpline(wilist,Xilist)
-  #roots = spline.roots()
-  #print roots[1]-roots[0]
   pl.plot(wilist,Xilist)
   pl.savefig("Dynamic.png")
   pl.show()
-  #np.savetxt("1XV1.dat", zip(wilist,Xilist))
   
   #Flist = []
   #for m in range(1,9):
