@@ -254,11 +254,9 @@ def gSISPA(DZ,DA,E):
 
 
 if __name__ == "__main__":
-  nE = 30
-  E = 0.0 + 1j*eta
-  #DZlist = range(1,nE)
-  DZlist = [DZ for DZ in range(1,nE) if DZ % 3 != 0]
-  DOSlist = [-gRib_Arm(nE,DZ,0,DZ,0,0,E).imag/pi for DZ in DZlist]
-  pl.plot(DZlist,DOSlist)
-  pl.savefig("test.png")
+  nE,DZ = 6,3
+  Elist = np.linspace(-3.0,3.0,201)
+  DOSlist = [-gRib_Arm(nE,DZ,0,DZ,0,0,E+1j*eta).imag/pi for E in Elist]
+  pl.plot(Elist,DOSlist)
+  np.savetxt("test.dat",(Elist,DOSlist))
   pl.show()
