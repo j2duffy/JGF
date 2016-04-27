@@ -9,9 +9,12 @@ import multiprocessing
 from functionsample import sample_function
 from scipy.interpolate import UnivariateSpline
 
+# Routines for single impurities
+# The following routines calculate the HF and RPA susceptibilities in different systems for single impurities
 
 def X1HF(GF,Vup,Vdown,w):
-  """Calculates the Hartree-Fock spin susceptibility for a general GF"""
+  """Calculates the Hartree-Fock spin susceptibility for a general GF.
+  Vup and Vdown are the relevant potentials and w the frequency."""
   def spin_sus_int12(y):
     return hbar/(2.0*pi) *( GF(wf + 1j*y,Vup)*GF(wf + w + 1j*y,Vdown) + GF(wf - 1j*y,Vdown)*GF(wf - w - 1j*y,Vup) )
 
@@ -73,7 +76,8 @@ def X1RPAGNRTop(nE,m,n,Vup,Vdown,w):
   X0 = X1HFGNRTop(nE,m,n,Vup,Vdown,w)
   return X0/(1.0+U*X0)
 
-
+# Double impurities
+# Calculates HF and RPA susceptibilities for 2 impurities
 
 def XHF(GF,site,Vup,Vdown,w):	# Might be better to include the Dyson function within the calling functions
   """Calculates the Hartree-Fock spin susceptibility between two sites"""
@@ -147,6 +151,7 @@ def X2RPAGNRTop(nE,m1,n1,m2,n2,s,Vup,Vdown,w):
   temp = inv( np.eye(len(X00)) + X00.dot(U) )
   return temp.dot(X00)
 
+# Triple impurities
 
 def X3HFGNRSubs(nE,r0,r1,r2,site,Vup,Vdown,w):
   """Calculates the HF spin susceptibility for 3 substitutional impurities in a GNR"""
@@ -166,7 +171,7 @@ def X3RPAGNRSubs(nE,r0,r1,r2,Vup,Vdown,w):
   temp = inv( np.eye(len(X00)) + X00.dot(U) )
   return temp.dot(X00)
 
-
+# n impurities
 
 def XnHFGNRSubs(nE,r,site,Vup,Vdown,w):
   """The HF spin sus for n substitutional atoms in a GNR."""
@@ -199,7 +204,8 @@ def XnRPAGNRTop(nE,r,Vup,Vdown,w):
   temp = inv( np.eye(len(X00)) + X00.dot(U) )
   return temp.dot(X00)
 
-
+# SC1
+# Calculates the self consistency for single impurities
 
 def SC1(GF,n0=1.0):
   """Calculate Vup/Vdown for a single impurity in graphene."""
@@ -253,8 +259,8 @@ def SC1GNRTop(nE,m,n,n0=1.0):
     return Dyson1(g,V).real
   return SC1(GF,n0)
 
-
-
+# SC2 
+# Calculates the self consistency for systems with 2 impurities
 
 def SC2(GF,n0):
   """Calculates the self-consistency for 2 substitutional atoms in a GNR.
@@ -350,6 +356,8 @@ def SC2GNRTop(nE,m1,n1,m2,n2,s,n0=1.0):
     return gGNRTopMx(nE,m1,n1,m2,n2,s,E)
   return SC2(GF,n0)
 
+# SC3+
+# Calculates the self consistency for systems with 3 or more impurities
 
 def SC3GNRSubs(nE,r0,r1,r2,n0=1.0):
   """Calculates the self consistency for 3 atoms."""
