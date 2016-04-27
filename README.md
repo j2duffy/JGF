@@ -25,4 +25,4 @@ The FORTRAN module is compiled using
 f2py --fcompiler=gfortran --opt=-O -c -m FMod FMod.f95 
 I avoid capital letters while using f2py, since this seems to avoid the name mangling issue.
 
-Python files are run in the usual manner of **python file**.
+Python files are run in the usual manner of *python $file*.
