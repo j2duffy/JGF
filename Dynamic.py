@@ -604,14 +604,14 @@ def X1RPATest(Vup,Vdown,w):
 
 
 if __name__ == "__main__":
-  #Single Impurity
-  nE = 6
-  m,n = 3,0
-  Vup, Vdown = SC1GNRTop(nE,m,n)
-  fXi = np.vectorize(lambda w: X1RPAGNRTop(nE,m,n,Vup,Vdown,w).imag)
+  # Single Impurity
+  # Calculates the susceptibility against w for a single impurity.
+  nE = 6	# This gives the number of atoms in a zigzag strip nE - 1 = N
+  m,n = 3,0	# Gives the position of the impurity 
+  Vup, Vdown = SC1GNRTop(nE,m,n)	# Loads the appropriate petrubations mxs.
+  fXi = np.vectorize(lambda w: X1RPAGNRTop(nE,m,n,Vup,Vdown,w).imag)	# Just creates a vectorized version of the susceptibility
   wilist, Xitemp = sample_function(fXi,[0,1.0e-2], tol=1e-3)
   Xilist = Xitemp[0]
-  Xilist = Xilist - Xilist.min()/2.0
   pl.plot(wilist,Xilist)
   pl.savefig("Dynamic.png")
   pl.show()

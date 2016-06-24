@@ -17,7 +17,7 @@ Higher level routines and numerical integration are in Python.
 ## Other Files
 *tst.py* is a unit testing module. 
 I haven't fully completed this, and it suffers from the normal floating point problems, and the fact that I would expect some things to change after program changes.
-TestRoutines is a legacy file that stores a bunch of routines that I never though would stand the test of time
+TestRoutines is a legacy file that stores a bunch of routines that I never though would stand the test of time.
 functionsample.py provides a way to plot functions adaptively, and is essential when working with the susceptibility.
 
 ## Running

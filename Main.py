@@ -1,4 +1,6 @@
-# Currently working on some shit with my Dynamic code
+# My main code
+# Contains whatever functions I'm working on at the moment
+
 from Dynamic import *
 
 def Xplot(nE,DZ,interval):
