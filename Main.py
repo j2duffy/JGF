@@ -4,6 +4,7 @@
 from Dynamic import *
 
 def Xplot(nE,DZ,interval):
+  """Adaptively gets values for the RPA susceptibility of a single top adsorbed impurity"""
   Vup, Vdown = SC1GNRTop(nE,DZ,0)
   fXi = np.vectorize(lambda w: X1RPAGNRTop(nE,DZ,0,Vup,Vdown,w).imag)
   wilist, Xitemp = sample_function(fXi,interval, tol=1e-3)
@@ -61,6 +62,7 @@ def AdjustPlotEF(nE,DZ):
     
     
 def PeakHeight():
+  """A routine that plots the peak height for various saved susceptibility files"""
   nE = 30
   DZlist = range(1,nE)
   for DZ in DZlist:
@@ -83,20 +85,20 @@ def PeakHeight():
   
   
 if __name__ == "__main__":    
-  #nE = 30
-  #DZlist = [DZ for DZ in range(1,nE) if DZ % 3 != 0]
-  #FWHMlist = []
-  #for DZ in DZlist:
-    #w,X = np.loadtxt("data/X_nE%i_DZ%i_EF0.0.dat" % (nE,DZ))
-    #X = X - X.min()/2.0
-    #spline = UnivariateSpline(w,X,s=0.1)
-    #r1, r2 = spline.roots() # find the roots
-    #FWHMlist.append(r2 - r1)
-    #pl.plot(w,X)
-    #pl.plot(w,spline(w))
-    #pl.show()
-  #pl.plot(DZlist,FWHMlist,'-o')
-  #pl.show()
+  nE = 30
+  DZlist = [DZ for DZ in range(1,nE) if DZ % 3 != 0]
+  FWHMlist = []
+  for DZ in DZlist:
+    w,X = np.loadtxt("data/X_nE%i_DZ%i_EF0.0.dat" % (nE,DZ))
+    X = X - X.min()/2.0
+    spline = UnivariateSpline(w,X,s=0.1)
+    r1, r2 = spline.roots() # find the roots
+    FWHMlist.append(r2 - r1)
+    pl.plot(w,X)
+    pl.plot(w,spline(w))
+    pl.show()
+  pl.plot(DZlist,FWHMlist,'-o')
+  pl.show()
   
   #nE = 30
   #DZlist = [DZ for DZ in range(1,nE) if DZ % 3 != 0]
