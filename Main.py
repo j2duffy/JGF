@@ -118,8 +118,8 @@ def PeakHeight():
   
   
 if __name__ == "__main__":    
-  nE,m1,n1 = 6,3,0
-  m2,n2,s = 6,5,1
+  nE,m1,n1 = 6,5,1
+  m2,n2,s = 6,3,0
   AdjustPlot2(nE,m1,n1,m2,n2)
   
   #Elist, DOSlist = np.loadtxt('PaperData/DOS_DZ3.dat')
