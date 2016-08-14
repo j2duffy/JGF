@@ -118,7 +118,7 @@ def PeakHeight():
   
   
 if __name__ == "__main__":    
-  nE,m1,n1 = 6,5,1
+  nE,m1,n1 = 6,4+10,0+10
   m2,n2,s = 6,3,0
   AdjustPlot2(nE,m1,n1,m2,n2)
   

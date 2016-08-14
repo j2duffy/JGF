@@ -10,7 +10,7 @@ def get_col(f1,f2):
     data = np.loadtxt(f1)
   with open(f2,'w') as f:
     for i in zip(*data):
-      fmt = len(i)*'{:<18.12}' + '\n'
+      fmt = len(i)*'{:<22.12}' + '\n'
       f.write( fmt.format(*i) )
 
 
